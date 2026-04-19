@@ -93,23 +93,19 @@ with t_dash:
 
             st.markdown("---")
 # --- PHẦN 3: DOANH SỐ CIRCLE K ---
-            with c_nam:
-                    st.info("📍 MIỀN NAM")
-                    st.metric("Số lượng PO", f"{df_sum.iloc[9, 0]}")    # A11
-                    
-                    # Tùy chỉnh màu sắc bằng HTML
-                    st.markdown(f"📉 <span style='color: #FFA500;'>**Thấp nhất (Min):**</span> <span style='color: #FFA500; font-size: 20px;'>{df_sum.iloc[11, 0]}</span>", unsafe_allow_html=True)
-                    st.markdown(f"📈 <span style='color: #00FF00;'>**Cao nhất (Max):**</span> <span style='color: #00FF00; font-size: 20px;'>{df_sum.iloc[13, 0]}</span>", unsafe_allow_html=True)
-                    st.markdown(f"📊 <span style='color: #00BFFF;'>**Trung bình:**</span> <span style='color: #00BFFF; font-size: 20px;'>{df_sum.iloc[15, 0]}</span>", unsafe_allow_html=True)
+            st.markdown("## 🏪 PHẦN 3: DOANH SỐ CIRCLE K")
+            
+            # Chia đều không gian Trái và Phải
+            col_trai, col_phai = st.columns(2)
 
-                with c_bac:
-                    st.success("📍 MIỀN BẮC")
-                    st.metric("Số lượng PO", f"{df_sum.iloc[9, 1]}")    # B11
-                    
-                    # Tùy chỉnh màu sắc bằng HTML
-                    st.markdown(f"📉 <span style='color: #FFA500;'>**Thấp nhất (Min):**</span> <span style='color: #FFA500; font-size: 20px;'>{df_sum.iloc[11, 1]}</span>", unsafe_allow_html=True)
-                    st.markdown(f"📈 <span style='color: #00FF00;'>**Cao nhất (Max):**</span> <span style='color: #00FF00; font-size: 20px;'>{df_sum.iloc[13, 1]}</span>", unsafe_allow_html=True)
-                    st.markdown(f"📊 <span style='color: #00BFFF;'>**Trung bình:**</span> <span style='color: #00BFFF; font-size: 20px;'>{df_sum.iloc[15, 1]}</span>", unsafe_allow_html=True)
+            # --- BÊN TRÁI: DOANH SỐ (So sánh Nam - Bắc) ---
+            with col_trai:
+                st.markdown("### 📊 SO SÁNH DOANH SỐ")
+                
+                # Chia đôi dọc để so sánh
+                c_nam, c_bac = st.columns(2)
+                
+                with c_nam:
                     st.info("📍 MIỀN NAM")
                     st.metric("SL PO", f"{df_sum.iloc[9, 0]}")    # A11 (Index 9)
                     st.metric("(Min)", f"{df_sum.iloc[11, 0]}") # A13 (Index 11)
