@@ -161,7 +161,7 @@ with t_ck:
     df_raw = load(URL_CIRCLE_K)
     
     if df_raw is not None:
-        # 1. Xử lý tiêu đề chuẩn (Bỏ hàng trống đầu tiên)
+        # 1. Xử lý tiêu đề chuẩn
         df_circlek = df_raw.copy()
         df_circlek.columns = df_circlek.iloc[0]
         df_circlek = df_circlek.drop(df_circlek.index[0]).reset_index(drop=True)
@@ -172,42 +172,59 @@ with t_ck:
         
         st.markdown("---")
         
-        # 3. Vẽ biểu đồ (Đã xử lý ép kiểu số để hiện cột)
+        # 3. Vẽ biểu đồ 3 cột cùng Tone Xanh Stepad
         try:
             # Tìm tên cột thông minh
             c_thang = [c for c in df_circlek.columns if 'Tháng' in str(c)][0]
             c_mb = [c for c in df_circlek.columns if 'MB' in str(c)][0]
             c_mn = [c for c in df_circlek.columns if 'MN' in str(c)][0]
 
-            # Bỏ dòng Tổng cộng để không lệch biểu đồ
             df_plot = df_circlek[df_circlek[c_thang] != 'Tổng cộng'].copy()
             
-            # Hàm xử lý tiền (xóa dấu chấm, dấu phẩy, chữ đ) để máy hiểu là số
             def to_num(s):
                 s = str(s).replace('đ', '').replace('.', '').replace(',', '').strip()
                 return pd.to_numeric(s, errors='coerce')
 
             df_plot[c_mb] = df_plot[c_mb].apply(to_num).fillna(0)
             df_plot[c_mn] = df_plot[c_mn].apply(to_num).fillna(0)
+            df_plot['Tổng'] = df_plot[c_mb] + df_plot[c_mn]
 
             fig = go.Figure()
-            # Cột Miền Bắc
+
+            # Miền Bắc - Xanh lá sậm
             fig.add_trace(go.Bar(
                 x=df_plot[c_thang], y=df_plot[c_mb],
-                name='Miền Bắc (MB)', marker_color='#2E5A88'
+                name='Miền Bắc (MB)', 
+                marker_color='#006400', # DarkGreen
+                hovertemplate='%{y:,.0f} đ'
             ))
-            # Cột Miền Nam
+
+            # Miền Nam - Xanh lá vừa
             fig.add_trace(go.Bar(
                 x=df_plot[c_thang], y=df_plot[c_mn],
-                name='Miền Nam (MN)', marker_color='#D62728'
+                name='Miền Nam (MN)', 
+                marker_color='#00A300', # Green
+                hovertemplate='%{y:,.0f} đ'
+            ))
+
+            # TỔNG - Xanh lá sáng (Stepad Neon)
+            fig.add_trace(go.Bar(
+                x=df_plot[c_thang], y=df_plot['Tổng'],
+                name='TỔNG DOANH THU', 
+                marker_color='#00FF00', # Stepad Neon Green
+                hovertemplate='%{y:,.0f} đ'
             ))
 
             fig.update_layout(
-                title={'text': "📊 BIỂU ĐỒ DOANH THU CIRCLE K", 'x':0.5},
-                barmode='group', height=500,
-                xaxis_title="Tháng", yaxis_title="Doanh thu (VNĐ)",
-                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+                title={'text': "📊 PHÂN TÍCH DOANH THU CIRCLE K", 'x':0.5, 'font': {'color': '#00FF00'}},
+                barmode='group', 
+                height=500,
+                xaxis=dict(title="Tháng", tickfont=dict(color='#888888')),
+                yaxis=dict(title="Doanh thu (VNĐ)", gridcolor='#333333', tickfont=dict(color='#888888')),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color='#FFFFFF')),
+                paper_bgcolor='rgba(0,0,0,0)', 
+                plot_bgcolor='rgba(0,0,0,0)'
             )
             st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
+        except:
             st.info("Đang tải dữ liệu biểu đồ...")
