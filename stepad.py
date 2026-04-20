@@ -156,4 +156,58 @@ with t_sp:
 with t_kh:
     st.dataframe(load(URL_KHACH_HANG), use_container_width=True)
 with t_ck:
-    st.dataframe(load(URL_CIRCLE_K), use_container_width=True)
+    import plotly.graph_objects as go
+    
+    df_raw = load(URL_CIRCLE_K)
+    
+    if df_raw is not None:
+        # 1. Xử lý tiêu đề chuẩn (Bỏ hàng trống đầu tiên)
+        df_circlek = df_raw.copy()
+        df_circlek.columns = df_circlek.iloc[0]
+        df_circlek = df_circlek.drop(df_circlek.index[0]).reset_index(drop=True)
+        
+        # 2. Hiển thị 1 bảng số liệu duy nhất
+        st.write("### 📋 Chi tiết doanh thu theo tháng")
+        st.dataframe(df_circlek, use_container_width=True)
+        
+        st.markdown("---")
+        
+        # 3. Vẽ biểu đồ (Đã xử lý ép kiểu số để hiện cột)
+        try:
+            # Tìm tên cột thông minh
+            c_thang = [c for c in df_circlek.columns if 'Tháng' in str(c)][0]
+            c_mb = [c for c in df_circlek.columns if 'MB' in str(c)][0]
+            c_mn = [c for c in df_circlek.columns if 'MN' in str(c)][0]
+
+            # Bỏ dòng Tổng cộng để không lệch biểu đồ
+            df_plot = df_circlek[df_circlek[c_thang] != 'Tổng cộng'].copy()
+            
+            # Hàm xử lý tiền (xóa dấu chấm, dấu phẩy, chữ đ) để máy hiểu là số
+            def to_num(s):
+                s = str(s).replace('đ', '').replace('.', '').replace(',', '').strip()
+                return pd.to_numeric(s, errors='coerce')
+
+            df_plot[c_mb] = df_plot[c_mb].apply(to_num).fillna(0)
+            df_plot[c_mn] = df_plot[c_mn].apply(to_num).fillna(0)
+
+            fig = go.Figure()
+            # Cột Miền Bắc
+            fig.add_trace(go.Bar(
+                x=df_plot[c_thang], y=df_plot[c_mb],
+                name='Miền Bắc (MB)', marker_color='#2E5A88'
+            ))
+            # Cột Miền Nam
+            fig.add_trace(go.Bar(
+                x=df_plot[c_thang], y=df_plot[c_mn],
+                name='Miền Nam (MN)', marker_color='#D62728'
+            ))
+
+            fig.update_layout(
+                title={'text': "📊 BIỂU ĐỒ DOANH THU CIRCLE K", 'x':0.5},
+                barmode='group', height=500,
+                xaxis_title="Tháng", yaxis_title="Doanh thu (VNĐ)",
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.info("Đang tải dữ liệu biểu đồ...")
