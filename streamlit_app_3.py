@@ -399,21 +399,36 @@ if st.session_state.role == "admin":
 
         with col_right:
             st.markdown('<div class="section-header">🟢 TOP KHÁCH HIỆU SUẤT TỐT</div>', unsafe_allow_html=True)
-            if not df_kh.empty and 'Tổng doanh thu' in df_kh.columns:
+            if not df_kh.empty:
                 try:
-                    col_dt = [c for c in df_kh.columns if 'doanh thu' in c.lower() or 'Tổng' in c][0]
-                    col_tt = [c for c in df_kh.columns if 'thanh toán' in c.lower() or 'Đã' in c][0]
-                    df_perf = df_kh.copy()
-                    df_perf[col_dt] = pd.to_numeric(df_perf[col_dt], errors='coerce').fillna(0)
-                    df_perf[col_tt] = pd.to_numeric(df_perf[col_tt], errors='coerce').fillna(0)
-                    df_perf = df_perf[df_perf[col_dt] > 0]
-                    df_perf["Tỷ lệ TT"] = (df_perf[col_tt] / df_perf[col_dt] * 100).round(1).astype(str) + "%"
-                    df_perf = df_perf.nlargest(5, col_dt)[["Tên cửa hàng", col_dt, "Tỷ lệ TT"]]
-                    df_perf = df_perf.rename(columns={col_dt: "Tổng doanh thu"})
-                    df_perf["Tổng doanh thu"] = df_perf["Tổng doanh thu"].apply(fmt_currency)
-                    st.dataframe(df_perf, use_container_width=True, hide_index=True)
-                except:
-                    st.info("Chưa có dữ liệu hiệu suất")
+                    # Detect cột doanh thu linh hoạt (không phân biệt hoa thường, khoảng trắng)
+                    cols_lower = {c: c.lower().strip() for c in df_kh.columns}
+                    col_dt = next((c for c, cl in cols_lower.items() 
+                                   if 'doanh thu' in cl or 'tổng' in cl), None)
+                    col_tt = next((c for c, cl in cols_lower.items() 
+                                   if 'đã thanh toán' in cl or 'đã tt' in cl or ('thanh toán' in cl and 'đã' in cl)), None)
+                    if col_dt is None:
+                        # fallback: tìm cột số có giá trị lớn nhất
+                        numeric_cols = df_kh.select_dtypes(include='number').columns.tolist()
+                        if numeric_cols:
+                            col_dt = numeric_cols[0]
+                    if col_dt:
+                        df_perf = df_kh.copy()
+                        df_perf[col_dt] = pd.to_numeric(df_perf[col_dt].astype(str).str.replace('.','').str.replace(',','.'), errors='coerce').fillna(0)
+                        df_perf = df_perf[df_perf[col_dt] > 0]
+                        show_cols = ["Tên cửa hàng", col_dt]
+                        if col_tt:
+                            df_perf[col_tt] = pd.to_numeric(df_perf[col_tt].astype(str).str.replace('.','').str.replace(',','.'), errors='coerce').fillna(0)
+                            df_perf["Tỷ lệ TT"] = (df_perf[col_tt] / df_perf[col_dt] * 100).round(1).astype(str) + "%"
+                            show_cols.append("Tỷ lệ TT")
+                        df_perf = df_perf.nlargest(5, col_dt)[show_cols]
+                        df_perf = df_perf.rename(columns={col_dt: "Tổng doanh thu"})
+                        df_perf["Tổng doanh thu"] = df_perf["Tổng doanh thu"].apply(fmt_currency)
+                        st.dataframe(df_perf, use_container_width=True, hide_index=True)
+                    else:
+                        st.info("Không tìm thấy cột doanh thu")
+                except Exception as e:
+                    st.info(f"Chưa có dữ liệu hiệu suất: {e}")
             else:
                 st.info("Chưa có dữ liệu")
 
@@ -601,6 +616,28 @@ with t_order:
                         success = False
                         break
 
+                # Ghi vào Chi_tiet_don
+                if success:
+                    for i, item in enumerate(items_data):
+                        id_ct = f"CT{now.strftime('%Y%m%d%H%M%S')}{i+1:02d}"
+                        row_ct = [
+                            id_ct,
+                            id_don,
+                            item["sku"],
+                            "",
+                            item["sl"],
+                            item["don_gia"],
+                            thue_suat,
+                            item["thanh_tien"],
+                            item["thanh_tien"] * thue_suat,
+                            item["thanh_tien"] * (1 + thue_suat),
+                            khu_vuc,
+                            kho,
+                            thang,
+                            str(ngay_don)
+                        ]
+                        append_row("Chi_tiet_don", row_ct)
+
                 # Ghi vào Phieu_nhap_don
                 if success:
                     row_phieu = [
@@ -754,46 +791,110 @@ if st.session_state.role == "admin":
         # Thống kê PO
         st.markdown('<div class="section-header">📋 THỐNG KÊ PO</div>', unsafe_allow_html=True)
         df_dash_ck = load_sheet("Dashboard")
+
+        # ---- DEBUG PANEL (ẩn, chỉ admin) ----
+        with st.expander("🔧 Debug: Xem nội dung Dashboard sheet (để xác định đúng row/col)"):
+            if not df_dash_ck.empty:
+                st.caption(f"Kích thước: {df_dash_ck.shape[0]} hàng × {df_dash_ck.shape[1]} cột")
+                st.caption(f"Tên cột: {list(df_dash_ck.columns)}")
+                st.dataframe(df_dash_ck.reset_index(), use_container_width=True)
+            else:
+                st.warning("Dashboard sheet rỗng!")
+
         if not df_dash_ck.empty:
+            def to_num_po(v):
+                """Parse số: xử lý cả định dạng VN (1.234,56) và US (1234.56)"""
+                s = str(v).strip().replace(" ", "").replace("đ", "")
+                if not s or s in ["-", "N/A", ""]:
+                    return 0
+                # Nếu có cả dấu . và , thì dấu . là phân cách nghìn, , là thập phân
+                if "," in s and "." in s:
+                    s = s.replace(".", "").replace(",", ".")
+                elif "," in s:
+                    # Chỉ có dấu , — nếu phần sau , > 2 ký tự thì là nghìn
+                    parts = s.split(",")
+                    if len(parts[-1]) > 2:
+                        s = s.replace(",", "")
+                    else:
+                        s = s.replace(",", ".")
+                elif "." in s:
+                    parts = s.split(".")
+                    if len(parts[-1]) > 2:
+                        s = s.replace(".", "")
+                try:
+                    return float(s)
+                except:
+                    return 0
+
             try:
                 col1, col2 = st.columns(2)
+                n_rows = df_dash_ck.shape[0]
+                n_cols = df_dash_ck.shape[1]
+
+                def safe_iloc(r, c):
+                    if r < n_rows and c < n_cols:
+                        return df_dash_ck.iloc[r, c]
+                    return 0
+
                 with col1:
                     st.markdown("**📍 Miền Nam**")
                     c1, c2, c3, c4 = st.columns(4)
-                    with c1: st.metric("SL PO", df_dash_ck.iloc[18, 0])
-                    with c2: st.metric("Min", fmt_currency(df_dash_ck.iloc[20, 0]))
-                    with c3: st.metric("Max", fmt_currency(df_dash_ck.iloc[22, 0]))
-                    with c4: st.metric("Avg", fmt_currency(df_dash_ck.iloc[24, 0]))
+                    # Sheets hàng 19 = iloc[17] (trừ 1 header, trừ 1 vì 0-indexed)
+                    with c1: st.metric("SL PO", int(to_num_po(safe_iloc(17, 0))))
+                    with c2: st.metric("Min", fmt_currency(to_num_po(safe_iloc(19, 0))))
+                    with c3: st.metric("Max", fmt_currency(to_num_po(safe_iloc(21, 0))))
+                    with c4: st.metric("Avg", fmt_currency(to_num_po(safe_iloc(23, 0))))
                 with col2:
                     st.markdown("**📍 Miền Bắc**")
                     c1, c2, c3, c4 = st.columns(4)
-                    with c1: st.metric("SL PO", df_dash_ck.iloc[18, 1])
-                    with c2: st.metric("Min", fmt_currency(df_dash_ck.iloc[20, 1]))
-                    with c3: st.metric("Max", fmt_currency(df_dash_ck.iloc[22, 1]))
-                    with c4: st.metric("Avg", fmt_currency(df_dash_ck.iloc[24, 1]))
-            except:
-                st.info("Chưa có dữ liệu PO")
+                    with c1: st.metric("SL PO", int(to_num_po(safe_iloc(17, 1))))
+                    with c2: st.metric("Min", fmt_currency(to_num_po(safe_iloc(19, 1))))
+                    with c3: st.metric("Max", fmt_currency(to_num_po(safe_iloc(21, 1))))
+                    with c4: st.metric("Avg", fmt_currency(to_num_po(safe_iloc(23, 1))))
+            except Exception as e:
+                st.warning(f"Lỗi hiển thị PO: {e}")
+                st.info("Vui lòng mở Debug panel bên trên để xem đúng vị trí row/col")
 
         # Top SKU
         st.markdown('<div class="section-header">🏷️ PHÂN TÍCH SKU</div>', unsafe_allow_html=True)
         col_top, col_slow = st.columns(2)
+
+        def safe_get(df, r, c):
+            try:
+                if r < df.shape[0] and c < df.shape[1]:
+                    v = df.iloc[r, c]
+                    return v if str(v).strip() not in ["", "nan", "None"] else None
+            except:
+                pass
+            return None
+
         with col_top:
             st.markdown("🔥 **TOP 3 MÃ BÁN CHẠY**")
             try:
-                data_top = {
-                    "Mã SKU": [df_dash_ck.iloc[17, 4], df_dash_ck.iloc[18, 4], df_dash_ck.iloc[19, 4]],
-                    "Sản lượng": [df_dash_ck.iloc[17, 5], df_dash_ck.iloc[18, 5], df_dash_ck.iloc[19, 5]]
-                }
-                st.table(pd.DataFrame(data_top))
-            except:
-                st.info("Chưa có dữ liệu")
+                # Sheets hàng 18-20 = iloc[16, 17, 18]
+                rows_top = [16, 17, 18]
+                skus = [safe_get(df_dash_ck, r, 4) for r in rows_top]
+                sls  = [safe_get(df_dash_ck, r, 5) for r in rows_top]
+                # Lọc ra các dòng có dữ liệu thực
+                data_top = [(s, q) for s, q in zip(skus, sls) if s is not None]
+                if data_top:
+                    st.table(pd.DataFrame(data_top, columns=["Mã SKU", "Sản lượng"]))
+                else:
+                    st.info("Chưa có dữ liệu (kiểm tra Debug panel để xem đúng vị trí)")
+            except Exception as e:
+                st.info(f"Lỗi đọc SKU chạy: {e}")
+
         with col_slow:
             st.markdown("⚠️ **TOP 3 MÃ BÁN CHẬM**")
             try:
-                data_slow = {
-                    "Mã SKU": [df_dash_ck.iloc[22, 4], df_dash_ck.iloc[23, 4], df_dash_ck.iloc[24, 4]],
-                    "Sản lượng": [df_dash_ck.iloc[22, 5], df_dash_ck.iloc[23, 5], df_dash_ck.iloc[24, 5]]
-                }
-                st.table(pd.DataFrame(data_slow))
-            except:
-                st.info("Chưa có dữ liệu")
+                # Sheets hàng 23-25 = iloc[21, 22, 23]
+                rows_slow = [21, 22, 23]
+                skus = [safe_get(df_dash_ck, r, 4) for r in rows_slow]
+                sls  = [safe_get(df_dash_ck, r, 5) for r in rows_slow]
+                data_slow = [(s, q) for s, q in zip(skus, sls) if s is not None]
+                if data_slow:
+                    st.table(pd.DataFrame(data_slow, columns=["Mã SKU", "Sản lượng"]))
+                else:
+                    st.info("Chưa có dữ liệu (kiểm tra Debug panel để xem đúng vị trí)")
+            except Exception as e:
+                st.info(f"Lỗi đọc SKU chậm: {e}")
