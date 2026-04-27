@@ -209,6 +209,95 @@ USERS = {
     "ctv5": {"password": "ctv005", "role": "sale", "name": "CTV5"},
 }
 
+# ============================================================
+# NGÔN NGỮ / 语言
+# ============================================================
+LANG = {
+    "vi": {
+        "title": "🚀 STEPAD — QUẢN LÝ DOANH SỐ",
+        "logout": "Đăng xuất", "login_btn": "ĐĂNG NHẬP",
+        "login_user": "👤 Tên đăng nhập", "login_pass": "🔒 Mật khẩu",
+        "login_err": "Sai tên đăng nhập hoặc mật khẩu!",
+        "tab_dash": "🏠 Dashboard", "tab_order": "📝 Lên đơn", "tab_don": "📦 Đơn hàng",
+        "tab_sp": "🏷️ Sản phẩm", "tab_kh": "👥 Khách hàng", "tab_ck": "🏪 Circle K",
+        "tab_don_sale": "📦 Đơn hàng của tôi",
+        "tai_chinh": "💳 TÀI CHÍNH TỔNG QUAN",
+        "tong_dt": "TỔNG DOANH THU", "da_nhan": "ĐÃ THỰC NHẬN", "no_thu": "NỢ CẦN THU",
+        "tong_ch": "TỔNG CỬA HÀNG", "ch_active": "CH ACTIVE 3T", "ty_le_phu": "TỶ LỆ PHỦ",
+        "diem": "điểm", "dt_kenh": "📊 DOANH THU THEO KÊNH",
+        "tong": "Tổng", "mien_bac": "Miền Bắc", "mien_nam": "Miền Nam",
+        "tong_dt2": "Tổng DT", "da_tt": "Đã TT", "no": "Nợ", "ky_gui": "Ký gửi",
+        "top_no": "🔴 TOP KHÁCH NỢ NHIỀU", "top_hieu_suat": "🟢 TOP KHÁCH HIỆU SUẤT TỐT",
+        "chua_du_lieu": "Chưa có dữ liệu", "chua_du_lieu_no": "Chưa có dữ liệu nợ",
+        "thong_tin_don": "📋 THÔNG TIN ĐƠN HÀNG",
+        "khach_hang": "👤 Khách hàng *", "khu_vuc_label": "📍 Khu vực:",
+        "ngay_don": "📅 Ngày đơn", "loai_don": "📋 Loại đơn *",
+        "thue_suat": "💰 Thuế suất", "ma_po": "🔖 Mã PO", "nhap_neu_co": "Nhập nếu có...",
+        "xuat_hd": "🧾 Xuất hóa đơn VAT?", "sp_dat_hang": "🛒 SẢN PHẨM ĐẶT HÀNG",
+        "san_pham": "Sản phẩm", "so_luong": "Số lượng", "don_gia": "Đơn giá", "thanh_tien": "Thành tiền",
+        "them_sp": "➕ Thêm sản phẩm", "truoc_thue": "Trước thuế", "tong_sau_thue": "💰 TỔNG SAU THUẾ",
+        "da_tt2": "💵 Đã thanh toán (đ)", "con_no": "Còn nợ", "ghi_chu": "📝 Ghi chú",
+        "xac_nhan": "✅ XÁC NHẬN ĐƠN HÀNG", "dang_luu": "Đang lưu đơn hàng...",
+        "luu_ok": "✅ Đơn hàng đã được lưu thành công!",
+        "loi_chon_kh": "Vui lòng chọn khách hàng!", "loi_them_sp": "Vui lòng thêm ít nhất 1 sản phẩm!",
+        "loi_luu": "Có lỗi xảy ra khi lưu đơn hàng!",
+        "ds_don_hang": "📦 DANH SÁCH ĐƠN HÀNG", "tim_kiem": "🔍 Tìm kiếm",
+        "tim_placeholder": "Tìm theo ID khách, tên...", "loc_khu_vuc": "Lọc khu vực", "tat_ca": "Tất cả",
+        "tong_label": "Tổng:", "chua_don": "Chưa có đơn hàng nào.",
+        "ds_sp": "🏷️ DANH SÁCH SẢN PHẨM", "sp_canh_bao": "sản phẩm cần chú ý tồn kho!",
+        "ds_kh": "👥 DANH SÁCH KHÁCH HÀNG", "tim_kh": "🔍 Tìm kiếm khách hàng",
+        "tim_kh_ph": "Tên, ID, khu vực...", "loc_kenh": "Lọc kênh", "tong_kh": "khách hàng",
+        "ck_title": "🏪 PHÂN TÍCH CIRCLE K", "bieu_do_title": "📊 DOANH THU CIRCLE K THEO THÁNG",
+        "thong_ke_po": "📋 THỐNG KÊ PO", "sku_title": "🏷️ PHÂN TÍCH SKU",
+        "sku_chay": "🔥 TOP 3 MÃ BÁN CHẠY", "sku_cham": "⚠️ TOP 3 MÃ BÁN CHẬM",
+        "ma_sku": "Mã SKU", "san_luong": "Sản lượng", "chon": "-- Chọn --",
+    },
+    "zh": {
+        "title": "🚀 STEPAD — 销售管理系统",
+        "logout": "退出登录", "login_btn": "登录",
+        "login_user": "👤 用户名", "login_pass": "🔒 密码",
+        "login_err": "用户名或密码错误！",
+        "tab_dash": "🏠 仪表板", "tab_order": "📝 下单", "tab_don": "📦 订单",
+        "tab_sp": "🏷️ 产品", "tab_kh": "👥 客户", "tab_ck": "🏪 Circle K",
+        "tab_don_sale": "📦 我的订单",
+        "tai_chinh": "💳 财务总览",
+        "tong_dt": "总营业额", "da_nhan": "已收款", "no_thu": "待收款",
+        "tong_ch": "门店总数", "ch_active": "活跃门店(3月)", "ty_le_phu": "覆盖率",
+        "diem": "家", "dt_kenh": "📊 各渠道营业额",
+        "tong": "合计", "mien_bac": "北区", "mien_nam": "南区",
+        "tong_dt2": "总营业额", "da_tt": "已付款", "no": "欠款", "ky_gui": "寄售",
+        "top_no": "🔴 欠款最多客户", "top_hieu_suat": "🟢 业绩最佳客户",
+        "chua_du_lieu": "暂无数据", "chua_du_lieu_no": "暂无欠款数据",
+        "thong_tin_don": "📋 订单信息",
+        "khach_hang": "👤 客户 *", "khu_vuc_label": "📍 区域:",
+        "ngay_don": "📅 订单日期", "loai_don": "📋 订单类型 *",
+        "thue_suat": "💰 税率", "ma_po": "🔖 PO编号", "nhap_neu_co": "如有请填写...",
+        "xuat_hd": "🧾 开具增值税发票？", "sp_dat_hang": "🛒 订购产品",
+        "san_pham": "产品", "so_luong": "数量", "don_gia": "单价", "thanh_tien": "金额",
+        "them_sp": "➕ 添加产品", "truoc_thue": "税前", "tong_sau_thue": "💰 税后总计",
+        "da_tt2": "💵 已付款 (đ)", "con_no": "欠款", "ghi_chu": "📝 备注",
+        "xac_nhan": "✅ 确认订单", "dang_luu": "正在保存订单...",
+        "luu_ok": "✅ 订单保存成功！表单已重置。",
+        "loi_chon_kh": "请选择客户！", "loi_them_sp": "请至少添加1个产品！",
+        "loi_luu": "保存订单时出错，请重试！",
+        "ds_don_hang": "📦 订单列表", "tim_kiem": "🔍 搜索",
+        "tim_placeholder": "按客户ID、名称搜索...", "loc_khu_vuc": "按区域筛选", "tat_ca": "全部",
+        "tong_label": "共:", "chua_don": "暂无订单。",
+        "ds_sp": "🏷️ 产品列表", "sp_canh_bao": "个产品库存需注意！",
+        "ds_kh": "👥 客户列表", "tim_kh": "🔍 搜索客户",
+        "tim_kh_ph": "名称、ID、区域...", "loc_kenh": "按渠道筛选", "tong_kh": "位客户",
+        "ck_title": "🏪 Circle K 分析", "bieu_do_title": "📊 Circle K 月度营业额",
+        "thong_ke_po": "📋 PO统计", "sku_title": "🏷️ SKU分析",
+        "sku_chay": "🔥 销量TOP 3", "sku_cham": "⚠️ 滞销TOP 3",
+        "ma_sku": "SKU编码", "san_luong": "销量", "chon": "-- 请选择 --",
+    }
+}
+
+def T(key):
+    lang = st.session_state.get("lang", "vi")
+    return LANG[lang].get(key, LANG["vi"].get(key, key))
+
+
 def login_page():
     st.markdown("""
     <div style="text-align:center; margin-top: 80px;">
@@ -224,25 +313,26 @@ def login_page():
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)
-        username = st.text_input("👤 Tên đăng nhập", placeholder="Nhập username...")
-        password = st.text_input("🔒 Mật khẩu", type="password", placeholder="Nhập mật khẩu...")
+        username = st.text_input(T("login_user"), placeholder="Nhập username...")
+        password = st.text_input(T("login_pass"), type="password", placeholder="Nhập mật khẩu...")
         
-        if st.button("ĐĂNG NHẬP", use_container_width=True):
+        if st.button(T("login_btn"), use_container_width=True):
             if username in USERS and USERS[username]["password"] == password:
                 st.session_state.logged_in = True
+                st.query_params["user"] = username
                 st.session_state.username = username
                 st.session_state.role = USERS[username]["role"]
                 st.session_state.name = USERS[username]["name"]
                 st.rerun()
             else:
-                st.error("Sai tên đăng nhập hoặc mật khẩu!")
+                st.error(T("login_err"))
 
 # ============================================================
 # 4. HELPER FUNCTIONS
 # ============================================================
 def fmt_currency(val):
     try:
-        return f"{float(val):,.0f} đ"
+        s = str(val).strip().replace(".","-").replace(",",".").replace("-",""); return f"{float(s):,.0f} đ"
     except:
         return "0 đ"
 
@@ -283,6 +373,15 @@ def get_kho(khu_vuc, id_khach=""):
 # ============================================================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+if "lang" not in st.session_state:
+    st.session_state.lang = "vi"
+    if "user" in st.query_params:
+        u = st.query_params["user"]
+        if u in USERS:
+            st.session_state.logged_in = True
+            st.session_state.username = u
+            st.session_state.role = USERS[u]["role"]
+            st.session_state.name = USERS[u]["name"]
 
 if not st.session_state.logged_in:
     login_page()
@@ -293,7 +392,7 @@ col_h1, col_h2 = st.columns([3,1])
 with col_h1:
     st.markdown(f"""
     <div style="font-family:'JetBrains Mono',monospace; color:#00FF00; font-size:1.4rem; font-weight:700; letter-spacing:3px; padding: 8px 0;">
-        🚀 STEPAD — QUẢN LÝ DOANH SỐ
+        {T("title")}
     </div>
     """, unsafe_allow_html=True)
 with col_h2:
@@ -303,9 +402,15 @@ with col_h2:
         <span style="color:#00FF00">{st.session_state.role.upper()}</span>
     </div>
     """, unsafe_allow_html=True)
-    if st.button("Đăng xuất", key="logout"):
-        st.session_state.logged_in = False
-        st.rerun()
+    col_lang, col_out = st.columns([1,1])
+    with col_lang:
+        if st.button("🌐 VI / 中文", key="lang_toggle"):
+            st.session_state.lang = "zh" if st.session_state.get("lang","vi") == "vi" else "vi"
+            st.rerun()
+    with col_out:
+        if st.button(T("logout"), key="logout"):
+            st.session_state.logged_in = False
+            st.rerun()
 
 st.markdown("<hr style='border-color:#222222; margin: 0 0 16px 0;'>", unsafe_allow_html=True)
 
@@ -313,10 +418,10 @@ st.markdown("<hr style='border-color:#222222; margin: 0 0 16px 0;'>", unsafe_all
 # 6. TABS
 # ============================================================
 if st.session_state.role == "admin":
-    tabs = st.tabs(["🏠 Dashboard", "📝 Lên đơn", "📦 Đơn hàng", "🏷️ Sản phẩm", "👥 Khách hàng", "🏪 Circle K"])
+    tabs = st.tabs([T("tab_dash"), T("tab_order"), T("tab_don"), T("tab_sp"), T("tab_kh"), T("tab_ck")])
     t_dash, t_order, t_don, t_sp, t_kh, t_ck = tabs
 else:
-    tabs = st.tabs(["📝 Lên đơn", "📦 Đơn hàng của tôi"])
+    tabs = st.tabs([T("tab_order"), T("tab_don_sale")])
     t_order, t_don = tabs
 
 # ============================================================
@@ -333,12 +438,12 @@ if st.session_state.role == "admin":
             try:
                 row = df_dash.iloc[0]
                 col1, col2, col3, col4, col5, col6 = st.columns(6)
-                with col1: st.metric("TỔNG DOANH THU", fmt_currency(row.iloc[0]))
-                with col2: st.metric("ĐÃ THỰC NHẬN", fmt_currency(row.iloc[1]))
-                with col3: st.metric("NỢ CẦN THU", fmt_currency(row.iloc[2]))
-                with col4: st.metric("TỔNG CỬA HÀNG", f"{row.iloc[3]} điểm")
-                with col5: st.metric("CH ACTIVE 3T", f"{row.iloc[4]} điểm")
-                with col6: st.metric("TỶ LỆ PHỦ", f"{row.iloc[5]}")
+                with col1: st.metric(T("tong_dt"), fmt_currency(row.iloc[0]))
+                with col2: st.metric(T("da_nhan"), fmt_currency(row.iloc[1]))
+                with col3: st.metric(T("no_thu"), fmt_currency(row.iloc[2]))
+                with col4: st.metric(T("tong_ch"), f'{row.iloc[3]} {T("diem")}')
+                with col5: st.metric(T("ch_active"), f'{row.iloc[4]} {T("diem")}')
+                with col6: st.metric(T("ty_le_phu"), f"{row.iloc[5]}")
             except Exception as e:
                 st.error(f"Lỗi đọc Dashboard: {e}")
 
@@ -350,30 +455,30 @@ if st.session_state.role == "admin":
                 with col1:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
                     st.markdown("**🏪 CIRCLE K**")
-                    st.metric("Tổng", fmt_currency(df_dash.iloc[4, 0]))
-                    st.metric("Miền Bắc", fmt_currency(df_dash.iloc[4, 1]))
-                    st.metric("Miền Nam", fmt_currency(df_dash.iloc[4, 2]))
+                    st.metric(T("tong"), fmt_currency(df_dash.iloc[4, 0]))
+                    st.metric(T("mien_bac"), fmt_currency(df_dash.iloc[4, 1]))
+                    st.metric(T("mien_nam"), fmt_currency(df_dash.iloc[4, 2]))
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col2:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
                     st.markdown("**🏬 MODERN TRADE**")
-                    st.metric("Tổng DT", fmt_currency(df_dash.iloc[7, 0]))
-                    st.metric("Đã TT", fmt_currency(df_dash.iloc[7, 1]))
-                    st.metric("Nợ", fmt_currency(df_dash.iloc[7, 2]))
+                    st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[7, 0]))
+                    st.metric(T("da_tt"), fmt_currency(df_dash.iloc[7, 1]))
+                    st.metric(T("no"), fmt_currency(df_dash.iloc[7, 2]))
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col3:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
                     st.markdown("**🛒 GENERAL TRADE**")
-                    st.metric("Tổng DT", fmt_currency(df_dash.iloc[9, 0]))
-                    st.metric("Đã TT", fmt_currency(df_dash.iloc[9, 1]))
-                    st.metric("Nợ", fmt_currency(df_dash.iloc[9, 2]))
+                    st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[9, 0]))
+                    st.metric(T("da_tt"), fmt_currency(df_dash.iloc[9, 1]))
+                    st.metric(T("no"), fmt_currency(df_dash.iloc[9, 2]))
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col4:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
                     st.markdown("**🌊 NHA TRANG**")
-                    st.metric("Ký gửi", fmt_currency(df_dash.iloc[14, 0]))
-                    st.metric("Đã TT", fmt_currency(df_dash.iloc[14, 1]))
-                    st.metric("Nợ", fmt_currency(df_dash.iloc[14, 2]))
+                    st.metric(T("ky_gui"), fmt_currency(df_dash.iloc[13, 0]))
+                    st.metric(T("da_tt"), fmt_currency(df_dash.iloc[13, 1]))
+                    st.metric(T("no"), fmt_currency(df_dash.iloc[13, 2]))
                     st.markdown('</div>', unsafe_allow_html=True)
             except Exception as e:
                 st.warning(f"Đang chờ dữ liệu kênh phân phối...")
@@ -393,9 +498,9 @@ if st.session_state.role == "admin":
                     df_no['Còn nợ'] = df_no['Còn nợ'].apply(fmt_currency)
                     st.dataframe(df_no, use_container_width=True, hide_index=True)
                 except:
-                    st.info("Chưa có dữ liệu nợ")
+                    st.info(T("chua_du_lieu_no"))
             else:
-                st.info("Chưa có dữ liệu")
+                st.info(T("chua_du_lieu"))
 
         with col_right:
             st.markdown('<div class="section-header">🟢 TOP KHÁCH HIỆU SUẤT TỐT</div>', unsafe_allow_html=True)
@@ -430,7 +535,7 @@ if st.session_state.role == "admin":
                 except Exception as e:
                     st.info(f"Chưa có dữ liệu hiệu suất: {e}")
             else:
-                st.info("Chưa có dữ liệu")
+                st.info(T("chua_du_lieu"))
 
 # ============================================================
 # TAB: LÊN ĐƠN HÀNG
@@ -453,7 +558,7 @@ with t_order:
 
     # Hiện thông báo thành công nếu vừa lưu xong
     if st.session_state.order_success:
-        st.success(f"✅ Đơn hàng đã được lưu thành công! Form đã được làm mới.")
+        st.success(fT("luu_ok"))
         st.session_state.order_success = False
 
     # ---- THÔNG TIN ĐƠN HÀNG ----
@@ -464,23 +569,23 @@ with t_order:
         ds_khach = df_kh['ID Khách'].tolist() if 'ID Khách' in df_kh.columns else []
         ds_ten = df_kh['Tên cửa hàng'].tolist() if 'Tên cửa hàng' in df_kh.columns else []
         ds_khach_display = [f"{id} — {ten}" for id, ten in zip(ds_khach, ds_ten)]
-        khach_selected = st.selectbox("👤 Khách hàng *", ds_khach_display, key=f"sel_khach_{st.session_state.form_key}")
+        khach_selected = st.selectbox(T("khach_hang"), ds_khach_display, key=f"sel_khach_{st.session_state.form_key}")
         id_khach = khach_selected.split(" — ")[0] if khach_selected else ""
         khu_vuc = get_khu_vuc(id_khach)
         st.markdown(f"<small style='color:#00FF00'>📍 Khu vực: <b>{khu_vuc}</b></small>", unsafe_allow_html=True)
 
     with col2:
-        ngay_don = st.date_input("📅 Ngày đơn", value=date.today(), key=f"ngay_{st.session_state.form_key}")
+        ngay_don = st.date_input(T("ngay_don"), value=date.today(), key=f"ngay_{st.session_state.form_key}")
 
     col3, col4, col5 = st.columns(3)
     with col3:
-        loai_don = st.selectbox("📋 Loại đơn *", ["Ký gửi", "Bổ sung hàng", "Circle K"], key=f"loai_{st.session_state.form_key}")
+        loai_don = st.selectbox(T("loai_don"), [T("ky_gui"), "Bổ sung hàng", "Circle K"], key=f"loai_{st.session_state.form_key}")
     with col4:
-        thue_suat = st.selectbox("💰 Thuế suất", [0.08, 0.0], format_func=lambda x: f"{int(x*100)}%", key=f"thue_{st.session_state.form_key}")
+        thue_suat = st.selectbox(T("thue_suat"), [0.08, 0.0], format_func=lambda x: f"{int(x*100)}%", key=f"thue_{st.session_state.form_key}")
     with col5:
-        ma_po = st.text_input("🔖 Mã PO", placeholder="Nhập nếu có...", key=f"mapo_{st.session_state.form_key}")
+        ma_po = st.text_input(T("ma_po"), placeholder=T("nhap_neu_co"), key=f"mapo_{st.session_state.form_key}")
 
-    tt_hd = st.selectbox("🧾 Xuất hóa đơn VAT?", ["Không xuất HĐ", "Có xuất HĐ"], key=f"tthd_{st.session_state.form_key}")
+    tt_hd = st.selectbox(T("xuat_hd"), ["Không xuất HĐ", "Có xuất HĐ"], key=f"tthd_{st.session_state.form_key}")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -507,14 +612,14 @@ with t_order:
         with col_sku:
             sku_sel = st.selectbox(
                 f"SP{i+1}",
-                ["-- Chọn --"] + ds_sku_display,
+                [T("chon")] + ds_sku_display,
                 key=f"sku_{st.session_state.form_key}_{i}",
                 label_visibility="collapsed"
             )
         with col_sl:
             sl = st.number_input("SL", min_value=1, value=1, key=f"sl_{st.session_state.form_key}_{i}", label_visibility="collapsed")
 
-        sku_code = sku_sel.split(" — ")[0] if sku_sel != "-- Chọn --" else ""
+        sku_code = sku_sel.split(" — ")[0] if sku_sel != T("chon") else ""
         don_gia = get_gia_theo_khu_vuc(df_sp, sku_code, khu_vuc) if sku_code else 0
         thanh_tien = don_gia * sl
         tong_truoc_thue += thanh_tien
@@ -531,7 +636,7 @@ with t_order:
         if sku_code:
             items_data.append({"sku": sku_code, "sl": sl, "don_gia": don_gia, "thanh_tien": thanh_tien})
 
-    if st.button("➕ Thêm sản phẩm", key=f"add_sku_{st.session_state.form_key}"):
+    if st.button(T("them_sp"), key=f"add_sku_{st.session_state.form_key}"):
         st.session_state.order_items.append({"sku": "", "sl": 1})
         st.rerun()
 
@@ -542,28 +647,28 @@ with t_order:
     tong_sau_thue = tong_truoc_thue + tien_thue
 
     col_s1, col_s2, col_s3 = st.columns(3)
-    with col_s1: st.metric("Trước thuế", fmt_currency(tong_truoc_thue))
+    with col_s1: st.metric(T("truoc_thue"), fmt_currency(tong_truoc_thue))
     with col_s2: st.metric(f"Thuế {int(thue_suat*100)}%", fmt_currency(tien_thue))
-    with col_s3: st.metric("💰 TỔNG SAU THUẾ", fmt_currency(tong_sau_thue))
+    with col_s3: st.metric(T("tong_sau_thue"), fmt_currency(tong_sau_thue))
 
     col_tt1, col_tt2 = st.columns(2)
     with col_tt1:
-        da_thanh_toan = st.number_input("💵 Đã thanh toán (đ)", min_value=0, value=0, step=100000, key=f"datt_{st.session_state.form_key}")
+        da_thanh_toan = st.number_input(T("da_tt2"), min_value=0, value=0, step=100000, key=f"datt_{st.session_state.form_key}")
     with col_tt2:
         con_no = tong_sau_thue - da_thanh_toan
-        st.metric("Còn nợ", fmt_currency(con_no))
+        st.metric(T("con_no"), fmt_currency(con_no))
 
-    ghi_chu = st.text_area("📝 Ghi chú", placeholder="Ghi chú đặc biệt cho đơn hàng này...", height=80, key=f"ghichu_{st.session_state.form_key}")
+    ghi_chu = st.text_area(T("ghi_chu"), placeholder="Ghi chú đặc biệt cho đơn hàng này...", height=80, key=f"ghichu_{st.session_state.form_key}")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if st.button("✅ XÁC NHẬN ĐƠN HÀNG", use_container_width=True, key="submit_order"):
+    if st.button(T("xac_nhan"), use_container_width=True, key="submit_order"):
         if not id_khach:
-            st.error("Vui lòng chọn khách hàng!")
+            st.error(T("loi_chon_kh"))
         elif not items_data:
-            st.error("Vui lòng thêm ít nhất 1 sản phẩm!")
+            st.error(T("loi_them_sp"))
         else:
-            with st.spinner("Đang lưu đơn hàng..."):
+            with st.spinner(T("dang_luu")):
                 now = datetime.now()
                 id_don = f"DH{now.strftime('%Y%m%d%H%M%S')}"
                 thang = now.strftime("%m/%Y")
@@ -668,7 +773,7 @@ with t_order:
                     st.cache_data.clear()
                     st.rerun()
                 else:
-                    st.error("Có lỗi xảy ra khi lưu đơn hàng. Vui lòng thử lại!")
+                    st.error(T("loi_luu"))
 
 # ============================================================
 # TAB: ĐƠN HÀNG
@@ -683,21 +788,21 @@ with t_don:
         
         col_f1, col_f2 = st.columns(2)
         with col_f1:
-            search = st.text_input("🔍 Tìm kiếm", placeholder="Tìm theo ID khách, tên...")
+            search = st.text_input(T("tim_kiem"), placeholder=T("tim_placeholder"))
         with col_f2:
             if 'Khu vực' in df_don.columns:
-                kv_filter = st.selectbox("Lọc khu vực", ["Tất cả"] + df_don['Khu vực'].dropna().unique().tolist())
+                kv_filter = st.selectbox(T("loc_khu_vuc"), [T("tat_ca")] + df_don['Khu vực'].dropna().unique().tolist())
         
         if search:
             mask = df_don.astype(str).apply(lambda x: x.str.contains(search, case=False)).any(axis=1)
             df_don = df_don[mask]
-        if 'Khu vực' in df_don.columns and kv_filter != "Tất cả":
+        if 'Khu vực' in df_don.columns and kv_filter != T("tat_ca"):
             df_don = df_don[df_don['Khu vực'] == kv_filter]
         
         st.dataframe(df_don, use_container_width=True, hide_index=True)
-        st.caption(f"Tổng: {len(df_don)} dòng")
+        st.caption(f'{T("tong_label")} {len(df_don)}')
     else:
-        st.info("Chưa có đơn hàng nào.")
+        st.info(T("chua_don"))
 
 # ============================================================
 # TAB: SẢN PHẨM (Admin only)
@@ -726,20 +831,20 @@ if st.session_state.role == "admin":
         if not df_kh_full.empty:
             col_f1, col_f2 = st.columns(2)
             with col_f1:
-                search_kh = st.text_input("🔍 Tìm kiếm khách hàng", placeholder="Tên, ID, khu vực...")
+                search_kh = st.text_input(T("tim_kh"), placeholder=T("tim_kh_ph"))
             with col_f2:
                 if 'Kênh phân phối' in df_kh_full.columns:
-                    kenh_filter = st.selectbox("Lọc kênh", ["Tất cả"] + df_kh_full['Kênh phân phối'].dropna().unique().tolist())
+                    kenh_filter = st.selectbox(T("loc_kenh"), [T("tat_ca")] + df_kh_full['Kênh phân phối'].dropna().unique().tolist())
             
             df_display = df_kh_full.copy()
             if search_kh:
                 mask = df_display.astype(str).apply(lambda x: x.str.contains(search_kh, case=False)).any(axis=1)
                 df_display = df_display[mask]
-            if 'Kênh phân phối' in df_kh_full.columns and kenh_filter != "Tất cả":
+            if 'Kênh phân phối' in df_kh_full.columns and kenh_filter != T("tat_ca"):
                 df_display = df_display[df_display['Kênh phân phối'] == kenh_filter]
             
             st.dataframe(df_display, use_container_width=True, hide_index=True)
-            st.caption(f"Tổng: {len(df_display)} khách hàng")
+            st.caption(f'{T("tong_label")} {len(df_display)} {T("tong_kh")}')
 
     # ============================================================
     # TAB: CIRCLE K
@@ -776,7 +881,7 @@ if st.session_state.role == "admin":
                     fig.add_trace(go.Bar(x=df_ck_plot[col_thang], y=df_ck_plot[col_nam], name='Miền Nam', marker_color='#00A300', hovertemplate='%{y:,.0f} đ'))
                     fig.add_trace(go.Bar(x=df_ck_plot[col_thang], y=df_ck_plot[col_tong], name='TỔNG', marker_color='#00FF00', hovertemplate='%{y:,.0f} đ'))
                     fig.update_layout(
-                        title={'text': "📊 DOANH THU CIRCLE K THEO THÁNG", 'x': 0.5, 'font': {'color': '#00FF00', 'size': 14}},
+                        title={'text': T("bieu_do_title"), 'x': 0.5, 'font': {'color': '#00FF00', 'size': 14}},
                         barmode='group', height=400,
                         xaxis=dict(tickfont=dict(color='#888888')),
                         yaxis=dict(gridcolor='#222222', tickfont=dict(color='#888888')),
@@ -869,7 +974,7 @@ if st.session_state.role == "admin":
             return None
 
         with col_top:
-            st.markdown("🔥 **TOP 3 MÃ BÁN CHẠY**")
+            st.markdown(f'🔥 **{T("sku_chay")}**')
             try:
                 # Sheets hàng 18-20 = iloc[16, 17, 18]
                 rows_top = [16, 17, 18]
@@ -878,14 +983,14 @@ if st.session_state.role == "admin":
                 # Lọc ra các dòng có dữ liệu thực
                 data_top = [(s, q) for s, q in zip(skus, sls) if s is not None]
                 if data_top:
-                    st.table(pd.DataFrame(data_top, columns=["Mã SKU", "Sản lượng"]))
+                    st.table(pd.DataFrame(data_top, columns=[T("ma_sku"), T("san_luong")]))
                 else:
                     st.info("Chưa có dữ liệu (kiểm tra Debug panel để xem đúng vị trí)")
             except Exception as e:
                 st.info(f"Lỗi đọc SKU chạy: {e}")
 
         with col_slow:
-            st.markdown("⚠️ **TOP 3 MÃ BÁN CHẬM**")
+            st.markdown(f'⚠️ **{T("sku_cham")}**')
             try:
                 # Sheets hàng 23-25 = iloc[21, 22, 23]
                 rows_slow = [21, 22, 23]
@@ -893,7 +998,7 @@ if st.session_state.role == "admin":
                 sls  = [safe_get(df_dash_ck, r, 5) for r in rows_slow]
                 data_slow = [(s, q) for s, q in zip(skus, sls) if s is not None]
                 if data_slow:
-                    st.table(pd.DataFrame(data_slow, columns=["Mã SKU", "Sản lượng"]))
+                    st.table(pd.DataFrame(data_slow, columns=[T("ma_sku"), T("san_luong")]))
                 else:
                     st.info("Chưa có dữ liệu (kiểm tra Debug panel để xem đúng vị trí)")
             except Exception as e:
