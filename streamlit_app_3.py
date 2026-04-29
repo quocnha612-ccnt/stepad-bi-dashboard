@@ -574,7 +574,7 @@ with t_order:
 
     # Hiện thông báo thành công nếu vừa lưu xong
     if st.session_state.order_success:
-        st.success(fT("luu_ok"))
+        st.success(T("luu_ok"))
         st.session_state.order_success = False
 
     # ---- THÔNG TIN ĐƠN HÀNG ----
