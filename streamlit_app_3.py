@@ -511,7 +511,7 @@ if st.session_state.role == "admin":
                     df_no = df_kh.copy(); df_no["_no_num"] = df_no["Còn nợ"].astype(str).str.replace(".","-").str.replace(",",".").str.replace("-",""); df_no["_no_num"] = pd.to_numeric(df_no["_no_num"], errors="coerce").fillna(0); df_no = df_no[df_no["_no_num"] > 0]
                     df_no['Còn nợ'] = pd.to_numeric(df_no['Còn nợ'], errors='coerce')
                     df_no = df_no.nlargest(5, 'Còn nợ')[['Tên cửa hàng', 'Còn nợ', 'Khu vực']]
-                    df_no['Còn nợ'] = df_no['Còn nợ'].apply(fmt_currency)
+                    df_no["Còn nợ"] = df_no["_no_num"].apply(fmt_currency)
                     st.dataframe(df_no, use_container_width=True, hide_index=True)
                 except:
                     st.info(T("chua_du_lieu_no"))
