@@ -659,13 +659,26 @@ with t_order:
     # ---- TỔNG KẾT ----
     st.markdown("<hr style='border-color:#222222; margin:16px 0'>", unsafe_allow_html=True)
 
-    tien_thue = tong_truoc_thue * thue_suat
-    tong_sau_thue = tong_truoc_thue + tien_thue
+    # Giảm giá đặc biệt
+    ap_dung_giam = st.checkbox("🏷️ Áp dụng giảm giá đặc biệt", value=False, key=f"giam_{st.session_state.form_key}")
+    pct_giam = 0
+    if ap_dung_giam:
+        pct_giam = st.number_input("% Giảm giá", min_value=0.0, max_value=100.0, value=0.0, step=0.5, key=f"pct_giam_{st.session_state.form_key}")
 
-    col_s1, col_s2, col_s3 = st.columns(3)
+    tien_giam = tong_truoc_thue * (pct_giam / 100)
+    tong_sau_giam = tong_truoc_thue - tien_giam
+    tien_thue = tong_sau_giam * thue_suat
+    tong_sau_thue = tong_sau_giam + tien_thue
+
+    col_s1, col_s2, col_s3, col_s4 = st.columns(4) if ap_dung_giam else st.columns([1,1,0.01,1])
     with col_s1: st.metric(T("truoc_thue"), fmt_currency(tong_truoc_thue))
-    with col_s2: st.metric(f"Thuế {int(thue_suat*100)}%", fmt_currency(tien_thue))
-    with col_s3: st.metric(T("tong_sau_thue"), fmt_currency(tong_sau_thue))
+    if ap_dung_giam:
+        with col_s2: st.metric(f"Giảm {pct_giam}%", f"-{fmt_currency(tien_giam)}")
+        with col_s3: st.metric(f"Thuế {int(thue_suat*100)}%", fmt_currency(tien_thue))
+        with col_s4: st.metric(T("tong_sau_thue"), fmt_currency(tong_sau_thue))
+    else:
+        with col_s2: st.metric(f"Thuế {int(thue_suat*100)}%", fmt_currency(tien_thue))
+        with col_s4: st.metric(T("tong_sau_thue"), fmt_currency(tong_sau_thue))
 
     col_tt1, col_tt2 = st.columns(2)
     with col_tt1:
