@@ -332,7 +332,23 @@ def login_page():
 # ============================================================
 def fmt_currency(val):
     try:
-        s = str(val).strip().replace(".","-").replace(",",".").replace("-",""); return f"{float(s):,.0f} đ"
+        s = str(val).strip().replace(" ","").replace("đ","")
+        if not s or s in ["-","N/A",""]: return "0 đ"
+        # VN format: 1.234.567 hoặc 1.234,56
+        if s.count(".") > 1:
+            s = s.replace(".","").replace(",",".")
+        elif "," in s and "." in s:
+            if s.index(".") < s.index(","):
+                s = s.replace(".","").replace(",",".")
+            else:
+                s = s.replace(",","")
+        elif "," in s:
+            parts = s.split(",")
+            if len(parts[-1]) > 2:
+                s = s.replace(",","")
+            else:
+                s = s.replace(",",".")
+        return f"{float(s):,.0f} đ"
     except:
         return "0 đ"
 
@@ -908,28 +924,23 @@ if st.session_state.role == "admin":
 
         if not df_dash_ck.empty:
             def to_num_po(v):
-                """Parse số: xử lý cả định dạng VN (1.234,56) và US (1234.56)"""
-                s = str(v).strip().replace(" ", "").replace("đ", "")
-                if not s or s in ["-", "N/A", ""]:
-                    return 0
-                # Nếu có cả dấu . và , thì dấu . là phân cách nghìn, , là thập phân
-                if "," in s and "." in s:
-                    s = s.replace(".", "").replace(",", ".")
-                elif "," in s:
-                    # Chỉ có dấu , — nếu phần sau , > 2 ký tự thì là nghìn
-                    parts = s.split(",")
-                    if len(parts[-1]) > 2:
-                        s = s.replace(",", "")
+                s = str(v).strip().replace(" ","").replace("đ","")
+                if not s or s in ["-","N/A",""]: return 0
+                if s.count(".") > 1:
+                    s = s.replace(".","").replace(",",".")
+                elif "," in s and "." in s:
+                    if s.index(".") < s.index(","):
+                        s = s.replace(".","").replace(",",".")
                     else:
-                        s = s.replace(",", ".")
+                        s = s.replace(",","")
+                elif "," in s:
+                    parts = s.split(",")
+                    s = s.replace(",","") if len(parts[-1]) > 2 else s.replace(",",".")
                 elif "." in s:
                     parts = s.split(".")
-                    if len(parts[-1]) > 2:
-                        s = s.replace(".", "")
-                try:
-                    return float(s)
-                except:
-                    return 0
+                    if len(parts[-1]) > 2: s = s.replace(".","")
+                try: return float(s)
+                except: return 0
 
             try:
                 col1, col2 = st.columns(2)
