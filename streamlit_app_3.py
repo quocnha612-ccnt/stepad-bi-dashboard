@@ -508,7 +508,7 @@ if st.session_state.role == "admin":
             st.markdown('<div class="section-header">🔴 TOP KHÁCH NỢ NHIỀU</div>', unsafe_allow_html=True)
             if not df_kh.empty and 'Còn nợ' in df_kh.columns and 'Tên cửa hàng' in df_kh.columns:
                 try:
-                    df_no = df_kh[pd.to_numeric(df_kh['Còn nợ'], errors='coerce') > 0].copy()
+                    df_no = df_kh.copy(); df_no["_no_num"] = df_no["Còn nợ"].astype(str).str.replace(".","-").str.replace(",",".").str.replace("-",""); df_no["_no_num"] = pd.to_numeric(df_no["_no_num"], errors="coerce").fillna(0); df_no = df_no[df_no["_no_num"] > 0]
                     df_no['Còn nợ'] = pd.to_numeric(df_no['Còn nợ'], errors='coerce')
                     df_no = df_no.nlargest(5, 'Còn nợ')[['Tên cửa hàng', 'Còn nợ', 'Khu vực']]
                     df_no['Còn nợ'] = df_no['Còn nợ'].apply(fmt_currency)
