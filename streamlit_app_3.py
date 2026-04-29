@@ -700,7 +700,7 @@ with t_order:
             with st.spinner(T("dang_luu")):
                 now = datetime.now()
                 id_don = f"DH{now.strftime('%Y%m%d%H%M%S')}"
-                thang = now.strftime("%m/%Y")
+                thang = ngay_don.strftime("%m/%Y")
                 kho = get_kho(khu_vuc, id_khach)
 
                 if da_thanh_toan == 0:
