@@ -588,7 +588,8 @@ with t_order:
     with col1:
         ds_khach = df_kh['ID Khách'].tolist() if 'ID Khách' in df_kh.columns else []
         ds_ten = df_kh['Tên cửa hàng'].tolist() if 'Tên cửa hàng' in df_kh.columns else []
-        ds_khach_display = [f"{id} — {ten}" for id, ten in zip(ds_khach, ds_ten)]
+        ds_diachi = df_kh['Địa chỉ'].tolist() if 'Địa chỉ' in df_kh.columns else ['' for _ in ds_khach]
+        ds_khach_display = [f"{id} — {ten} — {dc}" for id, ten, dc in zip(ds_khach, ds_ten, ds_diachi)]
         khach_selected = st.selectbox(T("khach_hang"), ds_khach_display, key=f"sel_khach_{st.session_state.form_key}")
         id_khach = khach_selected.split(" — ")[0] if khach_selected else ""
         khu_vuc = get_khu_vuc(id_khach)
