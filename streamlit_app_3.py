@@ -361,7 +361,7 @@ def fmt_pct(val):
 def get_gia_theo_khu_vuc(df_sp, sku, khu_vuc):
     try:
         row = df_sp[df_sp['SKU Sản phẩm'] == sku].iloc[0]
-        if khu_vuc == "Nha Trang": return float(str(row.get('Giá Nha Trang', 0)).replace(',','').replace('.',''))
+        if khu_vuc in ["Nha Trang","Ký gửi"]: return float(str(row.get('Giá Nha Trang', 0)).replace(',','').replace('.',''))
         if khu_vuc == "Circle K": return float(str(row.get('Giá Circle K', 0)).replace(',','').replace('.',''))
         if khu_vuc == "MT": return float(str(row.get('Giá MT', 0)).replace(',','').replace('.',''))
         if khu_vuc == "GT": return float(str(row.get('Giá GT', 0)).replace(',','').replace('.',''))
