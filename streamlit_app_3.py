@@ -145,7 +145,7 @@ def get_gsheet_client():
     )
     return gspread.authorize(creds)
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=300)
 def load_sheet(sheet_name):
     try:
         client = get_gsheet_client()
@@ -538,10 +538,11 @@ def parse_num(s):
 
 if st.session_state.role == "admin":
     with t_dash:
-        df_dash = load_sheet("Dashboard")
-        df_kh   = load_sheet("Khach_Hang")
-        df_chitiet = load_sheet("Chi_tiet_don")
-        df_donhang = load_sheet("Don_Hang")
+        with st.spinner("Đang tải dữ liệu..."):
+            df_dash    = load_sheet("Dashboard")
+            df_kh      = load_sheet("Khach_Hang")
+            df_chitiet = load_sheet("Chi_tiet_don")
+            df_donhang = load_sheet("Don_Hang")
 
         # ── BỘ LỌC THÁNG / NĂM ────────────────────────────────
         st.markdown('<div class="section-header">🗓️ BỘ LỌC THỜI GIAN</div>', unsafe_allow_html=True)
@@ -1162,7 +1163,8 @@ with t_order:
 # ============================================================
 with t_don:
     st.markdown('<div class="section-header">📦 DANH SÁCH ĐƠN HÀNG</div>', unsafe_allow_html=True)
-    df_don = load_sheet("Don_Hang")
+    with st.spinner("Đang tải..."):
+        df_don = load_sheet("Don_Hang")
     
     if not df_don.empty:
         if st.session_state.role == "sale":
@@ -1191,7 +1193,8 @@ with t_don:
 # ============================================================
 if st.session_state.role == "admin":
     with t_sp:
-        df_sp_full = load_sheet("San_Pham")
+        with st.spinner("Đang tải..."):
+            df_sp_full = load_sheet("San_Pham")
 
         # ── CẢNH BÁO TỒN KHO ──────────────────────────────────
         if not df_sp_full.empty and 'Trạng thái tồn kho' in df_sp_full.columns:
@@ -1319,7 +1322,8 @@ if st.session_state.role == "admin":
     # ============================================================
     with t_kh:
         st.markdown('<div class="section-header">👥 DANH SÁCH KHÁCH HÀNG</div>', unsafe_allow_html=True)
-        df_kh_full = load_sheet("Khach_Hang")
+        with st.spinner("Đang tải..."):
+            df_kh_full = load_sheet("Khach_Hang")
         if not df_kh_full.empty:
             col_f1, col_f2 = st.columns(2)
             with col_f1:
