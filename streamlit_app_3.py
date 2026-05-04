@@ -950,7 +950,7 @@ with t_order:
     with col3:
         loai_don = st.selectbox(T("loai_don"), [T("ky_gui"), "Bổ sung hàng", "Circle K"], key=f"loai_{st.session_state.form_key}")
     with col4:
-        thue_suat = st.selectbox(T("thue_suat"), [0.08, 0.0], format_func=lambda x: f"{int(x*100)}%", key=f"thue_{st.session_state.form_key}")
+        thue_suat = st.selectbox(T("thue_suat"), [0.0, 0.08, 0.10], format_func=lambda x: f"{int(x*100)}%", key=f"thue_{st.session_state.form_key}")
     with col5:
         ma_po = st.text_input(T("ma_po"), placeholder=T("nhap_neu_co"), key=f"mapo_{st.session_state.form_key}")
 
