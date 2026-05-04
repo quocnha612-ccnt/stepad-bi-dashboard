@@ -828,9 +828,17 @@ if st.session_state.role == "admin":
                     df_trend = df_trend[df_trend["_year"] == sel_year]
                 if not sel_month and not df_trend.empty:
                     df_trend["_val"] = df_trend[col_sau_thue].apply(parse_num)
-                    df_trend_grp = df_trend.groupby(["_month", col_kv_ct])["_val"].sum().reset_index()
-                    df_trend_grp.columns = ["Tháng", "Kênh", "Doanh thu"]
-                    df_trend_grp["Tháng"] = df_trend_grp["Tháng"].apply(lambda m: f"T{int(m)}")
+                    df_trend_grp = df_trend.groupby(["_year", "_month", col_kv_ct])["_val"].sum().reset_index()
+                    df_trend_grp.columns = ["Năm", "Tháng số", "Kênh", "Doanh thu"]
+                    # Tạo nhãn tháng có năm để phân biệt (ví dụ: T3/2025 vs T3/2026)
+                    if not sel_year:
+                        df_trend_grp["Tháng"] = df_trend_grp.apply(
+                            lambda r: f"T{int(r['Tháng số'])}/{int(r['Năm'])}", axis=1
+                        )
+                    else:
+                        df_trend_grp["Tháng"] = df_trend_grp["Tháng số"].apply(lambda m: f"T{int(m)}")
+                    # Sắp xếp đúng thứ tự thời gian
+                    df_trend_grp = df_trend_grp.sort_values(["Năm", "Tháng số"])
                     fig_trend = px.bar(
                         df_trend_grp, x="Tháng", y="Doanh thu", color="Kênh",
                         barmode="group",
