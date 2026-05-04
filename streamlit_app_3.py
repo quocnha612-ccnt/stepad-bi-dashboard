@@ -251,6 +251,8 @@ LANG = {
         "thong_ke_po": "📋 THỐNG KÊ PO", "sku_title": "🏷️ PHÂN TÍCH SKU",
         "sku_chay": "🔥 TOP 3 MÃ BÁN CHẠY", "sku_cham": "⚠️ TOP 3 MÃ BÁN CHẬM",
         "ma_sku": "Mã SKU", "san_luong": "Sản lượng", "chon": "-- Chọn --",
+        "ton_kho_bac": "Tồn kho Bắc", "ton_kho_nam": "Tồn kho Nam", "tong_ton": "Tổng tồn kho",
+        "nhap_kho": "📥 NHẬP HÀNG VÀO KHO", "lich_su_nhap": "🕐 LỊCH SỬ NHẬP KHO",
     },
     "zh": {
         "title": "🚀 STEPAD — 销售管理系统",
@@ -358,6 +360,72 @@ def fmt_pct(val):
     except:
         return "0%"
 
+# ── DỊCH TIÊU ĐỀ CỘT KHI HIỂN THỊ ─────────────────────────
+COL_TRANSLATE = {
+    # Don_Hang / Chi_tiet_don
+    "ID Đơn":                    {"zh": "订单ID"},
+    "Ngày lên đơn":              {"zh": "下单日期"},
+    "ID Khách":                  {"zh": "客户ID"},
+    "ID Khách hàng":             {"zh": "客户ID"},
+    "Khu vực":                   {"zh": "区域"},
+    "Tổng tiền PO":              {"zh": "PO总金额"},
+    "Đã thanh toán":             {"zh": "已付款"},
+    "Còn nợ":                    {"zh": "欠款"},
+    "Tháng":                     {"zh": "月份"},
+    "Trạng thái TT":             {"zh": "付款状态"},
+    "Loại đơn":                  {"zh": "订单类型"},
+    "Mã PO":                     {"zh": "PO编号"},
+    # Chi_tiet_don
+    "ID Chi tiết":               {"zh": "明细ID"},
+    "SKU":                       {"zh": "SKU"},
+    "SKU Sản phẩm":              {"zh": "SKU编码"},
+    "Tên SP":                    {"zh": "产品名称"},
+    "Tên sản phẩm":              {"zh": "产品名称"},
+    "Số lượng":                  {"zh": "数量"},
+    "Đơn giá":                   {"zh": "单价"},
+    "Thuế suất":                 {"zh": "税率"},
+    "Thành tiền trước thuế":     {"zh": "税前金额"},
+    "Tiền thuế":                 {"zh": "税额"},
+    "Tổng sau thuế":             {"zh": "税后总计"},
+    "Kho xuất":                  {"zh": "出库仓"},
+    # Khach_Hang
+    "Tên cửa hàng":              {"zh": "门店名称"},
+    "Địa chỉ":                   {"zh": "地址"},
+    "Kênh phân phối":            {"zh": "渠道"},
+    "Tổng doanh thu":            {"zh": "总营业额"},
+    "Tỷ lệ TT":                  {"zh": "付款率"},
+    # San_Pham
+    "Giá Nha Trang":             {"zh": "芽庄价"},
+    "Giá Circle K":              {"zh": "Circle K价"},
+    "Giá MT":                    {"zh": "现代贸易价"},
+    "Giá GT":                    {"zh": "传统贸易价"},
+    "Trạng thái tồn kho":        {"zh": "库存状态"},
+    "Tổng kho":                  {"zh": "总库存"},
+    # Nhap_Kho
+    "Ngày":                      {"zh": "日期"},
+    "Số lượng":                  {"zh": "数量"},
+    "Kho":                       {"zh": "仓库"},
+    "Người nhập":                {"zh": "录入人"},
+    "Ghi chú":                   {"zh": "备注"},
+    "SL nhập Bắc":               {"zh": "北区入库"},
+    "SL nhập Nam":               {"zh": "南区入库"},
+    "SL xuất Bắc":               {"zh": "北区出库"},
+    "SL xuất Nam":               {"zh": "南区出库"},
+    "Tồn kho Bắc":               {"zh": "北区库存"},
+    "Tồn kho Nam":               {"zh": "南区库存"},
+    "Ngưỡng cảnh báo":           {"zh": "预警阈值"},
+}
+
+def translate_columns(df):
+    """Rename cột để hiển thị theo ngôn ngữ hiện tại. Không đổi data gốc."""
+    lang = st.session_state.get("lang", "vi")
+    if lang == "vi":
+        return df
+    rename_map = {col: COL_TRANSLATE[col][lang]
+                  for col in df.columns
+                  if col in COL_TRANSLATE and lang in COL_TRANSLATE[col]}
+    return df.rename(columns=rename_map)
+
 def get_gia_theo_khu_vuc(df_sp, sku, khu_vuc):
     try:
         row = df_sp[df_sp['SKU Sản phẩm'] == sku].iloc[0]
@@ -443,61 +511,341 @@ else:
 # ============================================================
 # TAB: DASHBOARD
 # ============================================================
+
+def parse_num(s):
+    """Parse số VN format (1.234.567) hoặc bình thường về float."""
+    try:
+        s = str(s).strip().replace(" ", "").replace("đ", "").replace("\xa0", "")
+        if not s or s in ["-", "N/A", "", "nan", "None"]:
+            return 0.0
+        if s.count(".") > 1:
+            s = s.replace(".", "").replace(",", ".")
+        elif "," in s and "." in s:
+            if s.index(".") < s.index(","):
+                s = s.replace(".", "").replace(",", ".")
+            else:
+                s = s.replace(",", "")
+        elif "," in s:
+            parts = s.split(",")
+            s = s.replace(",", "") if len(parts[-1]) > 2 else s.replace(",", ".")
+        elif "." in s:
+            parts = s.split(".")
+            if len(parts[-1]) > 2:
+                s = s.replace(".", "")
+        return float(s)
+    except:
+        return 0.0
+
 if st.session_state.role == "admin":
     with t_dash:
         df_dash = load_sheet("Dashboard")
-        df_kh = load_sheet("Khach_Hang")
+        df_kh   = load_sheet("Khach_Hang")
+        df_chitiet = load_sheet("Chi_tiet_don")
+        df_donhang = load_sheet("Don_Hang")
 
-        if not df_dash.empty:
-            st.markdown('<div class="section-header">💳 TÀI CHÍNH TỔNG QUAN</div>', unsafe_allow_html=True)
-            
+        # ── BỘ LỌC THÁNG / NĂM ────────────────────────────────
+        st.markdown('<div class="section-header">🗓️ BỘ LỌC THỜI GIAN</div>', unsafe_allow_html=True)
+
+        # Lấy danh sách năm & tháng từ Chi_tiet_don
+        available_years = []
+        available_months_map = {}   # year → sorted list of months (int)
+
+        if not df_chitiet.empty:
+            # Chuẩn hóa cột Tháng (dạng "T1", "1", "Tháng 1", v.v.)
+            col_thang_ct = next((c for c in df_chitiet.columns if "tháng" in c.lower() or c.lower() == "tháng"), None)
+            col_ngay_ct  = next((c for c in df_chitiet.columns if "ngày" in c.lower() or "ngay" in c.lower()), None)
+
+            # Ưu tiên dùng cột Ngày để trích xuất năm, tháng
+            if col_ngay_ct:
+                df_chitiet["_parsed_date"] = pd.to_datetime(
+                    df_chitiet[col_ngay_ct], dayfirst=True, errors="coerce"
+                )
+                df_chitiet["_year"]  = df_chitiet["_parsed_date"].dt.year
+                df_chitiet["_month"] = df_chitiet["_parsed_date"].dt.month
+            elif col_thang_ct:
+                # Chỉ có cột Tháng (không có năm) → lấy năm hiện tại
+                def parse_thang(x):
+                    s = str(x).strip().upper().replace("THÁNG","").replace("T","").strip()
+                    try: return int(s)
+                    except: return None
+                df_chitiet["_month"] = df_chitiet[col_thang_ct].apply(parse_thang)
+                df_chitiet["_year"]  = datetime.now().year
+
+            if "_year" in df_chitiet.columns:
+                df_chitiet["_year"] = pd.to_numeric(df_chitiet["_year"], errors="coerce")
+                df_chitiet["_month"] = pd.to_numeric(df_chitiet["_month"], errors="coerce")
+                valid = df_chitiet.dropna(subset=["_year", "_month"])
+                available_years = sorted(valid["_year"].astype(int).unique().tolist(), reverse=True)
+                for yr in available_years:
+                    available_months_map[yr] = sorted(
+                        valid[valid["_year"] == yr]["_month"].astype(int).unique().tolist()
+                    )
+
+        MONTH_NAMES_VI = {1:"Tháng 1",2:"Tháng 2",3:"Tháng 3",4:"Tháng 4",
+                          5:"Tháng 5",6:"Tháng 6",7:"Tháng 7",8:"Tháng 8",
+                          9:"Tháng 9",10:"Tháng 10",11:"Tháng 11",12:"Tháng 12"}
+        MONTH_NAMES_ZH = {1:"1月",2:"2月",3:"3月",4:"4月",5:"5月",6:"6月",
+                          7:"7月",8:"8月",9:"9月",10:"10月",11:"11月",12:"12月"}
+
+        filter_col1, filter_col2, filter_col3 = st.columns([1, 1, 2])
+
+        with filter_col1:
+            year_options = ["Tất cả năm"] + [str(y) for y in available_years] if available_years else ["Tất cả năm"]
+            sel_year_str = st.selectbox(
+                "📅 Năm" if st.session_state.get("lang","vi") == "vi" else "📅 年份",
+                year_options, key="dash_year"
+            )
+        with filter_col2:
+            sel_year = int(sel_year_str) if sel_year_str != "Tất cả năm" else None
+            if sel_year and sel_year in available_months_map:
+                month_list = available_months_map[sel_year]
+            elif available_years:
+                all_months = set()
+                for ml in available_months_map.values():
+                    all_months.update(ml)
+                month_list = sorted(all_months)
+            else:
+                month_list = list(range(1, 13))
+
+            if st.session_state.get("lang","vi") == "vi":
+                month_display = ["Tất cả tháng"] + [MONTH_NAMES_VI[m] for m in month_list]
+            else:
+                month_display = ["全部月份"] + [MONTH_NAMES_ZH[m] for m in month_list]
+
+            sel_month_label = st.selectbox(
+                "📅 Tháng" if st.session_state.get("lang","vi") == "vi" else "📅 月份",
+                month_display, key="dash_month"
+            )
+            sel_month = None
+            if sel_month_label not in ["Tất cả tháng", "全部月份"]:
+                # lấy số tháng từ label
+                for m, name in (MONTH_NAMES_VI if st.session_state.get("lang","vi") == "vi" else MONTH_NAMES_ZH).items():
+                    if name == sel_month_label:
+                        sel_month = m
+                        break
+
+        with filter_col3:
+            if sel_year or sel_month:
+                filter_info = []
+                if sel_year: filter_info.append(f"Năm {sel_year}")
+                if sel_month: filter_info.append(MONTH_NAMES_VI.get(sel_month, ""))
+                st.markdown(
+                    f"<div style='padding-top:28px; color:#00FF00; font-family:JetBrains Mono; font-size:0.8rem;'>"
+                    f"🔍 Đang xem: <b>{' — '.join(filter_info)}</b></div>",
+                    unsafe_allow_html=True
+                )
+            else:
+                st.markdown(
+                    "<div style='padding-top:28px; color:#555; font-size:0.8rem;'>🔍 Đang xem: Toàn bộ thời gian</div>",
+                    unsafe_allow_html=True
+                )
+
+        st.markdown("<hr style='border-color:#1a1a1a; margin:8px 0 16px 0;'>", unsafe_allow_html=True)
+
+        # ── LỌC DỮ LIỆU CHI_TIET_DON THEO BỘ LỌC ─────────────
+        use_filtered = not df_chitiet.empty and "_year" in df_chitiet.columns
+
+        if use_filtered:
+            df_ct_filtered = df_chitiet.copy()
+            if sel_year:
+                df_ct_filtered = df_ct_filtered[df_ct_filtered["_year"] == sel_year]
+            if sel_month:
+                df_ct_filtered = df_ct_filtered[df_ct_filtered["_month"] == sel_month]
+        else:
+            df_ct_filtered = df_chitiet.copy() if not df_chitiet.empty else pd.DataFrame()
+
+        # Cột tiền trong Chi_tiet_don
+        col_truoc_thue = next((c for c in df_chitiet.columns if "trước thuế" in c.lower() or "truoc thue" in c.lower()), None)
+        col_sau_thue   = next((c for c in df_chitiet.columns if "sau thuế" in c.lower() or "sau thue" in c.lower()), None)
+        col_tien_thue  = next((c for c in df_chitiet.columns if c.lower().startswith("tiền thuế") or c.lower() == "tiền thuế"), None)
+
+        def sum_col(df, col):
+            if col and col in df.columns and not df.empty:
+                return df[col].apply(parse_num).sum()
+            return 0.0
+
+        # Lấy khu vực từ Chi_tiet_don
+        col_kv_ct = next((c for c in df_chitiet.columns if "khu vực" in c.lower()), None)
+
+        def sum_by_kenh(kenh_keyword):
+            if df_ct_filtered.empty or col_kv_ct is None or col_sau_thue is None:
+                return 0.0
+            mask = df_ct_filtered[col_kv_ct].astype(str).str.contains(kenh_keyword, case=False, na=False)
+            return df_ct_filtered[mask][col_sau_thue].apply(parse_num).sum()
+
+        # ── TÀI CHÍNH TỔNG QUAN (từ Chi_tiet_don nếu có bộ lọc, từ Dashboard sheet nếu không) ──
+        st.markdown('<div class="section-header">💳 TÀI CHÍNH TỔNG QUAN</div>', unsafe_allow_html=True)
+
+        show_filtered_metrics = use_filtered and (sel_year or sel_month)
+
+        if show_filtered_metrics:
+            # Tính từ Chi_tiet_don đã lọc
+            tong_dt_val  = sum_col(df_ct_filtered, col_sau_thue)
+
+            # Lấy từ Don_Hang nếu có bộ lọc
+            df_don_filtered = df_donhang.copy() if not df_donhang.empty else pd.DataFrame()
+            if not df_don_filtered.empty:
+                col_ngay_don = next((c for c in df_don_filtered.columns if "ngày" in c.lower()), None)
+                col_thang_don = next((c for c in df_don_filtered.columns if "tháng" in c.lower() or c.lower() == "tháng"), None)
+                if col_ngay_don:
+                    df_don_filtered["_parsed_date"] = pd.to_datetime(df_don_filtered[col_ngay_don], dayfirst=True, errors="coerce")
+                    df_don_filtered["_year"]  = df_don_filtered["_parsed_date"].dt.year
+                    df_don_filtered["_month"] = df_don_filtered["_parsed_date"].dt.month
+                    if sel_year:
+                        df_don_filtered = df_don_filtered[df_don_filtered["_year"] == sel_year]
+                    if sel_month:
+                        df_don_filtered = df_don_filtered[df_don_filtered["_month"] == sel_month]
+                elif col_thang_don:
+                    def parse_thang2(x):
+                        s = str(x).strip().upper().replace("THÁNG","").replace("T","").strip()
+                        try: return int(s)
+                        except: return None
+                    df_don_filtered["_month"] = df_don_filtered[col_thang_don].apply(parse_thang2)
+                    if sel_month:
+                        df_don_filtered = df_don_filtered[df_don_filtered["_month"] == sel_month]
+
+            col_da_tt_don = next((c for c in df_donhang.columns if "đã thanh toán" in c.lower() or "đã tt" in c.lower()), None)
+            col_con_no_don = next((c for c in df_donhang.columns if "còn nợ" in c.lower() or "con no" in c.lower()), None)
+            da_tt_val = sum_col(df_don_filtered, col_da_tt_don)
+            con_no_val = sum_col(df_don_filtered, col_con_no_don)
+            if da_tt_val == 0 and con_no_val == 0:
+                # Fallback: tính từ tong_dt
+                da_tt_val = tong_dt_val * 0.0
+                con_no_val = tong_dt_val
+
             try:
-                row = df_dash.iloc[0]
-                col1, col2, col3, col4, col5, col6 = st.columns(6)
-                with col1: st.metric(T("tong_dt"), fmt_currency(row.iloc[0]))
-                with col2: st.metric(T("da_nhan"), fmt_currency(row.iloc[1]))
-                with col3: st.metric(T("no_thu"), fmt_currency(row.iloc[2]))
-                with col4: st.metric(T("tong_ch"), f'{row.iloc[3]} {T("diem")}')
-                with col5: st.metric(T("ch_active"), f'{row.iloc[4]} {T("diem")}')
-                with col6: st.metric(T("ty_le_phu"), f"{row.iloc[5]}")
+                col1, col2, col3 = st.columns(3)
+                with col1: st.metric(T("tong_dt"), fmt_currency(tong_dt_val))
+                with col2: st.metric(T("da_nhan"), fmt_currency(da_tt_val))
+                with col3: st.metric(T("no_thu"), fmt_currency(con_no_val))
             except Exception as e:
-                st.error(f"Lỗi đọc Dashboard: {e}")
+                st.error(f"Lỗi tính metrics: {e}")
+        else:
+            # Toàn bộ: đọc từ Dashboard sheet (giữ nguyên logic cũ)
+            if not df_dash.empty:
+                try:
+                    row = df_dash.iloc[0]
+                    col1, col2, col3, col4, col5, col6 = st.columns(6)
+                    with col1: st.metric(T("tong_dt"), fmt_currency(row.iloc[0]))
+                    with col2: st.metric(T("da_nhan"), fmt_currency(row.iloc[1]))
+                    with col3: st.metric(T("no_thu"), fmt_currency(row.iloc[2]))
+                    with col4: st.metric(T("tong_ch"), f'{row.iloc[3]} {T("diem")}')
+                    with col5: st.metric(T("ch_active"), f'{row.iloc[4]} {T("diem")}')
+                    with col6: st.metric(T("ty_le_phu"), f"{row.iloc[5]}")
+                except Exception as e:
+                    st.error(f"Lỗi đọc Dashboard: {e}")
 
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown('<div class="section-header">📊 DOANH THU THEO KÊNH</div>', unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
 
+        # ── DOANH THU THEO KÊNH ────────────────────────────────
+        st.markdown('<div class="section-header">📊 DOANH THU THEO KÊNH</div>', unsafe_allow_html=True)
+
+        if show_filtered_metrics and use_filtered and col_kv_ct and col_sau_thue:
+            # Tính từ Chi_tiet_don đã lọc
             try:
+                ck_val  = sum_by_kenh("Circle K|CK")
+                mt_val  = sum_by_kenh("MT|Modern Trade")
+                gt_val  = sum_by_kenh("GT|General Trade")
+                nt_val  = sum_by_kenh("Nha Trang|NT|Ký gửi")
+
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
                     st.markdown("**🏪 CIRCLE K**")
-                    st.metric(T("tong"), fmt_currency(df_dash.iloc[4, 0]))
-                    st.metric(T("mien_bac"), fmt_currency(df_dash.iloc[4, 1]))
-                    st.metric(T("mien_nam"), fmt_currency(df_dash.iloc[4, 2]))
+                    st.metric(T("tong"), fmt_currency(ck_val))
+                    # Bắc / Nam từ cột Kho xuất
+                    col_kho = next((c for c in df_ct_filtered.columns if "kho" in c.lower()), None)
+                    if col_kho:
+                        mask_ck = df_ct_filtered[col_kv_ct].astype(str).str.contains("Circle K|CK", case=False, na=False)
+                        ck_df = df_ct_filtered[mask_ck]
+                        bac_val = ck_df[ck_df[col_kho].astype(str).str.contains("Bắc|bac|Bac", case=False, na=False)][col_sau_thue].apply(parse_num).sum()
+                        nam_val = ck_df[ck_df[col_kho].astype(str).str.contains("Nam|nam", case=False, na=False)][col_sau_thue].apply(parse_num).sum()
+                        st.metric(T("mien_bac"), fmt_currency(bac_val))
+                        st.metric(T("mien_nam"), fmt_currency(nam_val))
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col2:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
                     st.markdown("**🏬 MODERN TRADE**")
-                    st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[7, 0]))
-                    st.metric(T("da_tt"), fmt_currency(df_dash.iloc[7, 1]))
-                    st.metric(T("no"), fmt_currency(df_dash.iloc[7, 2]))
+                    st.metric(T("tong_dt2"), fmt_currency(mt_val))
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col3:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
                     st.markdown("**🛒 GENERAL TRADE**")
-                    st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[9, 0]))
-                    st.metric(T("da_tt"), fmt_currency(df_dash.iloc[9, 1]))
-                    st.metric(T("no"), fmt_currency(df_dash.iloc[9, 2]))
+                    st.metric(T("tong_dt2"), fmt_currency(gt_val))
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col4:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
                     st.markdown("**🌊 NHA TRANG**")
-                    st.metric(T("ky_gui"), fmt_currency(df_dash.iloc[13, 0]))
-                    st.metric(T("da_tt"), fmt_currency(df_dash.iloc[13, 1]))
-                    st.metric(T("no"), fmt_currency(df_dash.iloc[13, 2]))
+                    st.metric(T("ky_gui"), fmt_currency(nt_val))
                     st.markdown('</div>', unsafe_allow_html=True)
             except Exception as e:
-                st.warning(f"Đang chờ dữ liệu kênh phân phối...")
+                st.warning(f"Lỗi tính doanh thu kênh: {e}")
+        else:
+            # Toàn bộ: đọc từ Dashboard sheet
+            if not df_dash.empty:
+                try:
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.markdown('<div class="info-card">', unsafe_allow_html=True)
+                        st.markdown("**🏪 CIRCLE K**")
+                        st.metric(T("tong"), fmt_currency(df_dash.iloc[4, 0]))
+                        st.metric(T("mien_bac"), fmt_currency(df_dash.iloc[4, 1]))
+                        st.metric(T("mien_nam"), fmt_currency(df_dash.iloc[4, 2]))
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    with col2:
+                        st.markdown('<div class="info-card">', unsafe_allow_html=True)
+                        st.markdown("**🏬 MODERN TRADE**")
+                        st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[7, 0]))
+                        st.metric(T("da_tt"), fmt_currency(df_dash.iloc[7, 1]))
+                        st.metric(T("no"), fmt_currency(df_dash.iloc[7, 2]))
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    with col3:
+                        st.markdown('<div class="info-card">', unsafe_allow_html=True)
+                        st.markdown("**🛒 GENERAL TRADE**")
+                        st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[9, 0]))
+                        st.metric(T("da_tt"), fmt_currency(df_dash.iloc[9, 1]))
+                        st.metric(T("no"), fmt_currency(df_dash.iloc[9, 2]))
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    with col4:
+                        st.markdown('<div class="info-card">', unsafe_allow_html=True)
+                        st.markdown("**🌊 NHA TRANG**")
+                        st.metric(T("ky_gui"), fmt_currency(df_dash.iloc[13, 0]))
+                        st.metric(T("da_tt"), fmt_currency(df_dash.iloc[13, 1]))
+                        st.metric(T("no"), fmt_currency(df_dash.iloc[13, 2]))
+                        st.markdown('</div>', unsafe_allow_html=True)
+                except Exception as e:
+                    st.warning(f"Đang chờ dữ liệu kênh phân phối...")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── BIỂU ĐỒ DOANH THU THEO THÁNG (từ Chi_tiet_don) ────
+        if use_filtered and col_sau_thue and col_kv_ct:
+            st.markdown('<div class="section-header">📈 BIỂU ĐỒ DOANH THU THEO THÁNG</div>', unsafe_allow_html=True)
+            try:
+                df_trend = df_chitiet.copy()
+                if sel_year:
+                    df_trend = df_trend[df_trend["_year"] == sel_year]
+                if not sel_month and not df_trend.empty:
+                    df_trend["_val"] = df_trend[col_sau_thue].apply(parse_num)
+                    df_trend_grp = df_trend.groupby(["_month", col_kv_ct])["_val"].sum().reset_index()
+                    df_trend_grp.columns = ["Tháng", "Kênh", "Doanh thu"]
+                    df_trend_grp["Tháng"] = df_trend_grp["Tháng"].apply(lambda m: f"T{int(m)}")
+                    fig_trend = px.bar(
+                        df_trend_grp, x="Tháng", y="Doanh thu", color="Kênh",
+                        barmode="group",
+                        color_discrete_sequence=["#00FF00","#006400","#00A300","#88FF88"],
+                    )
+                    fig_trend.update_layout(
+                        height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                        xaxis=dict(tickfont=dict(color="#888888")),
+                        yaxis=dict(gridcolor="#222222", tickfont=dict(color="#888888")),
+                        legend=dict(font=dict(color="#ffffff"), orientation="h", y=1.1),
+                        margin=dict(l=0, r=0, t=20, b=0),
+                    )
+                    fig_trend.update_traces(hovertemplate="%{y:,.0f} đ")
+                    st.plotly_chart(fig_trend, use_container_width=True)
+            except Exception as e:
+                st.caption(f"Chưa thể vẽ biểu đồ: {e}")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -516,7 +864,7 @@ if st.session_state.role == "admin":
                     df_no = df_no.nlargest(5, '_no_num')[['Tên cửa hàng', '_no_num', 'Khu vực']]
                     df_no = df_no.rename(columns={'_no_num': 'Còn nợ'})
                     df_no['Còn nợ'] = df_no['Còn nợ'].apply(fmt_currency)
-                    st.dataframe(df_no, use_container_width=True, hide_index=True)
+                    st.dataframe(translate_columns(df_no), use_container_width=True, hide_index=True)
                 except:
                     st.info(T("chua_du_lieu_no"))
             else:
@@ -549,7 +897,7 @@ if st.session_state.role == "admin":
                         df_perf = df_perf.nlargest(5, col_dt)[show_cols]
                         df_perf = df_perf.rename(columns={col_dt: "Tổng doanh thu"})
                         df_perf["Tổng doanh thu"] = df_perf["Tổng doanh thu"].apply(fmt_currency)
-                        st.dataframe(df_perf, use_container_width=True, hide_index=True)
+                        st.dataframe(translate_columns(df_perf), use_container_width=True, hide_index=True)
                     else:
                         st.info("Không tìm thấy cột doanh thu")
                 except Exception as e:
@@ -833,7 +1181,7 @@ with t_don:
         if 'Khu vực' in df_don.columns and kv_filter != T("tat_ca"):
             df_don = df_don[df_don['Khu vực'] == kv_filter]
         
-        st.dataframe(df_don, use_container_width=True, hide_index=True)
+        st.dataframe(translate_columns(df_don), use_container_width=True, hide_index=True)
         st.caption(f'{T("tong_label")} {len(df_don)}')
     else:
         st.info(T("chua_don"))
@@ -843,18 +1191,128 @@ with t_don:
 # ============================================================
 if st.session_state.role == "admin":
     with t_sp:
-        st.markdown('<div class="section-header">🏷️ DANH SÁCH SẢN PHẨM</div>', unsafe_allow_html=True)
         df_sp_full = load_sheet("San_Pham")
+
+        # ── CẢNH BÁO TỒN KHO ──────────────────────────────────
+        if not df_sp_full.empty and 'Trạng thái tồn kho' in df_sp_full.columns:
+            df_canh_bao = df_sp_full[
+                df_sp_full['Trạng thái tồn kho'].astype(str).str.contains('Cảnh báo|Hết', na=False)
+            ]
+            if not df_canh_bao.empty:
+                st.warning(f"⚠️ **{len(df_canh_bao)} sản phẩm** cần chú ý tồn kho!")
+
+        # ── BẢNG TỒN KHO TỔNG QUAN ────────────────────────────
+        st.markdown('<div class="section-header">📦 TỒN KHO HIỆN TẠI</div>', unsafe_allow_html=True)
+
         if not df_sp_full.empty:
-            # Highlight cảnh báo tồn kho
-            st.dataframe(df_sp_full, use_container_width=True, hide_index=True)
-            
-            # Cảnh báo tồn kho thấp
-            if 'Trạng thái tồn kho' in df_sp_full.columns:
-                df_canh_bao = df_sp_full[df_sp_full['Trạng thái tồn kho'].astype(str).str.contains('Cảnh báo|Hết', na=False)]
-                if not df_canh_bao.empty:
-                    st.warning(f"⚠️ **{len(df_canh_bao)} sản phẩm** cần chú ý tồn kho!")
-                    st.dataframe(df_canh_bao[['SKU Sản phẩm', 'Tên sản phẩm', 'Tổng kho', 'Trạng thái tồn kho']], use_container_width=True, hide_index=True)
+            # Chọn cột hiển thị tồn kho
+            ton_kho_cols = ['SKU Sản phẩm', 'Tên sản phẩm',
+                            'SL nhập Bắc', 'SL xuất Bắc', 'Tồn kho Bắc',
+                            'SL nhập Nam', 'SL xuất Nam', 'Tồn kho Nam',
+                            'Tổng kho', 'Ngưỡng cảnh báo', 'Trạng thái tồn kho']
+            show_cols = [c for c in ton_kho_cols if c in df_sp_full.columns]
+
+            df_ton_kho = df_sp_full[show_cols].copy() if show_cols else df_sp_full.copy()
+
+            # Tô màu theo trạng thái
+            def color_status(val):
+                if '🔴' in str(val) or 'Hết' in str(val):
+                    return 'color: #FF4444'
+                if '🟡' in str(val) or 'Cảnh báo' in str(val):
+                    return 'color: #FF8800'
+                if '🟢' in str(val) or 'Còn' in str(val):
+                    return 'color: #00FF00'
+                return ''
+
+            st.dataframe(
+                translate_columns(df_ton_kho),
+                use_container_width=True,
+                hide_index=True
+            )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── FORM NHẬP KHO ──────────────────────────────────────
+        st.markdown('<div class="section-header">📥 NHẬP HÀNG VÀO KHO</div>', unsafe_allow_html=True)
+
+        if not df_sp_full.empty:
+            col_nk1, col_nk2 = st.columns([2, 1])
+            with col_nk1:
+                ds_sku_sp = df_sp_full['SKU Sản phẩm'].tolist() if 'SKU Sản phẩm' in df_sp_full.columns else []
+                ds_ten_sp2 = df_sp_full['Tên sản phẩm'].tolist() if 'Tên sản phẩm' in df_sp_full.columns else []
+                ds_sku_nk = [f"{s} — {t}" for s, t in zip(ds_sku_sp, ds_ten_sp2)]
+                sku_nhap = st.selectbox("🏷️ Chọn sản phẩm *", [T("chon")] + ds_sku_nk, key="nk_sku")
+            with col_nk2:
+                kho_nhap = st.selectbox("🏭 Kho nhập *", ["Bắc", "Nam"], key="nk_kho")
+
+            col_nk3, col_nk4 = st.columns([1, 2])
+            with col_nk3:
+                sl_nhap = st.number_input("📦 Số lượng nhập *", min_value=1, value=1, key="nk_sl")
+            with col_nk4:
+                ghi_chu_nk = st.text_input("📝 Ghi chú", placeholder="Nhập lý do, nguồn hàng...", key="nk_ghichu")
+
+            # Hiển thị tồn kho hiện tại của SP được chọn
+            if sku_nhap != T("chon"):
+                sku_code_nk = sku_nhap.split(" — ")[0]
+                row_sp = df_sp_full[df_sp_full['SKU Sản phẩm'] == sku_code_nk]
+                if not row_sp.empty:
+                    r = row_sp.iloc[0]
+                    c1, c2, c3 = st.columns(3)
+                    with c1:
+                        ton_bac = r.get('Tồn kho Bắc', 0)
+                        st.metric("Tồn kho Bắc hiện tại", f"{ton_bac}")
+                    with c2:
+                        ton_nam = r.get('Tồn kho Nam', 0)
+                        st.metric("Tồn kho Nam hiện tại", f"{ton_nam}")
+                    with c3:
+                        tong_ton = r.get('Tổng kho', 0)
+                        st.metric("Tổng tồn kho", f"{tong_ton}")
+
+            if st.button("✅ XÁC NHẬN NHẬP KHO", key="btn_nhap_kho"):
+                if sku_nhap == T("chon"):
+                    st.error("Vui lòng chọn sản phẩm!")
+                elif sl_nhap <= 0:
+                    st.error("Số lượng phải lớn hơn 0!")
+                else:
+                    sku_code_nk = sku_nhap.split(" — ")[0]
+                    ten_sp_nk = sku_nhap.split(" — ")[1] if " — " in sku_nhap else ""
+                    ngay_nk = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    row_nk = [
+                        ngay_nk,
+                        sku_code_nk,
+                        ten_sp_nk,
+                        sl_nhap,
+                        kho_nhap,
+                        st.session_state.name,
+                        ghi_chu_nk
+                    ]
+                    if append_row("Nhap_Kho", row_nk):
+                        st.success(f"✅ Đã nhập **{sl_nhap}** sản phẩm **{sku_code_nk}** vào kho **{kho_nhap}**!")
+                        st.cache_data.clear()
+                        st.rerun()
+                    else:
+                        st.error("Có lỗi khi ghi dữ liệu, vui lòng thử lại!")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── LỊCH SỬ NHẬP KHO GẦN NHẤT ────────────────────────
+        st.markdown('<div class="section-header">🕐 LỊCH SỬ NHẬP KHO</div>', unsafe_allow_html=True)
+        df_nhap_kho = load_sheet("Nhap_Kho")
+        if not df_nhap_kho.empty:
+            st.dataframe(
+                translate_columns(df_nhap_kho.tail(10).iloc[::-1]),
+                use_container_width=True, hide_index=True
+            )
+            st.caption(f"Hiển thị 10 lần nhập gần nhất | Tổng: {len(df_nhap_kho)} lần")
+        else:
+            st.info("Chưa có lịch sử nhập kho.")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── DANH SÁCH SẢN PHẨM ĐẦY ĐỦ ────────────────────────
+        st.markdown('<div class="section-header">🏷️ DANH SÁCH SẢN PHẨM ĐẦY ĐỦ</div>', unsafe_allow_html=True)
+        if not df_sp_full.empty:
+            st.dataframe(translate_columns(df_sp_full), use_container_width=True, hide_index=True)
 
     # ============================================================
     # TAB: KHÁCH HÀNG (Admin only)
@@ -877,7 +1335,7 @@ if st.session_state.role == "admin":
             if 'Kênh phân phối' in df_kh_full.columns and kenh_filter != T("tat_ca"):
                 df_display = df_display[df_display['Kênh phân phối'] == kenh_filter]
             
-            st.dataframe(df_display, use_container_width=True, hide_index=True)
+            st.dataframe(translate_columns(df_display), use_container_width=True, hide_index=True)
             st.caption(f'{T("tong_label")} {len(df_display)} {T("tong_kh")}')
 
     # ============================================================
