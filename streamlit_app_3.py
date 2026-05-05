@@ -1268,62 +1268,76 @@ if st.session_state.role == "admin":
         st.markdown('<div class="section-header">📥 NHẬP HÀNG VÀO KHO</div>', unsafe_allow_html=True)
 
         if not df_sp_full.empty:
-            col_nk1, col_nk2 = st.columns([2, 1])
+            ds_sku_sp = df_sp_full['SKU Sản phẩm'].tolist() if 'SKU Sản phẩm' in df_sp_full.columns else []
+            ds_ten_sp2 = df_sp_full['Tên sản phẩm'].tolist() if 'Tên sản phẩm' in df_sp_full.columns else []
+            ds_sku_nk = [f"{s} — {t}" for s, t in zip(ds_sku_sp, ds_ten_sp2)]
+
+            # Khởi tạo session state cho form nhập kho
+            if "nk_items" not in st.session_state:
+                st.session_state.nk_items = [{"sku": T("chon"), "sl": 1}]
+            if "nk_form_key" not in st.session_state:
+                st.session_state.nk_form_key = 0
+
+            # Kho nhập & ghi chú chung cho cả phiếu
+            col_nk1, col_nk2 = st.columns([1, 2])
             with col_nk1:
-                ds_sku_sp = df_sp_full['SKU Sản phẩm'].tolist() if 'SKU Sản phẩm' in df_sp_full.columns else []
-                ds_ten_sp2 = df_sp_full['Tên sản phẩm'].tolist() if 'Tên sản phẩm' in df_sp_full.columns else []
-                ds_sku_nk = [f"{s} — {t}" for s, t in zip(ds_sku_sp, ds_ten_sp2)]
-                sku_nhap = st.selectbox("🏷️ Chọn sản phẩm *", [T("chon")] + ds_sku_nk, key="nk_sku")
+                kho_nhap = st.selectbox("🏭 Kho nhập *", ["Bắc", "Nam"], key=f"nk_kho_{st.session_state.nk_form_key}")
             with col_nk2:
-                kho_nhap = st.selectbox("🏭 Kho nhập *", ["Bắc", "Nam"], key="nk_kho")
+                ghi_chu_nk = st.text_input("📝 Ghi chú chung", placeholder="Nhập lý do, nguồn hàng...", key=f"nk_ghichu_{st.session_state.nk_form_key}")
 
-            col_nk3, col_nk4 = st.columns([1, 2])
-            with col_nk3:
-                sl_nhap = st.number_input("📦 Số lượng nhập *", min_value=1, value=1, key="nk_sl")
-            with col_nk4:
-                ghi_chu_nk = st.text_input("📝 Ghi chú", placeholder="Nhập lý do, nguồn hàng...", key="nk_ghichu")
+            st.markdown("**📦 Danh sách sản phẩm nhập:**")
 
-            # Hiển thị tồn kho hiện tại của SP được chọn
-            if sku_nhap != T("chon"):
-                sku_code_nk = sku_nhap.split(" — ")[0]
-                row_sp = df_sp_full[df_sp_full['SKU Sản phẩm'] == sku_code_nk]
-                if not row_sp.empty:
-                    r = row_sp.iloc[0]
-                    c1, c2, c3 = st.columns(3)
-                    with c1:
-                        ton_bac = r.get('Tồn kho Bắc', 0)
-                        st.metric("Tồn kho Bắc hiện tại", f"{ton_bac}")
-                    with c2:
-                        ton_nam = r.get('Tồn kho Nam', 0)
-                        st.metric("Tồn kho Nam hiện tại", f"{ton_nam}")
-                    with c3:
-                        tong_ton = r.get('Tổng kho', 0)
-                        st.metric("Tổng tồn kho", f"{tong_ton}")
+            # Hiển thị từng dòng sản phẩm
+            for i, item in enumerate(st.session_state.nk_items):
+                col_a, col_b, col_c = st.columns([3, 1, 0.3])
+                with col_a:
+                    sku_sel = st.selectbox(
+                        f"Sản phẩm {i+1}",
+                        [T("chon")] + ds_sku_nk,
+                        key=f"nk_sku_{st.session_state.nk_form_key}_{i}",
+                        label_visibility="collapsed"
+                    )
+                    st.session_state.nk_items[i]["sku"] = sku_sel
+                with col_b:
+                    sl_sel = st.number_input(
+                        f"SL {i+1}", min_value=1, value=item["sl"],
+                        key=f"nk_sl_{st.session_state.nk_form_key}_{i}",
+                        label_visibility="collapsed"
+                    )
+                    st.session_state.nk_items[i]["sl"] = sl_sel
+                with col_c:
+                    if st.button("✕", key=f"nk_del_{st.session_state.nk_form_key}_{i}") and len(st.session_state.nk_items) > 1:
+                        st.session_state.nk_items.pop(i)
+                        st.rerun()
 
-            if st.button("✅ XÁC NHẬN NHẬP KHO", key="btn_nhap_kho"):
-                if sku_nhap == T("chon"):
-                    st.error("Vui lòng chọn sản phẩm!")
-                elif sl_nhap <= 0:
-                    st.error("Số lượng phải lớn hơn 0!")
+            if st.button("➕ Thêm sản phẩm", key=f"nk_add_{st.session_state.nk_form_key}"):
+                st.session_state.nk_items.append({"sku": T("chon"), "sl": 1})
+                st.rerun()
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            if st.button("✅ XÁC NHẬN NHẬP KHO", key=f"btn_nhap_kho_{st.session_state.nk_form_key}"):
+                valid_items = [it for it in st.session_state.nk_items if it["sku"] != T("chon")]
+                if not valid_items:
+                    st.error("Vui lòng chọn ít nhất 1 sản phẩm!")
                 else:
-                    sku_code_nk = sku_nhap.split(" — ")[0]
-                    ten_sp_nk = sku_nhap.split(" — ")[1] if " — " in sku_nhap else ""
+                    success_count = 0
                     ngay_nk = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    row_nk = [
-                        ngay_nk,
-                        sku_code_nk,
-                        ten_sp_nk,
-                        sl_nhap,
-                        kho_nhap,
-                        st.session_state.name,
-                        ghi_chu_nk
-                    ]
-                    if append_row("Nhap_Kho", row_nk):
-                        st.success(f"✅ Đã nhập **{sl_nhap}** sản phẩm **{sku_code_nk}** vào kho **{kho_nhap}**!")
-                        st.cache_data.clear()
+                    for it in valid_items:
+                        sku_code_nk = it["sku"].split(" — ")[0]
+                        ten_sp_nk = it["sku"].split(" — ")[1] if " — " in it["sku"] else ""
+                        row_nk = [ngay_nk, sku_code_nk, ten_sp_nk, it["sl"], kho_nhap, st.session_state.name, ghi_chu_nk]
+                        if append_row("Nhap_Kho", row_nk):
+                            success_count += 1
+                    if success_count == len(valid_items):
+                        st.success(f"✅ Đã nhập {success_count} sản phẩm vào kho {kho_nhap}!")
+                        # Reset form
+                        st.session_state.nk_items = [{"sku": T("chon"), "sl": 1}]
+                        st.session_state.nk_form_key += 1
+                        load_sheet.clear()
                         st.rerun()
                     else:
-                        st.error("Có lỗi khi ghi dữ liệu, vui lòng thử lại!")
+                        st.error(f"Chỉ nhập được {success_count}/{len(valid_items)} sản phẩm, vui lòng thử lại!")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
