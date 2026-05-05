@@ -576,9 +576,12 @@ if st.session_state.role == "admin":
 
             # Ưu tiên dùng cột Ngày để trích xuất năm, tháng
             if col_ngay_ct:
-                df_chitiet["_parsed_date"] = pd.to_datetime(
-                    df_chitiet[col_ngay_ct], dayfirst=True, errors="coerce"
-                )
+                parsed = pd.to_datetime(df_chitiet[col_ngay_ct], format="%Y-%m-%d", errors="coerce")
+                mask_failed = parsed.isna()
+                if mask_failed.any():
+                    parsed2 = pd.to_datetime(df_chitiet.loc[mask_failed, col_ngay_ct], dayfirst=True, errors="coerce")
+                    parsed[mask_failed] = parsed2
+                df_chitiet["_parsed_date"] = parsed
                 df_chitiet["_year"]  = df_chitiet["_parsed_date"].dt.year
                 df_chitiet["_month"] = df_chitiet["_parsed_date"].dt.month
             elif col_thang_ct:
