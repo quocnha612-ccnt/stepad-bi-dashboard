@@ -148,7 +148,7 @@ def get_gsheet_client():
 @st.cache_resource
 def get_gsheet_client():
     creds_dict = dict(st.secrets["gcp_service_account"])
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(
+    creds = Credentials.from_service_account_info(
         creds_dict,
         scopes=[
             "https://www.googleapis.com/auth/spreadsheets",
