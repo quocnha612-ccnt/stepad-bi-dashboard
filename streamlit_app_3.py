@@ -145,76 +145,16 @@ def get_gsheet_client():
     )
     return gspread.authorize(creds)
 
-@st.cache_resource
-def get_gsheet_client():
-    creds_dict = dict(st.secrets["gcp_service_account"])
-    creds = Credentials.from_service_account_info(
-        creds_dict,
-        scopes=[
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive"
-        ]
-    )
-    return gspread.authorize(creds)
-
-@st.cache_resource
-def get_spreadsheet():
-    """Cache spreadsheet object — tránh open_by_key mỗi lần gọi."""
-    client = get_gsheet_client()
-    return client.open_by_key(SPREADSHEET_ID)
-
-def _fetch_sheet(sheet_name):
-    """Fetch raw values từ sheet, có retry khi gặp quota error."""
+@st.cache_data(ttl=600)
+def load_sheet(sheet_name):
     import time
     for attempt in range(3):
         try:
-            ws = get_spreadsheet().worksheet(sheet_name)
-            return ws.get_all_values()
-        except Exception as e:
-            if "429" in str(e) or "Quota" in str(e):
-                wait = (attempt + 1) * 5  # 5s, 10s, 15s
-                time.sleep(wait)
-            else:
-                raise e
-    return []
-
-@st.cache_data(ttl=600)
-def load_sheet(sheet_name):
-    """Load sheet với cache 10 phút. Dùng chung cho tất cả user."""
-    try:
-        values = _fetch_sheet(sheet_name)
-        if not values:
-            return pd.DataFrame()
-        headers = values[0]
-        seen = {}
-        clean_headers = []
-        for h in headers:
-            if h == '' or h is None:
-                h = f'_col_{len(clean_headers)}'
-            if h in seen:
-                seen[h] += 1
-                h = f'{h}_{seen[h]}'
-            else:
-                seen[h] = 0
-            clean_headers.append(h)
-        df = pd.DataFrame(values[1:], columns=clean_headers)
-        df = df.loc[:, ~df.columns.str.startswith('_col_')]
-        return df
-    except Exception as e:
-        st.error(f"Lỗi tải {sheet_name}: {e}")
-        return pd.DataFrame()
-
-@st.cache_data(ttl=600)
-def load_sheets_batch(sheet_names: tuple):
-    """Load nhiều sheet cùng lúc, gộp request để tiết kiệm quota."""
-    result = {}
-    import time
-    for name in sheet_names:
-        try:
-            values = _fetch_sheet(name)
+            client = get_gsheet_client()
+            sheet = client.open_by_key(SPREADSHEET_ID).worksheet(sheet_name)
+            values = sheet.get_all_values()
             if not values:
-                result[name] = pd.DataFrame()
-                continue
+                return pd.DataFrame()
             headers = values[0]
             seen = {}
             clean_headers = []
@@ -229,24 +169,23 @@ def load_sheets_batch(sheet_names: tuple):
                 clean_headers.append(h)
             df = pd.DataFrame(values[1:], columns=clean_headers)
             df = df.loc[:, ~df.columns.str.startswith('_col_')]
-            result[name] = df
-            time.sleep(0.5)  # 500ms delay giữa các sheet tránh quota burst
+            return df
         except Exception as e:
-            st.error(f"Lỗi tải {name}: {e}")
-            result[name] = pd.DataFrame()
-    return result
-
-def clear_cache_sheets(*sheet_names):
-    """Chỉ clear cache cần thiết thay vì clear toàn bộ."""
-    load_sheet.clear()
-    load_sheets_batch.clear()
+            if "429" in str(e) or "Quota" in str(e):
+                time.sleep((attempt + 1) * 5)
+            else:
+                st.error(f"Lỗi tải {sheet_name}: {e}")
+                return pd.DataFrame()
+    st.error(f"Không thể tải {sheet_name} sau 3 lần thử.")
+    return pd.DataFrame()
 
 def append_row(sheet_name, row_data):
     import time
     for attempt in range(3):
         try:
-            ws = get_spreadsheet().worksheet(sheet_name)
-            ws.append_row(row_data)
+            client = get_gsheet_client()
+            sheet = client.open_by_key(SPREADSHEET_ID).worksheet(sheet_name)
+            sheet.append_row(row_data)
             return True
         except Exception as e:
             if "429" in str(e) or "Quota" in str(e):
@@ -261,8 +200,9 @@ def update_cell(sheet_name, row, col, value):
     import time
     for attempt in range(3):
         try:
-            ws = get_spreadsheet().worksheet(sheet_name)
-            ws.update_cell(row, col, value)
+            client = get_gsheet_client()
+            sheet = client.open_by_key(SPREADSHEET_ID).worksheet(sheet_name)
+            sheet.update_cell(row, col, value)
             return True
         except Exception as e:
             if "429" in str(e) or "Quota" in str(e):
@@ -617,11 +557,10 @@ def parse_num(s):
 if st.session_state.role == "admin":
     with t_dash:
         with st.spinner("Đang tải dữ liệu..."):
-            _batch = load_sheets_batch(("Dashboard", "Khach_Hang", "Chi_tiet_don", "Don_Hang"))
-            df_dash    = _batch.get("Dashboard", pd.DataFrame())
-            df_kh      = _batch.get("Khach_Hang", pd.DataFrame())
-            df_chitiet = _batch.get("Chi_tiet_don", pd.DataFrame())
-            df_donhang = _batch.get("Don_Hang", pd.DataFrame())
+            df_dash    = load_sheet("Dashboard")
+            df_kh      = load_sheet("Khach_Hang")
+            df_chitiet = load_sheet("Chi_tiet_don")
+            df_donhang = load_sheet("Don_Hang")
 
         # ── BỘ LỌC THÁNG / NĂM ────────────────────────────────
         st.markdown('<div class="section-header">🗓️ BỘ LỌC THỜI GIAN</div>', unsafe_allow_html=True)
@@ -1240,7 +1179,7 @@ with t_order:
                     st.session_state.order_items = [{"sku": "", "sl": 1}]
                     st.session_state.order_success = True
                     st.session_state.form_key += 1
-                    clear_cache_sheets()
+                    st.cache_data.clear()
                     st.rerun()
                 else:
                     st.error(T("loi_luu"))
@@ -1378,7 +1317,7 @@ if st.session_state.role == "admin":
                     ]
                     if append_row("Nhap_Kho", row_nk):
                         st.success(f"✅ Đã nhập **{sl_nhap}** sản phẩm **{sku_code_nk}** vào kho **{kho_nhap}**!")
-                        clear_cache_sheets()
+                        st.cache_data.clear()
                         st.rerun()
                     else:
                         st.error("Có lỗi khi ghi dữ liệu, vui lòng thử lại!")
