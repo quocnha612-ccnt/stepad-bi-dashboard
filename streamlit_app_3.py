@@ -145,7 +145,7 @@ def get_gsheet_client():
     )
     return gspread.authorize(creds)
 
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=1800)
 def load_sheet(sheet_name):
     import time
     for attempt in range(3):
