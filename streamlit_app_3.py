@@ -736,10 +736,31 @@ if st.session_state.role == "admin":
                 con_no_val = tong_dt_val
 
             try:
-                col1, col2, col3 = st.columns(3)
+                # Tính Tổng cửa hàng, CH Active, Tỷ lệ phủ từ Don_Hang đã lọc
+                col_id_kh_don = next((c for c in df_don_filtered.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
+                tong_ch_val = df_don_filtered[col_id_kh_don].nunique() if col_id_kh_don and not df_don_filtered.empty else 0
+
+                # CH Active: khách có đơn trong 3 tháng gần nhất tính từ tháng được chọn
+                if col_id_kh_don and "_parsed_date" in df_don_filtered.columns:
+                    max_date = df_don_filtered["_parsed_date"].max()
+                    if pd.notna(max_date):
+                        date_3m_ago = max_date - pd.DateOffset(months=3)
+                        df_active = df_don_filtered[df_don_filtered["_parsed_date"] >= date_3m_ago]
+                        ch_active_val = df_active[col_id_kh_don].nunique()
+                    else:
+                        ch_active_val = 0
+                else:
+                    ch_active_val = 0
+
+                ty_le_val = f"{ch_active_val/tong_ch_val*100:.2f}%" if tong_ch_val > 0 else "0%"
+
+                col1, col2, col3, col4, col5, col6 = st.columns(6)
                 with col1: st.metric(T("tong_dt"), fmt_currency(tong_dt_val))
                 with col2: st.metric(T("da_nhan"), fmt_currency(da_tt_val))
                 with col3: st.metric(T("no_thu"), fmt_currency(con_no_val))
+                with col4: st.metric(T("tong_ch"), f'{tong_ch_val} {T("diem")}')
+                with col5: st.metric(T("ch_active"), f'{ch_active_val} {T("diem")}')
+                with col6: st.metric(T("ty_le_phu"), ty_le_val)
             except Exception as e:
                 st.error(f"Lỗi tính metrics: {e}")
         else:
