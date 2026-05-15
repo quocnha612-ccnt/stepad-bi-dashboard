@@ -271,6 +271,8 @@ LANG = {
         "ma_sku": "Mã SKU", "san_luong": "Sản lượng", "chon": "-- Chọn --",
         "ton_kho_bac": "Tồn kho Bắc", "ton_kho_nam": "Tồn kho Nam", "tong_ton": "Tổng tồn kho",
         "nhap_kho": "📥 NHẬP HÀNG VÀO KHO", "lich_su_nhap": "🕐 LỊCH SỬ NHẬP KHO",
+        "ghi_nhan_tt": "💰 GHI NHẬN THANH TOÁN", "lich_su_tt": "🕐 LỊCH SỬ THANH TOÁN",
+        "tong_no": "Tổng nợ hiện tại", "so_tien_tra": "Số tiền trả",
     },
     "zh": {
         "title": "🚀 STEPAD — 销售管理系统",
@@ -425,6 +427,9 @@ COL_TRANSLATE = {
     "Kho":                       {"zh": "仓库"},
     "Người nhập":                {"zh": "录入人"},
     "Ghi chú":                   {"zh": "备注"},
+    # Thanh_Toan
+    "Số tiền trả":               {"zh": "还款金额"},
+    "Tên khách":                 {"zh": "客户名称"},
     "SL nhập Bắc":               {"zh": "北区入库"},
     "SL nhập Nam":               {"zh": "南区入库"},
     "SL xuất Bắc":               {"zh": "北区出库"},
@@ -1237,6 +1242,88 @@ with t_don:
         st.caption(f'{T("tong_label")} {len(df_don)}')
     else:
         st.info(T("chua_don"))
+
+    # ── FORM GHI NHẬN THANH TOÁN ──────────────────────────────
+    if st.session_state.role == "admin":
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="section-header">💰 GHI NHẬN THANH TOÁN</div>', unsafe_allow_html=True)
+
+        with st.spinner("Đang tải danh sách khách hàng..."):
+            df_kh_tt = load_sheet("Khach_Hang")
+
+        if not df_kh_tt.empty:
+            # Khởi tạo form key để reset
+            if "tt_form_key" not in st.session_state:
+                st.session_state.tt_form_key = 0
+
+            # Lấy danh sách khách còn nợ
+            col_id_kh  = next((c for c in df_kh_tt.columns if c.lower() == "id khách"), None)
+            col_ten_kh = next((c for c in df_kh_tt.columns if "tên cửa hàng" in c.lower()), None)
+            col_no     = next((c for c in df_kh_tt.columns if "còn nợ" in c.lower()), None)
+
+            if col_id_kh and col_ten_kh and col_no:
+                df_kh_tt["_no_num"] = df_kh_tt[col_no].apply(parse_num)
+                df_co_no = df_kh_tt[df_kh_tt["_no_num"] > 0].copy()
+
+                if df_co_no.empty:
+                    st.success("✅ Không có khách hàng nào đang nợ!")
+                else:
+                    col_dia_kh = next((c for c in df_kh_tt.columns if "địa chỉ" in c.lower()), None)
+                    ds_kh_no = [f"{row[col_id_kh]} — {row[col_ten_kh]} — {row[col_dia_kh] if col_dia_kh else ''}" for _, row in df_co_no.iterrows()]
+
+                    col_tt1, col_tt2 = st.columns([2, 1])
+                    with col_tt1:
+                        sel_kh_tt = st.selectbox("👤 Chọn khách hàng *", ["-- Chọn --"] + ds_kh_no, key=f"tt_kh_{st.session_state.tt_form_key}")
+                    with col_tt2:
+                        ghi_chu_tt = st.text_input("📝 Ghi chú", placeholder="Chuyển khoản, tiền mặt...", key=f"tt_ghichu_{st.session_state.tt_form_key}")
+
+                    # Hiển thị số nợ hiện tại
+                    if sel_kh_tt != "-- Chọn --":
+                        id_kh_sel = sel_kh_tt.split(" — ")[0]
+                        row_kh = df_co_no[df_co_no[col_id_kh] == id_kh_sel].iloc[0]
+                        so_no = row_kh["_no_num"]
+                        ten_kh_sel = row_kh[col_ten_kh]
+
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.metric("💳 Tổng nợ hiện tại", fmt_currency(so_no))
+                        with col_b:
+                            so_tien_tt = st.number_input(
+                                "💵 Số tiền trả *",
+                                min_value=0,
+                                max_value=int(so_no),
+                                value=int(so_no),
+                                step=100000,
+                                key=f"tt_sotien_{st.session_state.tt_form_key}"
+                            )
+
+                        if st.button("✅ XÁC NHẬN THANH TOÁN", key=f"btn_tt_{st.session_state.tt_form_key}"):
+                            if so_tien_tt <= 0:
+                                st.error("Số tiền phải lớn hơn 0!")
+                            else:
+                                ngay_tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                row_tt = [ngay_tt, id_kh_sel, ten_kh_sel, so_tien_tt, st.session_state.name, ghi_chu_tt]
+                                if append_row("Thanh_Toan", row_tt):
+                                    st.success(f"✅ Đã ghi nhận **{fmt_currency(so_tien_tt)}** từ **{ten_kh_sel}**!")
+                                    # Reset form về trạng thái ban đầu
+                                    st.session_state.tt_form_key += 1
+                                    load_sheet.clear()
+                                    st.rerun()
+                                else:
+                                    st.error("Có lỗi khi ghi dữ liệu, vui lòng thử lại!")
+
+        # ── LỊCH SỬ THANH TOÁN ────────────────────────────────
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🕐 LỊCH SỬ THANH TOÁN</div>', unsafe_allow_html=True)
+        df_tt_lich_su = load_sheet("Thanh_Toan")
+        if not df_tt_lich_su.empty:
+            st.dataframe(
+                translate_columns(df_tt_lich_su.tail(20).iloc[::-1]),
+                use_container_width=True, hide_index=True
+            )
+            st.caption(f"Hiển thị 20 lần gần nhất | Tổng: {len(df_tt_lich_su)} lần")
+        else:
+            st.info("Chưa có lịch sử thanh toán.")
 
 # ============================================================
 # TAB: SẢN PHẨM (Admin only)
