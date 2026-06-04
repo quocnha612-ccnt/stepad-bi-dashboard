@@ -1045,12 +1045,25 @@ with t_order:
             sl = st.number_input("SL", min_value=1, value=1, key=f"sl_{st.session_state.form_key}_{i}", label_visibility="collapsed")
 
         sku_code = sku_sel.split(" — ")[0] if sku_sel != T("chon") else ""
-        don_gia = get_gia_theo_khu_vuc(df_sp, sku_code, khu_vuc) if sku_code else 0
+        don_gia_mac_dinh = get_gia_theo_khu_vuc(df_sp, sku_code, khu_vuc) if sku_code else 0
+
+        with col_gia:
+            # Nha Trang cho phép sửa giá trực tiếp
+            if "nha trang" in khu_vuc.lower() and sku_code:
+                don_gia = st.number_input(
+                    "Giá", min_value=0,
+                    value=int(don_gia_mac_dinh),
+                    step=1000,
+                    key=f"gia_{st.session_state.form_key}_{i}",
+                    label_visibility="collapsed"
+                )
+            else:
+                don_gia = don_gia_mac_dinh
+                st.markdown(f"<div style='padding-top:8px; color:#888'>{fmt_currency(don_gia)}</div>", unsafe_allow_html=True)
+
         thanh_tien = don_gia * sl
         tong_truoc_thue += thanh_tien
 
-        with col_gia:
-            st.markdown(f"<div style='padding-top:8px; color:#888'>{fmt_currency(don_gia)}</div>", unsafe_allow_html=True)
         with col_tt:
             st.markdown(f"<div style='padding-top:8px; color:#00FF00; font-weight:700'>{fmt_currency(thanh_tien)}</div>", unsafe_allow_html=True)
         with col_del:
