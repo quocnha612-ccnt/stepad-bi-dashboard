@@ -9,7 +9,7 @@ import json
 import os
 
 # ============================================================
-# 1. CẤU HÌNH TRANG & CSS CỐ ĐỊNH GIAO DIỆN SÁNG (LIGHT THEME)
+# 1. CẤU HÌNH TRANG & CSS FIX ĐẶC TRỊ MÀU CHỮ CÁC TAB
 # ============================================================
 st.set_page_config(
     page_title="Stepad | Business Intelligence",
@@ -26,7 +26,7 @@ st.markdown("""
     font-family: 'Plus Jakarta Sans', sans-serif !important; 
 }
 
-/* Nền ứng dụng xám nhẹ chống chói mắt */
+/* Nền app xám nhẹ chống chói */
 .stApp { 
     background-color: #f8fafc !important; 
     color: #0f172a !important; 
@@ -36,57 +36,61 @@ st.markdown("""
 }
 
 /* ============================================================
-   ĐẶC TRỊ MÀU CHỮ CÁC TAB (KHẮC PHỤC TRIỆT ĐỂ CHỮ BỊ TÀNG HÌNH)
+   KHÓA CỐ ĐỊNH TIÊU ĐỀ CÁC TAB - GIỐNG CHỮ "ADMIN"
 ============================================================ */
-div[data-testid="stTabs"] {
+/* Khung chứa tab */
+div[data-testid="stTabs"] [data-baseweb="tab-list"],
+div[data-baseweb="tab-list"] {
     background-color: transparent !important;
+    gap: 10px !important;
 }
 
-div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+/* 1. Trạng thái BÌNH THƯỜNG (Chưa chọn): Giống màu chữ cụm Admin (#334155) */
+button[data-baseweb="tab"],
+div[data-testid="stTabs"] button[role="tab"],
+button[role="tab"] {
     background-color: transparent !important;
-    gap: 8px !important;
+    border: none !important;
+    padding: 10px 16px !important;
 }
 
-/* 1. Mọi tab CHƯA CHỌN: Ép chữ hiển thị màu xám đen đậm sắc nét */
-[data-testid="stTabs"] button[role="tab"] {
-    background-color: transparent !important;
-    border-radius: 8px 8px 0 0 !important;
-    padding: 10px 18px !important;
-}
-
-[data-testid="stTabs"] button[role="tab"] p,
-[data-testid="stTabs"] button[role="tab"] span,
-[data-testid="stTabs"] button[role="tab"] div {
-    color: #1e293b !important;
-    -webkit-text-fill-color: #1e293b !important;
-    font-weight: 700 !important;
+button[data-baseweb="tab"] *,
+div[data-testid="stTabs"] button[role="tab"] *,
+button[role="tab"] * {
+    color: #334155 !important;
+    -webkit-text-fill-color: #334155 !important;
     font-size: 0.95rem !important;
+    font-weight: 700 !important;
     opacity: 1 !important;
+    visibility: visible !important;
 }
 
-/* 2. Tab ĐANG CHỌN (Active): Nền trắng nổi bật, chữ xanh ngọc */
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+/* 2. Trạng thái ĐANG CHỌN (Active): Nổi bật màu xanh ngọc Stepad */
+button[data-baseweb="tab"][aria-selected="true"],
+div[data-testid="stTabs"] button[role="tab"][aria-selected="true"],
+button[role="tab"][aria-selected="true"] {
     background-color: #ffffff !important;
     border-radius: 8px 8px 0 0 !important;
-    box-shadow: 0 -2px 4px rgba(0,0,0,0.02) !important;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.03) !important;
 }
 
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] span,
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] div {
+button[data-baseweb="tab"][aria-selected="true"] *,
+div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] *,
+button[role="tab"][aria-selected="true"] * {
     color: #00b87c !important;
     -webkit-text-fill-color: #00b87c !important;
     font-weight: 800 !important;
+    opacity: 1 !important;
 }
 
 /* Gạch chân dưới tab đang chọn */
-[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+div[data-baseweb="tab-highlight"] {
     background-color: #00b87c !important;
     height: 3px !important;
 }
 
-/* Đường viền đáy tab */
-[data-testid="stTabs"] [data-baseweb="tab-border"] {
+/* Đường viền ngang đáy tab */
+div[data-baseweb="tab-border"] {
     background-color: #cbd5e1 !important;
 }
 
