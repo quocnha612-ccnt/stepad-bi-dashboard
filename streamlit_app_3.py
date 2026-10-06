@@ -6,9 +6,10 @@ from google.oauth2.service_account import Credentials
 import gspread
 from datetime import datetime, date
 import json
+import os
 
 # ============================================================
-# 1. CẤU HÌNH TRANG & GIAO DIỆN THEME MỚI (CLEAN LIGHT THEME)
+# 1. CẤU HÌNH TRANG & FIX TRIỆT ĐỂ MÀU HIỂN THỊ
 # ============================================================
 st.set_page_config(
     page_title="Stepad | Business Intelligence",
@@ -25,163 +26,145 @@ st.markdown("""
     font-family: 'Plus Jakarta Sans', sans-serif; 
 }
 
-/* Nền app sáng mềm mại theo mẫu */
+/* Nền sáng cố định cho toàn bộ ứng dụng */
 .stApp { 
-    background-color: #f4f6f8; 
-    color: #1e293b; 
+    background-color: #f8fafc !important; 
+    color: #0f172a !important; 
 }
 .stApp > header { 
-    background-color: transparent; 
+    background-color: transparent !important; 
 }
 
-/* Thanh Tabs hiện đại */
+/* Ép màu cho tất cả nhãn Form / Label (Tránh lỗi tàng hình do Dark Mode) */
+label, .stWidgetLabel p, [data-testid="stWidgetLabel"] {
+    color: #1e293b !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+}
+
+/* Thanh Tabs - Hiển thị chữ xám đậm/xanh rõ nét */
 button[data-baseweb="tab"] {
     background-color: transparent !important;
     border-radius: 8px 8px 0 0 !important;
-    padding: 10px 20px !important;
+    padding: 10px 18px !important;
 }
 button[data-baseweb="tab"] p { 
-    color: #64748b !important; 
-    font-weight: 600 !important; 
+    color: #334155 !important; 
+    font-weight: 700 !important; 
     font-size: 0.9rem !important;
 }
 button[aria-selected="true"] {
     background-color: #ffffff !important;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.02) !important;
 }
 button[aria-selected="true"] p { 
     color: #00b87c !important; 
-    font-weight: 700 !important; 
+    font-weight: 800 !important; 
 }
 div[data-baseweb="tab-highlight"] { 
     background-color: #00b87c !important; 
     height: 3px !important;
 }
 div[data-baseweb="tab-border"] { 
-    background-color: #e2e8f0 !important; 
+    background-color: #cbd5e1 !important; 
 }
 
-/* Thẻ Metric hiển thị số liệu */
-[data-testid="metric-container"] {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 18px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
-[data-testid="stMetricValue"] { 
-    color: #00b87c !important; 
-    font-weight: 700 !important;
-    font-size: 1.5rem !important;
-    letter-spacing: -0.5px;
-}
-[data-testid="stMetricLabel"] { 
-    color: #64748b !important; 
-    font-size: 0.8rem !important; 
-    font-weight: 600 !important;
-    text-transform: uppercase;
-}
-
-/* Ô nhập liệu Form Inputs */
-.stTextInput input, .stSelectbox select, .stNumberInput input, .stDateInput input, .stTextArea textarea {
+/* Ô nhập liệu Form (Input, Select, Number, Date, TextArea) */
+.stTextInput input, .stNumberInput input, .stDateInput input, .stTextArea textarea {
     background-color: #ffffff !important;
     color: #0f172a !important;
-    border: 1px solid #cbd5e1 !important;
+    border: 1.5px solid #cbd5e1 !important;
     border-radius: 8px !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+    font-weight: 600 !important;
 }
 .stSelectbox > div > div {
     background-color: #ffffff !important;
     color: #0f172a !important;
-    border: 1px solid #cbd5e1 !important;
+    border: 1.5px solid #cbd5e1 !important;
     border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+/* Text bên trong dropdown đang chọn */
+.stSelectbox div[data-baseweb="select"] * {
+    color: #0f172a !important;
 }
 
 /* Nút bấm chủ đạo màu Xanh Ngọc Lục Bảo */
 .stButton > button {
     background-color: #00b87c !important;
     color: #ffffff !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     border: none !important;
     border-radius: 8px !important;
     padding: 9px 22px !important;
-    box-shadow: 0 2px 4px rgba(0, 184, 124, 0.2) !important;
-    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 2px 5px rgba(0, 184, 124, 0.25) !important;
 }
 .stButton > button:hover {
     background-color: #009966 !important;
     color: #ffffff !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0, 184, 124, 0.3) !important;
 }
 
-/* Bảng dữ liệu Dataframe */
-.stDataFrame { 
-    border: 1px solid #e2e8f0 !important; 
-    border-radius: 12px !important; 
-    background-color: #ffffff !important;
+/* Thẻ Metric hiển thị số liệu */
+[data-testid="metric-container"] {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 16px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03) !important;
+}
+[data-testid="stMetricValue"] { 
+    color: #00b87c !important; 
+    font-weight: 800 !important;
+    font-size: 1.55rem !important;
+}
+[data-testid="stMetricLabel"] { 
+    color: #475569 !important; 
+    font-size: 0.8rem !important; 
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+}
+
+/* Tiêu đề mục Section Header */
+.section-header {
+    color: #0f172a !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+}
+
+/* Hộp Card nền trắng */
+.info-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 20px !important;
+    margin-bottom: 16px !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
 }
 
-/* Tiêu đề phân mục Section Header */
-.section-header {
-    color: #0f172a;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #e2e8f0;
-    display: flex;
+/* Khung bọc logo thương hiệu */
+.logo-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 6px 14px;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
-/* Hộp Card thông tin nền trắng */
-.info-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
-
-/* Đăng nhập */
-.login-container {
-    max-width: 400px;
-    margin: 80px auto;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 40px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-/* Cảnh báo nợ & hiệu suất */
-.debt-high { border-left: 4px solid #ef4444 !important; }
-.debt-medium { border-left: 4px solid #f59e0b !important; }
-.perf-good { border-left: 4px solid #00b87c !important; }
-
-/* Dòng sản phẩm đặt hàng */
-.sku-row {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 14px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-}
-
-/* Huy hiệu vai trò Admin/Sale */
 .role-badge {
-    background-color: #e6f7f1;
+    background-color: #ecfdf5;
     color: #00b87c;
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800;
     border: 1px solid #a7f3d0;
 }
 </style>
@@ -286,9 +269,6 @@ USERS = {
     "ctv5": {"password": "ctv005", "role": "sale", "name": "CTV5"},
 }
 
-# ============================================================
-# NGÔN NGỮ / 语言
-# ============================================================
 LANG = {
     "vi": {
         "title": "STEPAD CRM",
@@ -296,7 +276,7 @@ LANG = {
         "login_user": "👤 Tên đăng nhập", "login_pass": "🔒 Mật khẩu",
         "login_err": "Sai tên đăng nhập hoặc mật khẩu!",
         "tab_dash": "🏠 Dashboard", "tab_order": "📝 Lên đơn", "tab_don": "📦 Đơn hàng",
-        "tab_sp": "🏷️️ Sản phẩm", "tab_kh": "👥 Khách hàng", "tab_ck": "🏪 Circle K",
+        "tab_sp": "🏷️ Sản phẩm", "tab_kh": "👥 Khách hàng", "tab_ck": "🏪 Circle K",
         "tab_don_sale": "📦 Đơn hàng của tôi",
         "tai_chinh": "💳 TÀI CHÍNH TỔNG QUAN",
         "tong_dt": "TỔNG DOANH THU", "da_nhan": "ĐÃ THỰC NHẬN", "no_thu": "NỢ CẦN THU",
@@ -378,17 +358,25 @@ def T(key):
     lang = st.session_state.get("lang", "vi")
     return LANG[lang].get(key, LANG["vi"].get(key, key))
 
+def render_logo(width=160):
+    logo_candidates = ["logo.png", "logo Trang chủ.png", "logo_stepad.png", "assets/logo.png"]
+    found_logo = next((p for p in logo_candidates if os.path.exists(p)), None)
+    if found_logo:
+        st.image(found_logo, width=width)
+    else:
+        st.markdown("""
+        <div class="logo-container">
+            <span style="font-family:'Plus Jakarta Sans',sans-serif; font-size:1.45rem; font-weight:900; letter-spacing:1px; color:#334155;">
+                stepad<sup style="font-size:0.6rem; color:#64748b;">®</sup>
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
 
 def login_page():
+    st.markdown("<div style='text-align:center; margin-top:60px;'>", unsafe_allow_html=True)
+    render_logo(width=220)
     st.markdown("""
-    <div class="login-container">
-        <div style="width: 52px; height: 52px; background: #00b87c; border-radius: 12px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 4px 10px rgba(0,184,124,0.3);">
-            ❖
-        </div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif; color:#0f172a; font-size:1.6rem; font-weight:800; letter-spacing:1px;">
-            STEPAD
-        </div>
-        <div style="color:#64748b; font-size:0.85rem; letter-spacing:1px; margin-top:4px; font-weight:600;">
+        <div style="color:#64748b; font-size:0.85rem; letter-spacing:2px; margin-top:8px; font-weight:700;">
             BUSINESS INTELLIGENCE SYSTEM
         </div>
     </div>
@@ -396,6 +384,7 @@ def login_page():
 
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
+        st.markdown("<br>", unsafe_allow_html=True)
         username = st.text_input(T("login_user"), placeholder="Nhập username...")
         password = st.text_input(T("login_pass"), type="password", placeholder="Nhập mật khẩu...")
         
@@ -545,24 +534,14 @@ if not st.session_state.logged_in:
     login_page()
     st.stop()
 
-# Header sáng trang nhã theo hình mẫu
-col_h1, col_h2 = st.columns([3, 1])
+# Header chính hiển thị Logo Stepad sắc nét
+col_h1, col_h2 = st.columns([3, 1.2])
 with col_h1:
-    st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 14px; padding: 10px 0;">
-        <div style="width: 44px; height: 44px; background: #00b87c; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; box-shadow: 0 4px 8px rgba(0,184,124,0.25);">
-            ❖
-        </div>
-        <div>
-            <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a; line-height: 1.2;">STEPAD</div>
-            <div style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; letter-spacing: 1.5px;">CRM & ANALYTICS</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    render_logo(width=175)
 with col_h2:
     st.markdown(f"""
-    <div style="text-align: right; padding-top: 10px; margin-bottom: 6px;">
-        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">{st.session_state.name}</span> &nbsp;
+    <div style="text-align: right; padding-top: 6px; margin-bottom: 6px;">
+        <span style="color: #334155; font-weight: 700; font-size: 0.92rem;">{st.session_state.name}</span> &nbsp;
         <span class="role-badge">{st.session_state.role.upper()}</span>
     </div>
     """, unsafe_allow_html=True)
@@ -576,7 +555,7 @@ with col_h2:
             st.session_state.logged_in = False
             st.rerun()
 
-st.markdown("<hr style='border-color:#e2e8f0; margin: 4px 0 18px 0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='border-color:#cbd5e1; margin: 6px 0 18px 0;'>", unsafe_allow_html=True)
 
 # ============================================================
 # 6. TABS
@@ -706,17 +685,17 @@ if st.session_state.role == "admin":
                 if sel_year: filter_info.append(f"Năm {sel_year}")
                 if sel_month: filter_info.append(MONTH_NAMES_VI.get(sel_month, ""))
                 st.markdown(
-                    f"<div style='padding-top:28px; color:#00b87c; font-weight:700; font-size:0.85rem;'>"
+                    f"<div style='padding-top:28px; color:#00b87c; font-weight:800; font-size:0.85rem;'>"
                     f"🔍 Đang lọc theo: <b>{' — '.join(filter_info)}</b></div>",
                     unsafe_allow_html=True
                 )
             else:
                 st.markdown(
-                    "<div style='padding-top:28px; color:#94a3b8; font-size:0.85rem;'>🔍 Đang xem: Toàn bộ thời gian</div>",
+                    "<div style='padding-top:28px; color:#64748b; font-size:0.85rem; font-weight:600;'>🔍 Đang xem: Toàn bộ thời gian</div>",
                     unsafe_allow_html=True
                 )
 
-        st.markdown("<hr style='border-color:#e2e8f0; margin:8px 0 16px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border-color:#cbd5e1; margin:8px 0 16px 0;'>", unsafe_allow_html=True)
 
         use_filtered = not df_chitiet.empty and "_year" in df_chitiet.columns
 
@@ -731,7 +710,6 @@ if st.session_state.role == "admin":
 
         col_truoc_thue = next((c for c in df_chitiet.columns if "trước thuế" in c.lower() or "truoc thue" in c.lower()), None)
         col_sau_thue   = next((c for c in df_chitiet.columns if "sau thuế" in c.lower() or "sau thue" in c.lower()), None)
-        col_tien_thue  = next((c for c in df_chitiet.columns if c.lower().startswith("tiền thuế") or c.lower() == "tiền thuế"), None)
 
         def sum_col(df, col):
             if col and col in df.columns and not df.empty:
@@ -835,7 +813,7 @@ if st.session_state.role == "admin":
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                    st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>🏪 CIRCLE K</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🏪 CIRCLE K</div>", unsafe_allow_html=True)
                     st.metric(T("tong"), fmt_currency(ck_val))
                     col_kho = next((c for c in df_ct_filtered.columns if "kho" in c.lower()), None)
                     if col_kho:
@@ -848,17 +826,17 @@ if st.session_state.role == "admin":
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col2:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                    st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>🏬 MODERN TRADE</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🏬 MODERN TRADE</div>", unsafe_allow_html=True)
                     st.metric(T("tong_dt2"), fmt_currency(mt_val))
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col3:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                    st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>🛒 GENERAL TRADE</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🛒 GENERAL TRADE</div>", unsafe_allow_html=True)
                     st.metric(T("tong_dt2"), fmt_currency(gt_val))
                     st.markdown('</div>', unsafe_allow_html=True)
                 with col4:
                     st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                    st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>🌊 NHA TRANG</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🌊 NHA TRANG</div>", unsafe_allow_html=True)
                     st.metric(T("ky_gui"), fmt_currency(nt_val))
                     st.markdown('</div>', unsafe_allow_html=True)
             except Exception as e:
@@ -869,28 +847,28 @@ if st.session_state.role == "admin":
                     col1, col2, col3, col4 = st.columns(4)
                     with col1:
                         st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                        st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>🏪 CIRCLE K</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🏪 CIRCLE K</div>", unsafe_allow_html=True)
                         st.metric(T("tong"), fmt_currency(df_dash.iloc[4, 0]))
                         st.metric(T("mien_bac"), fmt_currency(df_dash.iloc[4, 1]))
                         st.metric(T("mien_nam"), fmt_currency(df_dash.iloc[4, 2]))
                         st.markdown('</div>', unsafe_allow_html=True)
                     with col2:
                         st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                        st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>🏬 MODERN TRADE</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🏬 MODERN TRADE</div>", unsafe_allow_html=True)
                         st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[7, 0]))
                         st.metric(T("da_tt"), fmt_currency(df_dash.iloc[7, 1]))
                         st.metric(T("no"), fmt_currency(df_dash.iloc[7, 2]))
                         st.markdown('</div>', unsafe_allow_html=True)
                     with col3:
                         st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                        st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>🛒 GENERAL TRADE</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🛒 GENERAL TRADE</div>", unsafe_allow_html=True)
                         st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[9, 0]))
                         st.metric(T("da_tt"), fmt_currency(df_dash.iloc[9, 1]))
                         st.metric(T("no"), fmt_currency(df_dash.iloc[9, 2]))
                         st.markdown('</div>', unsafe_allow_html=True)
                     with col4:
                         st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                        st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>🌊 NHA TRANG</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🌊 NHA TRANG</div>", unsafe_allow_html=True)
                         st.metric(T("ky_gui"), fmt_currency(df_dash.iloc[13, 0]))
                         st.metric(T("da_tt"), fmt_currency(df_dash.iloc[13, 1]))
                         st.metric(T("no"), fmt_currency(df_dash.iloc[13, 2]))
@@ -926,8 +904,8 @@ if st.session_state.role == "admin":
                         height=350, 
                         paper_bgcolor="#ffffff", 
                         plot_bgcolor="#ffffff",
-                        xaxis=dict(tickfont=dict(color="#64748b")),
-                        yaxis=dict(gridcolor="#f1f5f9", tickfont=dict(color="#64748b")),
+                        xaxis=dict(tickfont=dict(color="#475569")),
+                        yaxis=dict(gridcolor="#f1f5f9", tickfont=dict(color="#475569")),
                         legend=dict(font=dict(color="#0f172a"), orientation="h", y=1.1),
                         margin=dict(l=10, r=10, t=30, b=10),
                     )
@@ -1024,7 +1002,7 @@ with t_order:
         khach_selected = st.selectbox(T("khach_hang"), ds_khach_display, key=f"sel_khach_{st.session_state.form_key}")
         id_khach = khach_selected.split(" — ")[0] if khach_selected else ""
         khu_vuc = get_khu_vuc(id_khach)
-        st.markdown(f"<small style='color:#00b87c; font-weight:600;'>📍 Khu vực: <b>{khu_vuc}</b></small>", unsafe_allow_html=True)
+        st.markdown(f"<small style='color:#00b87c; font-weight:700;'>📍 Khu vực: <b>{khu_vuc}</b></small>", unsafe_allow_html=True)
 
     with col2:
         ngay_don = st.date_input(T("ngay_don"), value=date.today(), key=f"ngay_{st.session_state.form_key}")
@@ -1051,10 +1029,10 @@ with t_order:
     items_data = []
 
     h1, h2, h3, h4, h5 = st.columns([3, 1, 1.5, 1.5, 0.5])
-    with h1: st.markdown("<small style='color:#64748b; font-weight:700;'>Sản phẩm</small>", unsafe_allow_html=True)
-    with h2: st.markdown("<small style='color:#64748b; font-weight:700;'>Số lượng</small>", unsafe_allow_html=True)
-    with h3: st.markdown("<small style='color:#64748b; font-weight:700;'>Đơn giá</small>", unsafe_allow_html=True)
-    with h4: st.markdown("<small style='color:#64748b; font-weight:700;'>Thành tiền</small>", unsafe_allow_html=True)
+    with h1: st.markdown("<small style='color:#475569; font-weight:800;'>Sản phẩm</small>", unsafe_allow_html=True)
+    with h2: st.markdown("<small style='color:#475569; font-weight:800;'>Số lượng</small>", unsafe_allow_html=True)
+    with h3: st.markdown("<small style='color:#475569; font-weight:800;'>Đơn giá</small>", unsafe_allow_html=True)
+    with h4: st.markdown("<small style='color:#475569; font-weight:800;'>Thành tiền</small>", unsafe_allow_html=True)
 
     for i, item in enumerate(st.session_state.order_items):
         col_sku, col_sl, col_gia, col_tt, col_del = st.columns([3, 1, 1.5, 1.5, 0.5])
@@ -1083,13 +1061,13 @@ with t_order:
                 )
             else:
                 don_gia = don_gia_mac_dinh
-                st.markdown(f"<div style='padding-top:8px; color:#475569; font-weight:600;'>{fmt_currency(don_gia)}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='padding-top:8px; color:#1e293b; font-weight:700;'>{fmt_currency(don_gia)}</div>", unsafe_allow_html=True)
 
         thanh_tien = don_gia * sl
         tong_truoc_thue += thanh_tien
 
         with col_tt:
-            st.markdown(f"<div style='padding-top:8px; color:#00b87c; font-weight:700;'>{fmt_currency(thanh_tien)}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='padding-top:8px; color:#00b87c; font-weight:800;'>{fmt_currency(thanh_tien)}</div>", unsafe_allow_html=True)
         with col_del:
             if st.button("✕", key=f"del_{st.session_state.form_key}_{i}") and len(st.session_state.order_items) > 1:
                 st.session_state.order_items.pop(i)
@@ -1102,7 +1080,7 @@ with t_order:
         st.session_state.order_items.append({"sku": "", "sl": 1})
         st.rerun()
 
-    st.markdown("<hr style='border-color:#e2e8f0; margin:16px 0'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color:#cbd5e1; margin:16px 0'>", unsafe_allow_html=True)
 
     ap_dung_giam = st.checkbox("🏷️ Áp dụng giảm giá đặc biệt", value=False, key=f"giam_{st.session_state.form_key}")
     pct_giam = 0
@@ -1110,7 +1088,7 @@ with t_order:
         pct_giam = st.number_input("% Giảm giá", min_value=0.0, max_value=100.0, value=0.0, step=0.5, key=f"pct_giam_{st.session_state.form_key}")
 
     tien_giam = tong_truoc_thue * (pct_giam / 100)
-    tong_sau_giam = tong_truoc_thue - tien_giam
+    tong_sau_giam = tong_truoc_thue - tiền_giam if 'tiền_giam' in locals() else tong_truoc_thue - tien_giam
     tien_thue = tong_sau_giam * thue_suat
     tong_sau_thue = tong_sau_giam + tien_thue
 
@@ -1468,7 +1446,7 @@ if st.session_state.role == "admin":
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        st.markdown('<div class="section-header">🏷️ DANH SÁCH SẢN PHẨM ĐẦY ĐỦ</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🏷️️ DANH SÁCH SẢN PHẨM ĐẦY ĐỦ</div>', unsafe_allow_html=True)
         if not df_sp_full.empty:
             st.dataframe(translate_columns(df_sp_full), use_container_width=True, hide_index=True)
 
@@ -1533,9 +1511,9 @@ if st.session_state.role == "admin":
                     fig.update_layout(
                         title={'text': T("bieu_do_title"), 'x': 0.5, 'font': {'color': '#0f172a', 'size': 14, 'family': 'Plus Jakarta Sans'}},
                         barmode='group', height=400,
-                        xaxis=dict(tickfont=dict(color='#64748b')),
-                        yaxis=dict(gridcolor='#f1f5f9', tickfont=dict(color='#64748b')),
-                        legend=dict(font=dict(color='#0f172a'), orientation="h", y=1.1),
+                        xaxis=dict(tickfont=dict(color='#475569')),
+                        yaxis=dict(gridcolor='#f1f5f9', tickfont=dict(color='#475569')),
+                        legend=dict(font=dict(color="#0f172a"), orientation="h", y=1.1),
                         paper_bgcolor='#ffffff',
                         plot_bgcolor='#ffffff',
                         margin=dict(l=10, r=10, t=40, b=10)
@@ -1586,14 +1564,14 @@ if st.session_state.role == "admin":
                     return 0
 
                 with col1:
-                    st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>📍 Miền Nam</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>📍 Miền Nam</div>", unsafe_allow_html=True)
                     c1, c2, c3, c4 = st.columns(4)
                     with c1: st.metric("SL PO", int(to_num_po(safe_iloc(17, 0))))
                     with c2: st.metric("Min", fmt_currency(to_num_po(safe_iloc(19, 0))))
                     with c3: st.metric("Max", fmt_currency(to_num_po(safe_iloc(21, 0))))
                     with c4: st.metric("Avg", fmt_currency(to_num_po(safe_iloc(23, 0))))
                 with col2:
-                    st.markdown("<div style='font-weight:700; color:#0f172a; margin-bottom:8px;'>📍 Miền Bắc</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>📍 Miền Bắc</div>", unsafe_allow_html=True)
                     c1, c2, c3, c4 = st.columns(4)
                     with c1: st.metric("SL PO", int(to_num_po(safe_iloc(17, 1))))
                     with c2: st.metric("Min", fmt_currency(to_num_po(safe_iloc(19, 1))))
