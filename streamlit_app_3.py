@@ -9,7 +9,7 @@ import json
 import os
 
 # ============================================================
-# 1. CẤU HÌNH TRANG & CSS FIX TRIỆT ĐỂ CHỮ TÀNG HÌNH & GIAO DIỆN
+# 1. CẤU HÌNH TRANG & GIAO DIỆN CỐ ĐỊNH (LIGHT CLEAN THEME)
 # ============================================================
 st.set_page_config(
     page_title="Stepad | Business Intelligence",
@@ -20,56 +20,44 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
 * { 
-    font-family: 'Plus Jakarta Sans', sans-serif; 
+    font-family: 'Plus Jakarta Sans', sans-serif !important; 
 }
 
-/* 1. Ép toàn bộ khung nền và màu chữ chính */
+/* Nền app xám nhẹ chống chói mắt */
 .stApp { 
     background-color: #f8fafc !important; 
     color: #0f172a !important; 
 }
-.stApp > header { 
-    background-color: transparent !important; 
-}
 
-/* 2. FIX ĐẶC TRỊ TIÊU ĐỀ TABS (Tránh bị tàng hình màu trắng khi không hover) */
-div[data-testid="stTabs"] {
-    background-color: transparent !important;
-}
-
-div[data-testid="stTabs"] [data-baseweb="tab-list"] {
-    background-color: transparent !important;
-    gap: 8px !important;
-}
-
-div[data-testid="stTabs"] button[data-baseweb="tab"] {
+/* Thanh Tabs - Chữ luôn hiển thị rõ ràng */
+button[data-baseweb="tab"] {
     background-color: transparent !important;
     border-radius: 8px 8px 0 0 !important;
     padding: 10px 18px !important;
-    color: #334155 !important;
 }
 
-div[data-testid="stTabs"] button[data-baseweb="tab"] * {
-    color: #334155 !important;
-    -webkit-text-fill-color: #334155 !important;
-    font-weight: 700 !important;
+button[data-baseweb="tab"] p, 
+button[data-baseweb="tab"] div, 
+button[data-baseweb="tab"] span { 
+    color: #475569 !important; 
+    font-weight: 700 !important; 
     font-size: 0.95rem !important;
     opacity: 1 !important;
 }
 
-div[data-testid="stTabs"] button[aria-selected="true"] {
+button[aria-selected="true"] {
     background-color: #ffffff !important;
-    border-radius: 8px 8px 0 0 !important;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.03) !important;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.02) !important;
 }
 
-div[data-testid="stTabs"] button[aria-selected="true"] * {
-    color: #00b87c !important;
-    -webkit-text-fill-color: #00b87c !important;
-    font-weight: 800 !important;
+button[aria-selected="true"] p, 
+button[aria-selected="true"] div, 
+button[aria-selected="true"] span { 
+    color: #00b87c !important; 
+    font-weight: 800 !important; 
 }
 
 div[data-baseweb="tab-highlight"] { 
@@ -78,74 +66,60 @@ div[data-baseweb="tab-highlight"] {
 }
 
 div[data-baseweb="tab-border"] { 
-    background-color: #cbd5e1 !important; 
+    background-color: #e2e8f0 !important; 
 }
 
-/* 3. Fix tiêu đề nhãn FORM (Label) */
-label, .stWidgetLabel, .stWidgetLabel p, [data-testid="stWidgetLabel"] {
-    color: #0f172a !important;
+/* Nhãn biểu mẫu (Form Labels) */
+label, .stWidgetLabel p, [data-testid="stWidgetLabel"] {
+    color: #1e293b !important;
     font-weight: 700 !important;
     font-size: 0.88rem !important;
-    opacity: 1 !important;
 }
 
-/* 4. Fix triệt để giá trị hiển thị bên trong ô SELECTBOX / DROPDOWN */
+/* Ô nhập liệu Form Inputs */
+.stTextInput input, .stNumberInput input, .stDateInput input, .stTextArea textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* Dropdown / Selectbox */
 div[data-baseweb="select"] {
     background-color: #ffffff !important;
-    border: 1.5px solid #cbd5e1 !important;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 8px !important;
 }
 
 div[data-baseweb="select"] * {
     color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    opacity: 1 !important;
     font-weight: 600 !important;
 }
 
-div[data-baseweb="popover"] ul,
-div[data-baseweb="menu"] {
-    background-color: #ffffff !important;
-}
-
-div[data-baseweb="menu"] li {
-    color: #0f172a !important;
-}
-
-/* 5. Fix ô nhập TEXT, NUMBER, DATE, TEXTAREA */
-.stTextInput input, .stNumberInput input, .stDateInput input, .stTextArea textarea {
-    background-color: #ffffff !important;
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    border: 1.5px solid #cbd5e1 !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    opacity: 1 !important;
-}
-
-/* 6. Nút bấm chủ đạo màu Xanh Ngọc */
+/* Nút bấm chủ đạo Stepad */
 .stButton > button {
     background-color: #00b87c !important;
     color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
     font-weight: 700 !important;
     border: none !important;
     border-radius: 8px !important;
     padding: 9px 22px !important;
-    box-shadow: 0 2px 5px rgba(0, 184, 124, 0.25) !important;
+    box-shadow: 0 2px 4px rgba(0, 184, 124, 0.2) !important;
 }
 
 .stButton > button:hover {
     background-color: #009966 !important;
+    color: #ffffff !important;
 }
 
-/* 7. Metric Cards */
+/* Thẻ Metric hiển thị số liệu */
 [data-testid="metric-container"] {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 14px !important;
     padding: 16px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
 }
 
 [data-testid="stMetricValue"] { 
@@ -155,21 +129,13 @@ div[data-baseweb="menu"] li {
 }
 
 [data-testid="stMetricLabel"] { 
-    color: #475569 !important; 
+    color: #64748b !important; 
+    font-size: 0.8rem !important; 
     font-weight: 700 !important;
-    font-size: 0.8rem !important;
     text-transform: uppercase !important;
 }
 
-/* 8. Bảng dữ liệu Dataframe */
-.stDataFrame { 
-    border: 1px solid #cbd5e1 !important; 
-    border-radius: 12px !important; 
-    background-color: #ffffff !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
-}
-
-/* 9. Section Header */
+/* Tiêu đề mục */
 .section-header {
     color: #0f172a !important;
     font-size: 0.85rem !important;
@@ -178,10 +144,10 @@ div[data-baseweb="menu"] li {
     text-transform: uppercase !important;
     margin-bottom: 14px !important;
     padding-bottom: 8px !important;
-    border-bottom: 2px solid #cbd5e1 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
 }
 
-/* 10. Hộp Card & Logo */
+/* Hộp Card nội dung */
 .info-card {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
@@ -191,6 +157,7 @@ div[data-baseweb="menu"] li {
     box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
 }
 
+/* Khung bọc logo */
 .logo-container {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -577,7 +544,7 @@ if not st.session_state.logged_in:
     login_page()
     st.stop()
 
-# Header chính hiển thị Logo Stepad sắc nét
+# Header chính hiển thị Logo Stepad
 col_h1, col_h2 = st.columns([3, 1.2])
 with col_h1:
     render_logo(width=175)
@@ -598,7 +565,7 @@ with col_h2:
             st.session_state.logged_in = False
             st.rerun()
 
-st.markdown("<hr style='border-color:#cbd5e1; margin: 6px 0 18px 0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='border-color:#e2e8f0; margin: 6px 0 18px 0;'>", unsafe_allow_html=True)
 
 # ============================================================
 # 6. TABS
@@ -738,7 +705,7 @@ if st.session_state.role == "admin":
                     unsafe_allow_html=True
                 )
 
-        st.markdown("<hr style='border-color:#cbd5e1; margin:8px 0 16px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border-color:#e2e8f0; margin:8px 0 16px 0;'>", unsafe_allow_html=True)
 
         use_filtered = not df_chitiet.empty and "_year" in df_chitiet.columns
 
@@ -1123,7 +1090,7 @@ with t_order:
         st.session_state.order_items.append({"sku": "", "sl": 1})
         st.rerun()
 
-    st.markdown("<hr style='border-color:#cbd5e1; margin:16px 0'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color:#e2e8f0; margin:16px 0'>", unsafe_allow_html=True)
 
     ap_dung_giam = st.checkbox("🏷️ Áp dụng giảm giá đặc biệt", value=False, key=f"giam_{st.session_state.form_key}")
     pct_giam = 0
