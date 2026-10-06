@@ -9,7 +9,7 @@ import json
 import os
 
 # ============================================================
-# 1. CẤU HÌNH TRANG & CSS FIX ĐẶC TRỊ MÀU CHỮ CÁC TAB
+# 1. CẤU HÌNH TRANG & CSS ĐẶC TRỊ TRIỆT ĐỂ CHỮ TAB BỊ ẨN
 # ============================================================
 st.set_page_config(
     page_title="Stepad | Business Intelligence",
@@ -26,7 +26,7 @@ st.markdown("""
     font-family: 'Plus Jakarta Sans', sans-serif !important; 
 }
 
-/* Nền app xám nhẹ chống chói mắt */
+/* Nền app */
 .stApp { 
     background-color: #f8fafc !important; 
     color: #0f172a !important; 
@@ -36,29 +36,37 @@ st.markdown("""
 }
 
 /* ============================================================
-   ĐẶC TRỊ MÀU CHỮ CÁC TAB (CAN THIỆP SÂU VÀO THẺ P VÀ SPAN)
+   ĐẶC TRỊ FIX 100% MÀU CHỮ CÁC TAB (KHÔNG BỊ TÀNG HÌNH)
 ============================================================ */
+/* 1. Bao quát toàn bộ danh sách Tab */
+div[data-baseweb="tab-list"],
 div[data-testid="stTabs"] [data-baseweb="tab-list"],
-div[data-baseweb="tab-list"] {
+[data-testid="stTabs"] > div:first-child {
     background-color: transparent !important;
     gap: 8px !important;
 }
 
-/* 1. MỌI TAB CHƯA CHỌN: Ép thẻ p, span, text hiển thị màu xám đen đậm #1e293b */
-[data-testid="stTabs"] button[role="tab"],
-button[data-baseweb="tab"] {
+/* 2. MỌI TAB CHƯA CHỌN: Ép hiển thị rõ chữ xám đen #1e293b (giống chữ Admin) */
+div[data-baseweb="tab-list"] button,
+div[data-testid="stTabs"] button,
+button[data-baseweb="tab"],
+button[role="tab"] {
     background-color: transparent !important;
     border: none !important;
     padding: 10px 16px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
-[data-testid="stTabs"] button[role="tab"] p,
-[data-testid="stTabs"] button[role="tab"] span,
-[data-testid="stTabs"] button[role="tab"] div,
-[data-testid="stTabs"] button[role="tab"] [data-testid="stMarkdownContainer"] p,
-button[data-baseweb="tab"] p,
-button[data-baseweb="tab"] span,
-button[data-baseweb="tab"] div {
+/* Ép sâu vào toàn bộ thẻ p, span, div, text node bên trong Tab */
+div[data-baseweb="tab-list"] button *,
+div[data-testid="stTabs"] button *,
+button[data-baseweb="tab"] *,
+button[role="tab"] *,
+button[role="tab"] p,
+button[role="tab"] span,
+button[role="tab"] div,
+[data-testid="stMarkdownContainer"] p {
     color: #1e293b !important;
     -webkit-text-fill-color: #1e293b !important;
     font-weight: 700 !important;
@@ -67,40 +75,42 @@ button[data-baseweb="tab"] div {
     visibility: visible !important;
 }
 
-/* 2. TAB ĐANG ĐƯỢC CHỌN (Active): Nền trắng bo góc, chữ xanh ngọc #00b87c */
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"],
-button[data-baseweb="tab"][aria-selected="true"] {
+/* 3. TAB ĐANG KÍCH HOẠT (Active): Chữ xanh ngọc Stepad #00b87c, nền thẻ trắng */
+div[data-baseweb="tab-list"] button[aria-selected="true"],
+div[data-testid="stTabs"] button[aria-selected="true"],
+button[data-baseweb="tab"][aria-selected="true"],
+button[role="tab"][aria-selected="true"] {
     background-color: #ffffff !important;
     border-radius: 8px 8px 0 0 !important;
     box-shadow: 0 -2px 5px rgba(0,0,0,0.03) !important;
 }
 
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] span,
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] div,
-[data-testid="stTabs"] button[role="tab"][aria-selected="true"] [data-testid="stMarkdownContainer"] p,
-button[data-baseweb="tab"][aria-selected="true"] p,
-button[data-baseweb="tab"][aria-selected="true"] span,
-button[data-baseweb="tab"][aria-selected="true"] div {
+div[data-baseweb="tab-list"] button[aria-selected="true"] *,
+div[data-testid="stTabs"] button[aria-selected="true"] *,
+button[data-baseweb="tab"][aria-selected="true"] *,
+button[role="tab"][aria-selected="true"] *,
+button[role="tab"][aria-selected="true"] p,
+button[role="tab"][aria-selected="true"] span,
+button[role="tab"][aria-selected="true"] div {
     color: #00b87c !important;
     -webkit-text-fill-color: #00b87c !important;
     font-weight: 800 !important;
-    opacity: 1 !important;
 }
 
-/* Gạch chân dưới tab đang chọn */
-div[data-baseweb="tab-highlight"] {
+/* Thanh line gạch chân tab */
+div[data-baseweb="tab-highlight"],
+[data-baseweb="tab-highlight"] {
     background-color: #00b87c !important;
     height: 3px !important;
 }
 
-/* Đường viền kẻ ngang đáy tab */
-div[data-baseweb="tab-border"] {
+div[data-baseweb="tab-border"],
+[data-baseweb="tab-border"] {
     background-color: #cbd5e1 !important;
 }
 
 /* ============================================================
-   CÁC THÀNH PHẦN FORM & ĐIỀU KHIỂN
+   CÁC THÀNH PHẦN KHÁC (FORM INPUT, LABELS, METRICS)
 ============================================================ */
 label, .stWidgetLabel, .stWidgetLabel p, [data-testid="stWidgetLabel"] {
     color: #0f172a !important;
@@ -409,7 +419,7 @@ LANG = {
         "tim_kh_ph": "名称、ID、区域...", "loc_kenh": "按渠道筛选", "tong_kh": "位客户",
         "ck_title": "🏪 Circle K 分析", "bieu_do_title": "📊 Circle K 月度营业额",
         "thong_ke_po": "📋 PO统计", "sku_title": "🏷️ SKU分析",
-        "sku_chay": "🔥 销量TOP 3", "sku_cham": "⚠️ 滞销TOP 3",
+        "sku_chay": "🔥 销量TOP 3", "sku_cham": "⚠️️ 滞销TOP 3",
         "ma_sku": "SKU编码", "san_luong": "销量", "chon": "-- 请选择 --",
     }
 }
