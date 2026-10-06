@@ -9,7 +9,7 @@ import json
 import os
 
 # ============================================================
-# 1. CẤU HÌNH TRANG & GIAO DIỆN CỐ ĐỊNH (LIGHT CLEAN THEME)
+# 1. CẤU HÌNH TRANG & CSS CỐ ĐỊNH GIAO DIỆN SÁNG (LIGHT THEME)
 # ============================================================
 st.set_page_config(
     page_title="Stepad | Business Intelligence",
@@ -26,86 +26,119 @@ st.markdown("""
     font-family: 'Plus Jakarta Sans', sans-serif !important; 
 }
 
-/* Nền app xám nhẹ chống chói mắt */
+/* Nền ứng dụng xám nhẹ chống chói mắt */
 .stApp { 
     background-color: #f8fafc !important; 
     color: #0f172a !important; 
 }
+.stApp > header { 
+    background-color: transparent !important; 
+}
 
-/* Thanh Tabs - Chữ luôn hiển thị rõ ràng */
-button[data-baseweb="tab"] {
+/* ============================================================
+   ĐẶC TRỊ MÀU CHỮ CÁC TAB (KHẮC PHỤC TRIỆT ĐỂ CHỮ BỊ TÀNG HÌNH)
+============================================================ */
+div[data-testid="stTabs"] {
+    background-color: transparent !important;
+}
+
+div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    background-color: transparent !important;
+    gap: 8px !important;
+}
+
+/* 1. Mọi tab CHƯA CHỌN: Ép chữ hiển thị màu xám đen đậm sắc nét */
+[data-testid="stTabs"] button[role="tab"] {
     background-color: transparent !important;
     border-radius: 8px 8px 0 0 !important;
     padding: 10px 18px !important;
 }
 
-button[data-baseweb="tab"] p, 
-button[data-baseweb="tab"] div, 
-button[data-baseweb="tab"] span { 
-    color: #475569 !important; 
-    font-weight: 700 !important; 
+[data-testid="stTabs"] button[role="tab"] p,
+[data-testid="stTabs"] button[role="tab"] span,
+[data-testid="stTabs"] button[role="tab"] div {
+    color: #1e293b !important;
+    -webkit-text-fill-color: #1e293b !important;
+    font-weight: 700 !important;
     font-size: 0.95rem !important;
     opacity: 1 !important;
 }
 
-button[aria-selected="true"] {
+/* 2. Tab ĐANG CHỌN (Active): Nền trắng nổi bật, chữ xanh ngọc */
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
     background-color: #ffffff !important;
+    border-radius: 8px 8px 0 0 !important;
     box-shadow: 0 -2px 4px rgba(0,0,0,0.02) !important;
 }
 
-button[aria-selected="true"] p, 
-button[aria-selected="true"] div, 
-button[aria-selected="true"] span { 
-    color: #00b87c !important; 
-    font-weight: 800 !important; 
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] span,
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] div {
+    color: #00b87c !important;
+    -webkit-text-fill-color: #00b87c !important;
+    font-weight: 800 !important;
 }
 
-div[data-baseweb="tab-highlight"] { 
-    background-color: #00b87c !important; 
+/* Gạch chân dưới tab đang chọn */
+[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+    background-color: #00b87c !important;
     height: 3px !important;
 }
 
-div[data-baseweb="tab-border"] { 
-    background-color: #e2e8f0 !important; 
+/* Đường viền đáy tab */
+[data-testid="stTabs"] [data-baseweb="tab-border"] {
+    background-color: #cbd5e1 !important;
 }
 
-/* Nhãn biểu mẫu (Form Labels) */
-label, .stWidgetLabel p, [data-testid="stWidgetLabel"] {
-    color: #1e293b !important;
+/* ============================================================
+   CÁC THÀNH PHẦN FORM & ĐIỀU KHIỂN
+============================================================ */
+label, .stWidgetLabel, .stWidgetLabel p, [data-testid="stWidgetLabel"] {
+    color: #0f172a !important;
     font-weight: 700 !important;
     font-size: 0.88rem !important;
 }
 
-/* Ô nhập liệu Form Inputs */
 .stTextInput input, .stNumberInput input, .stDateInput input, .stTextArea textarea {
     background-color: #ffffff !important;
     color: #0f172a !important;
-    border: 1px solid #cbd5e1 !important;
+    -webkit-text-fill-color: #0f172a !important;
+    border: 1.5px solid #cbd5e1 !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
+    opacity: 1 !important;
 }
 
-/* Dropdown / Selectbox */
 div[data-baseweb="select"] {
     background-color: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
+    border: 1.5px solid #cbd5e1 !important;
     border-radius: 8px !important;
 }
 
 div[data-baseweb="select"] * {
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     font-weight: 600 !important;
 }
 
-/* Nút bấm chủ đạo Stepad */
+div[data-baseweb="popover"] ul, div[data-baseweb="menu"] {
+    background-color: #ffffff !important;
+}
+
+div[data-baseweb="menu"] li {
+    color: #0f172a !important;
+}
+
+/* Nút bấm thương hiệu Stepad */
 .stButton > button {
     background-color: #00b87c !important;
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     font-weight: 700 !important;
     border: none !important;
     border-radius: 8px !important;
     padding: 9px 22px !important;
-    box-shadow: 0 2px 4px rgba(0, 184, 124, 0.2) !important;
+    box-shadow: 0 2px 5px rgba(0, 184, 124, 0.25) !important;
 }
 
 .stButton > button:hover {
@@ -113,7 +146,7 @@ div[data-baseweb="select"] * {
     color: #ffffff !important;
 }
 
-/* Thẻ Metric hiển thị số liệu */
+/* Metric Cards */
 [data-testid="metric-container"] {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
@@ -130,9 +163,17 @@ div[data-baseweb="select"] * {
 
 [data-testid="stMetricLabel"] { 
     color: #64748b !important; 
-    font-size: 0.8rem !important; 
     font-weight: 700 !important;
+    font-size: 0.8rem !important;
     text-transform: uppercase !important;
+}
+
+/* Dataframe */
+.stDataFrame { 
+    border: 1px solid #cbd5e1 !important; 
+    border-radius: 12px !important; 
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
 }
 
 /* Tiêu đề mục */
@@ -144,10 +185,10 @@ div[data-baseweb="select"] * {
     text-transform: uppercase !important;
     margin-bottom: 14px !important;
     padding-bottom: 8px !important;
-    border-bottom: 2px solid #e2e8f0 !important;
+    border-bottom: 2px solid #cbd5e1 !important;
 }
 
-/* Hộp Card nội dung */
+/* Hộp Card */
 .info-card {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
@@ -157,7 +198,7 @@ div[data-baseweb="select"] * {
     box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
 }
 
-/* Khung bọc logo */
+/* Khung logo */
 .logo-container {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -565,7 +606,7 @@ with col_h2:
             st.session_state.logged_in = False
             st.rerun()
 
-st.markdown("<hr style='border-color:#e2e8f0; margin: 6px 0 18px 0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='border-color:#cbd5e1; margin: 6px 0 18px 0;'>", unsafe_allow_html=True)
 
 # ============================================================
 # 6. TABS
@@ -705,7 +746,7 @@ if st.session_state.role == "admin":
                     unsafe_allow_html=True
                 )
 
-        st.markdown("<hr style='border-color:#e2e8f0; margin:8px 0 16px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border-color:#cbd5e1; margin:8px 0 16px 0;'>", unsafe_allow_html=True)
 
         use_filtered = not df_chitiet.empty and "_year" in df_chitiet.columns
 
@@ -1090,7 +1131,7 @@ with t_order:
         st.session_state.order_items.append({"sku": "", "sl": 1})
         st.rerun()
 
-    st.markdown("<hr style='border-color:#e2e8f0; margin:16px 0'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color:#cbd5e1; margin:16px 0'>", unsafe_allow_html=True)
 
     ap_dung_giam = st.checkbox("🏷️ Áp dụng giảm giá đặc biệt", value=False, key=f"giam_{st.session_state.form_key}")
     pct_giam = 0
