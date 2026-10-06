@@ -35,34 +35,48 @@ st.markdown("""
     background-color: transparent !important; 
 }
 
-/* 2. Fix chữ trên thanh TABS (cả tab chọn và chưa chọn) */
-button[data-baseweb="tab"] {
+/* 2. FIX ĐẶC TRỊ TIÊU ĐỀ TABS (Tránh bị tàng hình màu trắng khi không hover) */
+div[data-testid="stTabs"] {
+    background-color: transparent !important;
+}
+
+div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    background-color: transparent !important;
+    gap: 8px !important;
+}
+
+div[data-testid="stTabs"] button[data-baseweb="tab"] {
     background-color: transparent !important;
     border-radius: 8px 8px 0 0 !important;
     padding: 10px 18px !important;
+    color: #334155 !important;
 }
-button[data-baseweb="tab"] div,
-button[data-baseweb="tab"] p,
-button[data-baseweb="tab"] span { 
-    color: #475569 !important; 
-    font-weight: 700 !important; 
+
+div[data-testid="stTabs"] button[data-baseweb="tab"] * {
+    color: #334155 !important;
+    -webkit-text-fill-color: #334155 !important;
+    font-weight: 700 !important;
     font-size: 0.95rem !important;
     opacity: 1 !important;
 }
-button[aria-selected="true"] {
+
+div[data-testid="stTabs"] button[aria-selected="true"] {
     background-color: #ffffff !important;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.02) !important;
+    border-radius: 8px 8px 0 0 !important;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.03) !important;
 }
-button[aria-selected="true"] div,
-button[aria-selected="true"] p,
-button[aria-selected="true"] span { 
-    color: #00b87c !important; 
-    font-weight: 800 !important; 
+
+div[data-testid="stTabs"] button[aria-selected="true"] * {
+    color: #00b87c !important;
+    -webkit-text-fill-color: #00b87c !important;
+    font-weight: 800 !important;
 }
+
 div[data-baseweb="tab-highlight"] { 
     background-color: #00b87c !important; 
     height: 3px !important;
 }
+
 div[data-baseweb="tab-border"] { 
     background-color: #cbd5e1 !important; 
 }
@@ -81,16 +95,19 @@ div[data-baseweb="select"] {
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 8px !important;
 }
+
 div[data-baseweb="select"] * {
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
     font-weight: 600 !important;
 }
+
 div[data-baseweb="popover"] ul,
 div[data-baseweb="menu"] {
     background-color: #ffffff !important;
 }
+
 div[data-baseweb="menu"] li {
     color: #0f172a !important;
 }
@@ -117,10 +134,9 @@ div[data-baseweb="menu"] li {
     padding: 9px 22px !important;
     box-shadow: 0 2px 5px rgba(0, 184, 124, 0.25) !important;
 }
+
 .stButton > button:hover {
     background-color: #009966 !important;
-    color: #ffffff !important;
-    transform: translateY(-1px);
 }
 
 /* 7. Metric Cards */
@@ -131,11 +147,13 @@ div[data-baseweb="menu"] li {
     padding: 16px !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.03) !important;
 }
+
 [data-testid="stMetricValue"] { 
     color: #00b87c !important; 
     font-weight: 800 !important;
     font-size: 1.55rem !important;
 }
+
 [data-testid="stMetricLabel"] { 
     color: #475569 !important; 
     font-weight: 700 !important;
@@ -626,7 +644,7 @@ if st.session_state.role == "admin":
             df_chitiet = load_sheet("Chi_tiet_don")
             df_donhang = load_sheet("Don_Hang")
 
-        st.markdown('<div class="section-header">🗓️️ BỘ LỌC THỜI GIAN</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🗓️ BỘ LỌC THỜI GIAN</div>', unsafe_allow_html=True)
 
         available_years = []
         available_months_map = {}
