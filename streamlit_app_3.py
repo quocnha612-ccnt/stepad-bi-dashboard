@@ -9,7 +9,7 @@ import json
 import os
 
 # ============================================================
-# 1. CẤU HÌNH TRANG & CSS ĐẶC TRỊ TRIỆT ĐỂ CHỮ TAB BỊ ẨN
+# 1. CẤU HÌNH TRANG & CSS GIAO DIỆN
 # ============================================================
 st.set_page_config(
     page_title="Stepad | Business Intelligence",
@@ -36,9 +36,8 @@ st.markdown("""
 }
 
 /* ============================================================
-   ĐẶC TRỊ FIX 100% MÀU CHỮ CÁC TAB (KHÔNG BỊ TÀNG HÌNH)
+   ĐẶC TRỊ MÀU CHỮ CÁC TAB
 ============================================================ */
-/* 1. Bao quát toàn bộ danh sách Tab */
 div[data-baseweb="tab-list"],
 div[data-testid="stTabs"] [data-baseweb="tab-list"],
 [data-testid="stTabs"] > div:first-child {
@@ -46,7 +45,6 @@ div[data-testid="stTabs"] [data-baseweb="tab-list"],
     gap: 8px !important;
 }
 
-/* 2. MỌI TAB CHƯA CHỌN: Ép hiển thị rõ chữ xám đen #1e293b (giống chữ Admin) */
 div[data-baseweb="tab-list"] button,
 div[data-testid="stTabs"] button,
 button[data-baseweb="tab"],
@@ -58,7 +56,6 @@ button[role="tab"] {
     visibility: visible !important;
 }
 
-/* Ép sâu vào toàn bộ thẻ p, span, div, text node bên trong Tab */
 div[data-baseweb="tab-list"] button *,
 div[data-testid="stTabs"] button *,
 button[data-baseweb="tab"] *,
@@ -75,7 +72,6 @@ button[role="tab"] div,
     visibility: visible !important;
 }
 
-/* 3. TAB ĐANG KÍCH HOẠT (Active): Chữ xanh ngọc Stepad #00b87c, nền thẻ trắng */
 div[data-baseweb="tab-list"] button[aria-selected="true"],
 div[data-testid="stTabs"] button[aria-selected="true"],
 button[data-baseweb="tab"][aria-selected="true"],
@@ -97,7 +93,6 @@ button[role="tab"][aria-selected="true"] div {
     font-weight: 800 !important;
 }
 
-/* Thanh line gạch chân tab */
 div[data-baseweb="tab-highlight"],
 [data-baseweb="tab-highlight"] {
     background-color: #00b87c !important;
@@ -107,6 +102,52 @@ div[data-baseweb="tab-highlight"],
 div[data-baseweb="tab-border"],
 [data-baseweb="tab-border"] {
     background-color: #cbd5e1 !important;
+}
+
+/* ============================================================
+   THIẾT KẾ CARD HIỂN THỊ KÊNH BÁN HÀNG
+============================================================ */
+.channel-box {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 16px 18px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+}
+.channel-name {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin-bottom: 12px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px dashed #e2e8f0 !important;
+}
+.metric-row {
+    margin-bottom: 8px !important;
+}
+.metric-lbl {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 2px !important;
+}
+.metric-val-main {
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    color: #00b87c !important; /* Xanh ngọc Stepad */
+}
+.metric-val-sub {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: #334155 !important; /* Xám đen sắc nét */
+}
+.metric-val-debt {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: #ef4444 !important; /* Đỏ cảnh báo nợ */
 }
 
 /* ============================================================
@@ -205,16 +246,6 @@ div[data-baseweb="menu"] li {
     margin-bottom: 14px !important;
     padding-bottom: 8px !important;
     border-bottom: 2px solid #cbd5e1 !important;
-}
-
-/* Hộp Card */
-.info-card {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 14px !important;
-    padding: 20px !important;
-    margin-bottom: 16px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
 }
 
 /* Khung logo */
@@ -414,12 +445,12 @@ LANG = {
         "ds_don_hang": "📦 订单列表", "tim_kiem": "🔍 搜索",
         "tim_placeholder": "按客户ID、名称搜索...", "loc_khu_vuc": "按区域筛选", "tat_ca": "全部",
         "tong_label": "共:", "chua_don": "暂无订单。",
-        "ds_sp": "🏷️ 产品列表", "sp_canh_bao": "个产品库存需注意！",
+        "ds_sp": "🏷️️ 产品列表", "sp_canh_bao": "个产品库存需注意！",
         "ds_kh": "👥 客户列表", "tim_kh": "🔍 搜索客户",
         "tim_kh_ph": "名称、ID、区域...", "loc_kenh": "按渠道筛选", "tong_kh": "位客户",
         "ck_title": "🏪 Circle K 分析", "bieu_do_title": "📊 Circle K 月度营业额",
         "thong_ke_po": "📋 PO统计", "sku_title": "🏷️ SKU分析",
-        "sku_chay": "🔥 销量TOP 3", "sku_cham": "⚠️️ 滞销TOP 3",
+        "sku_chay": "🔥 销量TOP 3", "sku_cham": "⚠️ 滞销TOP 3",
         "ma_sku": "SKU编码", "san_luong": "销量", "chon": "-- 请选择 --",
     }
 }
@@ -711,7 +742,7 @@ if st.session_state.role == "admin":
                           5:"Tháng 5",6:"Tháng 6",7:"Tháng 7",8:"Tháng 8",
                           9:"Tháng 9",10:"Tháng 10",11:"Tháng 11",12:"Tháng 12"}
         MONTH_NAMES_ZH = {1:"1月",2:"2月",3:"3月",4:"4月",5:"5月",6:"6月",
-                          7:"7月",8:"8月",9:"9月",10:"10月",11:"11月",12:"12月"}
+                          7:"7月",8:"8月",9:"9月",10:"11月",11:"11月",12:"12月"}
 
         filter_col1, filter_col2, filter_col3 = st.columns([1, 1, 2])
 
@@ -871,6 +902,9 @@ if st.session_state.role == "admin":
 
         st.markdown("<br>", unsafe_allow_html=True)
 
+        # ============================================================
+        # KHỐI HIỂN THỊ DOANH THU THEO KÊNH (ĐÃ TINH CHỈNH MÀU SẮC)
+        # ============================================================
         st.markdown('<div class="section-header">📊 DOANH THU THEO KÊNH</div>', unsafe_allow_html=True)
 
         if show_filtered_metrics and use_filtered and col_kv_ct and col_sau_thue:
@@ -882,33 +916,65 @@ if st.session_state.role == "admin":
 
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
-                    st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🏪 CIRCLE K</div>", unsafe_allow_html=True)
-                    st.metric(T("tong"), fmt_currency(ck_val))
+                    bac_val = 0.0
+                    nam_val = 0.0
                     col_kho = next((c for c in df_ct_filtered.columns if "kho" in c.lower()), None)
                     if col_kho:
                         mask_ck = df_ct_filtered[col_kv_ct].astype(str).str.contains("Circle K|CK", case=False, na=False)
                         ck_df = df_ct_filtered[mask_ck]
                         bac_val = ck_df[ck_df[col_kho].astype(str).str.contains("Bắc|bac|Bac", case=False, na=False)][col_sau_thue].apply(parse_num).sum()
                         nam_val = ck_df[ck_df[col_kho].astype(str).str.contains("Nam|nam", case=False, na=False)][col_sau_thue].apply(parse_num).sum()
-                        st.metric(T("mien_bac"), fmt_currency(bac_val))
-                        st.metric(T("mien_nam"), fmt_currency(nam_val))
-                    st.markdown('</div>', unsafe_allow_html=True)
+
+                    st.markdown(f"""
+                    <div class="channel-box">
+                        <div class="channel-name">🏪 CIRCLE K</div>
+                        <div class="metric-row">
+                            <div class="metric-lbl">{T("tong")}</div>
+                            <div class="metric-val-main">{fmt_currency(ck_val)}</div>
+                        </div>
+                        <div class="metric-row">
+                            <div class="metric-lbl">{T("mien_bac")}</div>
+                            <div class="metric-val-sub">{fmt_currency(bac_val)}</div>
+                        </div>
+                        <div class="metric-row">
+                            <div class="metric-lbl">{T("mien_nam")}</div>
+                            <div class="metric-val-sub">{fmt_currency(nam_val)}</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
                 with col2:
-                    st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🏬 MODERN TRADE</div>", unsafe_allow_html=True)
-                    st.metric(T("tong_dt2"), fmt_currency(mt_val))
-                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="channel-box">
+                        <div class="channel-name">🏬 MODERN TRADE</div>
+                        <div class="metric-row">
+                            <div class="metric-lbl">{T("tong_dt2")}</div>
+                            <div class="metric-val-main">{fmt_currency(mt_val)}</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
                 with col3:
-                    st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🛒 GENERAL TRADE</div>", unsafe_allow_html=True)
-                    st.metric(T("tong_dt2"), fmt_currency(gt_val))
-                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="channel-box">
+                        <div class="channel-name">🛒 GENERAL TRADE</div>
+                        <div class="metric-row">
+                            <div class="metric-lbl">{T("tong_dt2")}</div>
+                            <div class="metric-val-main">{fmt_currency(gt_val)}</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
                 with col4:
-                    st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🌊 NHA TRANG</div>", unsafe_allow_html=True)
-                    st.metric(T("ky_gui"), fmt_currency(nt_val))
-                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="channel-box">
+                        <div class="channel-name">🌊 NHA TRANG</div>
+                        <div class="metric-row">
+                            <div class="metric-lbl">{T("ky_gui")}</div>
+                            <div class="metric-val-main">{fmt_currency(nt_val)}</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
             except Exception as e:
                 st.warning(f"Lỗi tính doanh thu kênh: {e}")
         else:
@@ -916,33 +982,80 @@ if st.session_state.role == "admin":
                 try:
                     col1, col2, col3, col4 = st.columns(4)
                     with col1:
-                        st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                        st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🏪 CIRCLE K</div>", unsafe_allow_html=True)
-                        st.metric(T("tong"), fmt_currency(df_dash.iloc[4, 0]))
-                        st.metric(T("mien_bac"), fmt_currency(df_dash.iloc[4, 1]))
-                        st.metric(T("mien_nam"), fmt_currency(df_dash.iloc[4, 2]))
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class="channel-box">
+                            <div class="channel-name">🏪 CIRCLE K</div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("tong")}</div>
+                                <div class="metric-val-main">{fmt_currency(df_dash.iloc[4, 0])}</div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("mien_bac")}</div>
+                                <div class="metric-val-sub">{fmt_currency(df_dash.iloc[4, 1])}</div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("mien_nam")}</div>
+                                <div class="metric-val-sub">{fmt_currency(df_dash.iloc[4, 2])}</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
                     with col2:
-                        st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                        st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🏬 MODERN TRADE</div>", unsafe_allow_html=True)
-                        st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[7, 0]))
-                        st.metric(T("da_tt"), fmt_currency(df_dash.iloc[7, 1]))
-                        st.metric(T("no"), fmt_currency(df_dash.iloc[7, 2]))
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class="channel-box">
+                            <div class="channel-name">🏬 MODERN TRADE</div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("tong_dt2")}</div>
+                                <div class="metric-val-main">{fmt_currency(df_dash.iloc[7, 0])}</div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("da_tt")}</div>
+                                <div class="metric-val-sub">{fmt_currency(df_dash.iloc[7, 1])}</div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("no")}</div>
+                                <div class="metric-val-debt">{fmt_currency(df_dash.iloc[7, 2])}</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
                     with col3:
-                        st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                        st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🛒 GENERAL TRADE</div>", unsafe_allow_html=True)
-                        st.metric(T("tong_dt2"), fmt_currency(df_dash.iloc[9, 0]))
-                        st.metric(T("da_tt"), fmt_currency(df_dash.iloc[9, 1]))
-                        st.metric(T("no"), fmt_currency(df_dash.iloc[9, 2]))
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class="channel-box">
+                            <div class="channel-name">🛒 GENERAL TRADE</div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("tong_dt2")}</div>
+                                <div class="metric-val-main">{fmt_currency(df_dash.iloc[9, 0])}</div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("da_tt")}</div>
+                                <div class="metric-val-sub">{fmt_currency(df_dash.iloc[9, 1])}</div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("no")}</div>
+                                <div class="metric-val-debt">{fmt_currency(df_dash.iloc[9, 2])}</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
                     with col4:
-                        st.markdown('<div class="info-card">', unsafe_allow_html=True)
-                        st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>🌊 NHA TRANG</div>", unsafe_allow_html=True)
-                        st.metric(T("ky_gui"), fmt_currency(df_dash.iloc[13, 0]))
-                        st.metric(T("da_tt"), fmt_currency(df_dash.iloc[13, 1]))
-                        st.metric(T("no"), fmt_currency(df_dash.iloc[13, 2]))
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class="channel-box">
+                            <div class="channel-name">🌊 NHA TRANG</div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("ky_gui")}</div>
+                                <div class="metric-val-main">{fmt_currency(df_dash.iloc[13, 0])}</div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("da_tt")}</div>
+                                <div class="metric-val-sub">{fmt_currency(df_dash.iloc[13, 1])}</div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-lbl">{T("no")}</div>
+                                <div class="metric-val-debt">{fmt_currency(df_dash.iloc[13, 2])}</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                 except Exception as e:
                     st.warning(f"Đang chờ dữ liệu kênh phân phối...")
 
