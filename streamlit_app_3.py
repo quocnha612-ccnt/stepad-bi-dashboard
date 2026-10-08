@@ -26,7 +26,7 @@ st.markdown("""
     font-family: 'Plus Jakarta Sans', sans-serif !important; 
 }
 
-/* Nền app */
+/* Nền app xám nhẹ chống chói mắt */
 .stApp { 
     background-color: #f8fafc !important; 
     color: #0f172a !important; 
@@ -137,17 +137,17 @@ div[data-baseweb="tab-border"],
 .metric-val-main {
     font-size: 1.15rem !important;
     font-weight: 800 !important;
-    color: #00b87c !important; /* Xanh ngọc Stepad */
+    color: #00b87c !important;
 }
 .metric-val-sub {
     font-size: 1rem !important;
     font-weight: 700 !important;
-    color: #334155 !important; /* Xám đen sắc nét */
+    color: #334155 !important;
 }
 .metric-val-debt {
     font-size: 1rem !important;
     font-weight: 700 !important;
-    color: #ef4444 !important; /* Đỏ cảnh báo nợ */
+    color: #ef4444 !important;
 }
 
 /* ============================================================
@@ -189,7 +189,6 @@ div[data-baseweb="menu"] li {
     color: #0f172a !important;
 }
 
-/* Nút bấm thương hiệu Stepad */
 .stButton > button {
     background-color: #00b87c !important;
     color: #ffffff !important;
@@ -206,7 +205,6 @@ div[data-baseweb="menu"] li {
     color: #ffffff !important;
 }
 
-/* Metric Cards */
 [data-testid="metric-container"] {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
@@ -228,7 +226,6 @@ div[data-baseweb="menu"] li {
     text-transform: uppercase !important;
 }
 
-/* Dataframe */
 .stDataFrame { 
     border: 1px solid #cbd5e1 !important; 
     border-radius: 12px !important; 
@@ -236,7 +233,6 @@ div[data-baseweb="menu"] li {
     box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
 }
 
-/* Tiêu đề mục */
 .section-header {
     color: #0f172a !important;
     font-size: 0.85rem !important;
@@ -248,7 +244,6 @@ div[data-baseweb="menu"] li {
     border-bottom: 2px solid #cbd5e1 !important;
 }
 
-/* Khung logo */
 .logo-container {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -339,22 +334,6 @@ def append_row(sheet_name, row_data):
     st.error(f"Không thể ghi vào {sheet_name} sau 3 lần thử.")
     return False
 
-def update_cell(sheet_name, row, col, value):
-    import time
-    for attempt in range(3):
-        try:
-            client = get_gsheet_client()
-            sheet = client.open_by_key(SPREADSHEET_ID).worksheet(sheet_name)
-            sheet.update_cell(row, col, value)
-            return True
-        except Exception as e:
-            if "429" in str(e) or "Quota" in str(e):
-                time.sleep((attempt + 1) * 3)
-            else:
-                st.error(f"Lỗi cập nhật: {e}")
-                return False
-    return False
-
 # ============================================================
 # 3. HỆ THỐNG ĐĂNG NHẬP
 # ============================================================
@@ -409,10 +388,6 @@ LANG = {
         "thong_ke_po": "📋 THỐNG KÊ PO", "sku_title": "🏷️ PHÂN TÍCH SKU",
         "sku_chay": "🔥 TOP 3 MÃ BÁN CHẠY", "sku_cham": "⚠️ TOP 3 MÃ BÁN CHẬM",
         "ma_sku": "Mã SKU", "san_luong": "Sản lượng", "chon": "-- Chọn --",
-        "ton_kho_bac": "Tồn kho Bắc", "ton_kho_nam": "Tồn kho Nam", "tong_ton": "Tổng tồn kho",
-        "nhap_kho": "📥 NHẬP HÀNG VÀO KHO", "lich_su_nhap": "🕐 LỊCH SỬ NHẬP KHO",
-        "ghi_nhan_tt": "💰 GHI NHẬN THANH TOÁN", "lich_su_tt": "🕐 LỊCH SỬ THANH TOÁN",
-        "tong_no": "Tổng nợ hiện tại", "so_tien_tra": "Số tiền trả",
     },
     "zh": {
         "title": "STEPAD CRM",
@@ -445,7 +420,7 @@ LANG = {
         "ds_don_hang": "📦 订单列表", "tim_kiem": "🔍 搜索",
         "tim_placeholder": "按客户ID、名称搜索...", "loc_khu_vuc": "按区域筛选", "tat_ca": "全部",
         "tong_label": "共:", "chua_don": "暂无订单。",
-        "ds_sp": "🏷️️ 产品列表", "sp_canh_bao": "个产品库存需注意！",
+        "ds_sp": "🏷️ 产品列表", "sp_canh_bao": "个产品库存需注意！",
         "ds_kh": "👥 客户列表", "tim_kh": "🔍 搜索客户",
         "tim_kh_ph": "名称、ID、区域...", "loc_kenh": "按渠道筛选", "tong_kh": "位客户",
         "ck_title": "🏪 Circle K 分析", "bieu_do_title": "📊 Circle K 月度营业额",
@@ -501,34 +476,49 @@ def login_page():
                 st.error(T("login_err"))
 
 # ============================================================
-# 4. HELPER FUNCTIONS
+# 4. HÀM CHUẨN HÓA VÀ XỬ LÝ SỐ LIỆU ĐẶC TRỊ LỖI THẬP PHÂN
 # ============================================================
+def parse_num(s):
+    try:
+        if s is None or s == "":
+            return 0.0
+        # Xóa các ký hiệu tiền tệ, khoảng trắng không ngắt
+        s = str(s).strip().replace("đ", "").replace("VND", "").replace("\xa0", "").replace(" ", "")
+        if not s or s.lower() in ["-", "n/a", "nan", "none"]:
+            return 0.0
+
+        # Xử lý trường hợp số thập phân kiểu Việt Nam (ví dụ 0,4000000004 hay 4651434,4)
+        if "," in s and "." not in s:
+            parts = s.split(",")
+            # Nếu phần sau dấu phẩy KHÔNG PHẢI nhóm đúng 3 chữ số nghìn
+            if len(parts[-1]) != 3:
+                s = parts[0] + "." + parts[1]
+            else:
+                s = s.replace(",", "")
+        elif "." in s and "," in s:
+            if s.rfind(".") > s.rfind(","):
+                s = s.replace(",", "")
+            else:
+                s = s.replace(".", "").replace(",", ".")
+        elif s.count(".") > 1:
+            s = s.replace(".", "")
+        elif s.count(",") > 1:
+            s = s.replace(",", "")
+
+        val = float(s)
+        # Bỏ qua sai số thập phân nhỏ hơn 1 đồng
+        if abs(val) < 1.0:
+            return 0.0
+        return round(val)
+    except Exception:
+        return 0.0
+
 def fmt_currency(val):
     try:
-        s = str(val).strip().replace(" ","").replace("đ","")
-        if not s or s in ["-","N/A",""]: return "0 đ"
-        if s.count(".") > 1:
-            s = s.replace(".","").replace(",",".")
-        elif "," in s and "." in s:
-            if s.index(".") < s.index(","):
-                s = s.replace(".","").replace(",",".")
-            else:
-                s = s.replace(",","")
-        elif "," in s:
-            parts = s.split(",")
-            if len(parts[-1]) > 2:
-                s = s.replace(",","")
-            else:
-                s = s.replace(",",".")
-        return f"{float(s):,.0f} đ"
-    except:
+        num = parse_num(val)
+        return f"{num:,.0f} đ"
+    except Exception:
         return "0 đ"
-
-def fmt_pct(val):
-    try:
-        return f"{float(val)*100:.1f}%"
-    except:
-        return "0%"
 
 COL_TRANSLATE = {
     "ID Đơn":                    {"zh": "订单ID"},
@@ -598,7 +588,7 @@ def get_gia_theo_khu_vuc(df_sp, sku, khu_vuc):
         if khu_vuc == "MT": return float(str(row.get('Giá MT', 0)).replace(',','').replace('.',''))
         if khu_vuc == "GT": return float(str(row.get('Giá GT', 0)).replace(',','').replace('.',''))
         return 0
-    except:
+    except Exception:
         return 0
 
 def get_khu_vuc(id_khach):
@@ -617,7 +607,7 @@ def get_kho(khu_vuc, id_khach=""):
     return "Nam"
 
 # ============================================================
-# 5. MAIN APP
+# 5. KHỞI TẠO VÀ XÁC THỰC
 # ============================================================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -659,7 +649,7 @@ with col_h2:
 st.markdown("<hr style='border-color:#cbd5e1; margin: 6px 0 18px 0;'>", unsafe_allow_html=True)
 
 # ============================================================
-# 6. TABS
+# 6. TABS ĐIỀU HƯỚNG
 # ============================================================
 if st.session_state.role == "admin":
     tabs = st.tabs([T("tab_dash"), T("tab_order"), T("tab_don"), T("tab_sp"), T("tab_kh"), T("tab_ck")])
@@ -671,29 +661,6 @@ else:
 # ============================================================
 # TAB: DASHBOARD
 # ============================================================
-def parse_num(s):
-    try:
-        s = str(s).strip().replace(" ", "").replace("đ", "").replace("\xa0", "")
-        if not s or s in ["-", "N/A", "", "nan", "None"]:
-            return 0.0
-        if s.count(".") > 1:
-            s = s.replace(".", "").replace(",", ".")
-        elif "," in s and "." in s:
-            if s.index(".") < s.index(","):
-                s = s.replace(".", "").replace(",", ".")
-            else:
-                s = s.replace(",", "")
-        elif "," in s:
-            parts = s.split(",")
-            s = s.replace(",", "") if len(parts[-1]) > 2 else s.replace(",", ".")
-        elif "." in s:
-            parts = s.split(".")
-            if len(parts[-1]) > 2:
-                s = s.replace(".", "")
-        return float(s)
-    except:
-        return 0.0
-
 if st.session_state.role == "admin":
     with t_dash:
         with st.spinner("Đang tải dữ liệu..."):
@@ -724,7 +691,7 @@ if st.session_state.role == "admin":
                 def parse_thang(x):
                     s = str(x).strip().upper().replace("THÁNG","").replace("T","").strip()
                     try: return int(s)
-                    except: return None
+                    except Exception: return None
                 df_chitiet["_month"] = df_chitiet[col_thang_ct].apply(parse_thang)
                 df_chitiet["_year"]  = datetime.now().year
 
@@ -742,7 +709,7 @@ if st.session_state.role == "admin":
                           5:"Tháng 5",6:"Tháng 6",7:"Tháng 7",8:"Tháng 8",
                           9:"Tháng 9",10:"Tháng 10",11:"Tháng 11",12:"Tháng 12"}
         MONTH_NAMES_ZH = {1:"1月",2:"2月",3:"3月",4:"4月",5:"5月",6:"6月",
-                          7:"7月",8:"8月",9:"9月",10:"11月",11:"11月",12:"12月"}
+                          7:"7月",8:"8月",9:"9月",10:"10月",11:"11月",12:"12月"}
 
         filter_col1, filter_col2, filter_col3 = st.columns([1, 1, 2])
 
@@ -809,8 +776,7 @@ if st.session_state.role == "admin":
         else:
             df_ct_filtered = df_chitiet.copy() if not df_chitiet.empty else pd.DataFrame()
 
-        col_truoc_thue = next((c for c in df_chitiet.columns if "trước thuế" in c.lower() or "truoc thue" in c.lower()), None)
-        col_sau_thue   = next((c for c in df_chitiet.columns if "sau thuế" in c.lower() or "sau thue" in c.lower()), None)
+        col_sau_thue = next((c for c in df_chitiet.columns if "sau thuế" in c.lower() or "sau thue" in c.lower()), None)
 
         def sum_col(df, col):
             if col and col in df.columns and not df.empty:
@@ -847,7 +813,7 @@ if st.session_state.role == "admin":
                     def parse_thang2(x):
                         s = str(x).strip().upper().replace("THÁNG","").replace("T","").strip()
                         try: return int(s)
-                        except: return None
+                        except Exception: return None
                     df_don_filtered["_month"] = df_don_filtered[col_thang_don].apply(parse_thang2)
                     if sel_month:
                         df_don_filtered = df_don_filtered[df_don_filtered["_month"] == sel_month]
@@ -903,7 +869,7 @@ if st.session_state.role == "admin":
         st.markdown("<br>", unsafe_allow_html=True)
 
         # ============================================================
-        # KHỐI HIỂN THỊ DOANH THU THEO KÊNH (ĐÃ TINH CHỈNH MÀU SẮC)
+        # KHỐI HIỂN THỊ DOANH THU THEO KÊNH (TINH CHỈNH MÀU SẮC)
         # ============================================================
         st.markdown('<div class="section-header">📊 DOANH THU THEO KÊNH</div>', unsafe_allow_html=True)
 
@@ -1106,15 +1072,13 @@ if st.session_state.role == "admin":
             if not df_kh.empty and 'Còn nợ' in df_kh.columns and 'Tên cửa hàng' in df_kh.columns:
                 try:
                     df_no = df_kh.copy()
-                    df_no['_no_num'] = pd.to_numeric(
-                        df_no['Còn nợ'].astype(str).str.replace('.','',regex=False).str.replace(',','.',regex=False),
-                        errors='coerce').fillna(0)
+                    df_no['_no_num'] = df_no['Còn nợ'].apply(parse_num)
                     df_no = df_no[df_no['_no_num'] > 0]
                     df_no = df_no.nlargest(5, '_no_num')[['Tên cửa hàng', '_no_num', 'Khu vực']]
                     df_no = df_no.rename(columns={'_no_num': 'Còn nợ'})
                     df_no['Còn nợ'] = df_no['Còn nợ'].apply(fmt_currency)
                     st.dataframe(translate_columns(df_no), use_container_width=True, hide_index=True)
-                except:
+                except Exception:
                     st.info(T("chua_du_lieu_no"))
             else:
                 st.info(T("chua_du_lieu"))
@@ -1124,21 +1088,19 @@ if st.session_state.role == "admin":
             if not df_kh.empty:
                 try:
                     cols_lower = {c: c.lower().strip() for c in df_kh.columns}
-                    col_dt = next((c for c, cl in cols_lower.items() 
-                                   if 'doanh thu' in cl or 'tổng' in cl), None)
-                    col_tt = next((c for c, cl in cols_lower.items() 
-                                   if 'đã thanh toán' in cl or 'đã tt' in cl or ('thanh toán' in cl and 'đã' in cl)), None)
+                    col_dt = next((c for c, cl in cols_lower.items() if 'doanh thu' in cl or 'tổng' in cl), None)
+                    col_tt = next((c for c, cl in cols_lower.items() if 'đã thanh toán' in cl or 'đã tt' in cl or ('thanh toán' in cl and 'đã' in cl)), None)
                     if col_dt is None:
                         numeric_cols = df_kh.select_dtypes(include='number').columns.tolist()
                         if numeric_cols:
                             col_dt = numeric_cols[0]
                     if col_dt:
                         df_perf = df_kh.copy()
-                        df_perf[col_dt] = pd.to_numeric(df_perf[col_dt].astype(str).str.replace('.','').str.replace(',','.'), errors='coerce').fillna(0)
+                        df_perf[col_dt] = df_perf[col_dt].apply(parse_num)
                         df_perf = df_perf[df_perf[col_dt] > 0]
                         show_cols = ["Tên cửa hàng", col_dt]
                         if col_tt:
-                            df_perf[col_tt] = pd.to_numeric(df_perf[col_tt].astype(str).str.replace('.','').str.replace(',','.'), errors='coerce').fillna(0)
+                            df_perf[col_tt] = df_perf[col_tt].apply(parse_num)
                             df_perf["Tỷ lệ TT"] = (df_perf[col_tt] / df_perf[col_dt] * 100).round(1).astype(str) + "%"
                             show_cols.append("Tỷ lệ TT")
                         df_perf = df_perf.nlargest(5, col_dt)[show_cols]
@@ -1318,7 +1280,7 @@ with t_order:
                 ten_khach = ""
                 try:
                     ten_khach = df_kh[df_kh['ID Khách'] == id_khach]['Tên cửa hàng'].iloc[0]
-                except:
+                except Exception:
                     pass
 
                 nhan_vien = st.session_state.name
@@ -1326,29 +1288,29 @@ with t_order:
 
                 for item in items_data:
                     row_don_hang = [
-                        id_don,           # A: ID Đơn
-                        id_khach,         # B: ID Khách hàng
-                        str(ngay_don),    # C: Ngày tạo đơn
-                        loai_don,         # D: Loại đơn
-                        item['sku'],      # E: SKU Sản phẩm
-                        "",               # F: Tên sản phẩm
-                        item['sl'],       # G: Số lượng
-                        thue_suat,        # H: Thuế suất
-                        item['don_gia'],  # I: Đơn giá
-                        item['thanh_tien'],                    # J: Thành tiền trước thuế
-                        item['thanh_tien'] * thue_suat,       # K: Tiền thuế
-                        item['thanh_tien'] * (1 + thue_suat), # L: Tổng sau thuế
-                        da_thanh_toan,    # M: Đã thanh toán
-                        con_no,           # N: Còn nợ
-                        khu_vuc,          # O: Khu vực
-                        ma_po,            # P: Mã PO
-                        thang,            # Q: Tháng
-                        tt_thanh_toan,    # R: Trạng thái TT
-                        tt_hd,            # S: Trạng thái HĐ
-                        ten_khach,        # T: Tên khách hàng
-                        kho,              # U: Kho xuất
-                        nhan_vien,        # V: Nhân viên
-                        ""                # W: Ngày thanh toán
+                        id_don,
+                        id_khach,
+                        str(ngay_don),
+                        loai_don,
+                        item['sku'],
+                        "",
+                        item['sl'],
+                        thue_suat,
+                        item['don_gia'],
+                        item['thanh_tien'],
+                        item['thanh_tien'] * thue_suat,
+                        item['thanh_tien'] * (1 + thue_suat),
+                        da_thanh_toan,
+                        con_no,
+                        khu_vuc,
+                        ma_po,
+                        thang,
+                        tt_thanh_toan,
+                        tt_hd,
+                        ten_khach,
+                        kho,
+                        nhan_vien,
+                        ""
                     ]
                     if not append_row("Don_Hang", row_don_hang):
                         success = False
@@ -1406,7 +1368,7 @@ with t_order:
                     st.error(T("loi_luu"))
 
 # ============================================================
-# TAB: ĐƠN HÀNG
+# TAB: ĐƠN HÀNG & GHI NHẬN THANH TOÁN
 # ============================================================
 with t_don:
     st.markdown('<div class="section-header">📦 DANH SÁCH ĐƠN HÀNG</div>', unsafe_allow_html=True)
@@ -1494,7 +1456,7 @@ with t_don:
                                 if append_row("Thanh_Toan", row_tt):
                                     st.success(f"✅ Đã ghi nhận **{fmt_currency(so_tien_tt)}** từ **{ten_kh_sel}**!")
                                     st.session_state.tt_form_key += 1
-                                    load_sheet.clear()
+                                    st.cache_data.clear()
                                     st.rerun()
                                 else:
                                     st.error("Có lỗi khi ghi dữ liệu, vui lòng thử lại!")
@@ -1609,7 +1571,7 @@ if st.session_state.role == "admin":
                         st.success(f"✅ Đã nhập {success_count} sản phẩm vào kho {kho_nhap}!")
                         st.session_state.nk_items = [{"sku": T("chon"), "sl": 1}]
                         st.session_state.nk_form_key += 1
-                        load_sheet.clear()
+                        st.cache_data.clear()
                         st.rerun()
                     else:
                         st.error(f"Chỉ nhập được {success_count}/{len(valid_items)} sản phẩm, vui lòng thử lại!")
@@ -1677,15 +1639,9 @@ if st.session_state.role == "admin":
                     col_nam = cols[2]
                     col_tong = cols[3]
 
-                    def to_num(s):
-                        try:
-                            return float(str(s).replace('đ','').replace('.','').replace(',','.').strip())
-                        except:
-                            return 0
-
-                    df_ck_plot[col_bac] = df_ck_plot[col_bac].apply(to_num)
-                    df_ck_plot[col_nam] = df_ck_plot[col_nam].apply(to_num)
-                    df_ck_plot[col_tong] = df_ck_plot[col_tong].apply(to_num)
+                    df_ck_plot[col_bac] = df_ck_plot[col_bac].apply(parse_num)
+                    df_ck_plot[col_nam] = df_ck_plot[col_nam].apply(parse_num)
+                    df_ck_plot[col_tong] = df_ck_plot[col_tong].apply(parse_num)
 
                     fig = go.Figure()
                     fig.add_trace(go.Bar(x=df_ck_plot[col_thang], y=df_ck_plot[col_bac], name='Miền Bắc', marker_color='#10b981', hovertemplate='%{y:,.0f} đ'))
@@ -1717,25 +1673,6 @@ if st.session_state.role == "admin":
                 st.warning("Dashboard sheet rỗng!")
 
         if not df_dash_ck.empty:
-            def to_num_po(v):
-                s = str(v).strip().replace(" ","").replace("đ","")
-                if not s or s in ["-","N/A",""]: return 0
-                if s.count(".") > 1:
-                    s = s.replace(".","").replace(",",".")
-                elif "," in s and "." in s:
-                    if s.index(".") < s.index(","):
-                        s = s.replace(".","").replace(",",".")
-                    else:
-                        s = s.replace(",","")
-                elif "," in s:
-                    parts = s.split(",")
-                    s = s.replace(",","") if len(parts[-1]) > 2 else s.replace(",",".")
-                elif "." in s:
-                    parts = s.split(".")
-                    if len(parts[-1]) > 2: s = s.replace(".","")
-                try: return float(s)
-                except: return 0
-
             try:
                 col1, col2 = st.columns(2)
                 n_rows = df_dash_ck.shape[0]
@@ -1749,20 +1686,19 @@ if st.session_state.role == "admin":
                 with col1:
                     st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>📍 Miền Nam</div>", unsafe_allow_html=True)
                     c1, c2, c3, c4 = st.columns(4)
-                    with c1: st.metric("SL PO", int(to_num_po(safe_iloc(17, 0))))
-                    with c2: st.metric("Min", fmt_currency(to_num_po(safe_iloc(19, 0))))
-                    with c3: st.metric("Max", fmt_currency(to_num_po(safe_iloc(21, 0))))
-                    with c4: st.metric("Avg", fmt_currency(to_num_po(safe_iloc(23, 0))))
+                    with c1: st.metric("SL PO", int(parse_num(safe_iloc(17, 0))))
+                    with c2: st.metric("Min", fmt_currency(parse_num(safe_iloc(19, 0))))
+                    with c3: st.metric("Max", fmt_currency(parse_num(safe_iloc(21, 0))))
+                    with c4: st.metric("Avg", fmt_currency(parse_num(safe_iloc(23, 0))))
                 with col2:
                     st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>📍 Miền Bắc</div>", unsafe_allow_html=True)
                     c1, c2, c3, c4 = st.columns(4)
-                    with c1: st.metric("SL PO", int(to_num_po(safe_iloc(17, 1))))
-                    with c2: st.metric("Min", fmt_currency(to_num_po(safe_iloc(19, 1))))
-                    with c3: st.metric("Max", fmt_currency(to_num_po(safe_iloc(21, 1))))
-                    with c4: st.metric("Avg", fmt_currency(to_num_po(safe_iloc(23, 1))))
+                    with c1: st.metric("SL PO", int(parse_num(safe_iloc(17, 1))))
+                    with c2: st.metric("Min", fmt_currency(parse_num(safe_iloc(19, 1))))
+                    with c3: st.metric("Max", fmt_currency(parse_num(safe_iloc(21, 1))))
+                    with c4: st.metric("Avg", fmt_currency(parse_num(safe_iloc(23, 1))))
             except Exception as e:
                 st.warning(f"Lỗi hiển thị PO: {e}")
-                st.info("Vui lòng mở Debug panel bên trên để xem đúng vị trí row/col")
 
         st.markdown('<div class="section-header">🏷️ PHÂN TÍCH SKU</div>', unsafe_allow_html=True)
         col_top, col_slow = st.columns(2)
@@ -1772,7 +1708,7 @@ if st.session_state.role == "admin":
                 if r < df.shape[0] and c < df.shape[1]:
                     v = df.iloc[r, c]
                     return v if str(v).strip() not in ["", "nan", "None"] else None
-            except:
+            except Exception:
                 pass
             return None
 
@@ -1786,7 +1722,7 @@ if st.session_state.role == "admin":
                 if data_top:
                     st.table(pd.DataFrame(data_top, columns=[T("ma_sku"), T("san_luong")]))
                 else:
-                    st.info("Chưa có dữ liệu (kiểm tra Debug panel để xem đúng vị trí)")
+                    st.info("Chưa có dữ liệu.")
             except Exception as e:
                 st.info(f"Lỗi đọc SKU chạy: {e}")
 
@@ -1800,6 +1736,6 @@ if st.session_state.role == "admin":
                 if data_slow:
                     st.table(pd.DataFrame(data_slow, columns=[T("ma_sku"), T("san_luong")]))
                 else:
-                    st.info("Chưa có dữ liệu (kiểm tra Debug panel để xem đúng vị trí)")
+                    st.info("Chưa có dữ liệu.")
             except Exception as e:
                 st.info(f"Lỗi đọc SKU chậm: {e}")
