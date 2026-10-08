@@ -482,15 +482,12 @@ def parse_num(s):
     try:
         if s is None or s == "":
             return 0.0
-        # Xóa các ký hiệu tiền tệ, khoảng trắng không ngắt
         s = str(s).strip().replace("đ", "").replace("VND", "").replace("\xa0", "").replace(" ", "")
         if not s or s.lower() in ["-", "n/a", "nan", "none"]:
             return 0.0
 
-        # Xử lý trường hợp số thập phân kiểu Việt Nam (ví dụ 0,4000000004 hay 4651434,4)
         if "," in s and "." not in s:
             parts = s.split(",")
-            # Nếu phần sau dấu phẩy KHÔNG PHẢI nhóm đúng 3 chữ số nghìn
             if len(parts[-1]) != 3:
                 s = parts[0] + "." + parts[1]
             else:
@@ -506,7 +503,6 @@ def parse_num(s):
             s = s.replace(",", "")
 
         val = float(s)
-        # Bỏ qua sai số thập phân nhỏ hơn 1 đồng
         if abs(val) < 1.0:
             return 0.0
         return round(val)
@@ -1368,7 +1364,7 @@ with t_order:
                     st.error(T("loi_luu"))
 
 # ============================================================
-# TAB: ĐƠN HÀNG & GHI NHẬN THANH TOÁN
+# TAB: ĐƠN HÀNG & GHI NHẬN THANH TOÁN (TÌM TẤT CẢ KHÁCH HÀNG)
 # ============================================================
 with t_don:
     st.markdown('<div class="section-header">📦 DANH SÁCH ĐƠN HÀNG</div>', unsafe_allow_html=True)
@@ -1414,52 +1410,65 @@ with t_don:
 
             if col_id_kh and col_ten_kh and col_no:
                 df_kh_tt["_no_num"] = df_kh_tt[col_no].apply(parse_num)
-                df_co_no = df_kh_tt[df_kh_tt["_no_num"] > 0].copy()
+                col_dia_kh = next((c for c in df_kh_tt.columns if "địa chỉ" in c.lower()), None)
 
-                if df_co_no.empty:
-                    st.success("✅ Không có khách hàng nào đang nợ!")
-                else:
-                    col_dia_kh = next((c for c in df_kh_tt.columns if "địa chỉ" in c.lower()), None)
-                    ds_kh_no = [f"{row[col_id_kh]} — {row[col_ten_kh]} — {row[col_dia_kh] if col_dia_kh else ''}" for _, row in df_co_no.iterrows()]
+                # DANH SÁCH TOÀN BỘ KHÁCH HÀNG (KỂ CẢ KHÔNG CÒN NỢ)
+                ds_kh_all = []
+                for _, row in df_kh_tt.iterrows():
+                    cid = str(row[col_id_kh]).strip()
+                    cten = str(row[col_ten_kh]).strip()
+                    cdia = str(row[col_dia_kh]).strip() if col_dia_kh and pd.notna(row[col_dia_kh]) else ""
+                    if cid and cid.lower() not in ["none", "nan", ""]:
+                        ds_kh_all.append(f"{cid} — {cten} — {cdia}".strip(" — "))
 
-                    col_tt1, col_tt2 = st.columns([2, 1])
-                    with col_tt1:
-                        sel_kh_tt = st.selectbox("👤 Chọn khách hàng *", ["-- Chọn --"] + ds_kh_no, key=f"tt_kh_{st.session_state.tt_form_key}")
-                    with col_tt2:
-                        ghi_chu_tt = st.text_input("📝 Ghi chú", placeholder="Chuyển khoản, tiền mặt...", key=f"tt_ghichu_{st.session_state.tt_form_key}")
+                col_tt1, col_tt2 = st.columns([2, 1])
+                with col_tt1:
+                    sel_kh_tt = st.selectbox("👤 Chọn khách hàng *", ["-- Chọn --"] + ds_kh_all, key=f"tt_kh_{st.session_state.tt_form_key}")
+                with col_tt2:
+                    ghi_chu_tt = st.text_input("📝 Ghi chú", placeholder="Chuyển khoản, tiền mặt...", key=f"tt_ghichu_{st.session_state.tt_form_key}")
 
-                    if sel_kh_tt != "-- Chọn --":
-                        id_kh_sel = sel_kh_tt.split(" — ")[0]
-                        row_kh = df_co_no[df_co_no[col_id_kh] == id_kh_sel].iloc[0]
+                if sel_kh_tt != "-- Chọn --":
+                    id_kh_sel = sel_kh_tt.split(" — ")[0].strip()
+                    matched_rows = df_kh_tt[df_kh_tt[col_id_kh] == id_kh_sel]
+                    
+                    if not matched_rows.empty:
+                        row_kh = matched_rows.iloc[0]
                         so_no = row_kh["_no_num"]
                         ten_kh_sel = row_kh[col_ten_kh]
 
                         col_a, col_b = st.columns(2)
                         with col_a:
                             st.metric("💳 Tổng nợ hiện tại", fmt_currency(so_no))
+                            if so_no <= 0:
+                                st.markdown("<span style='color:#00b87c; font-weight:700;'>✅ Khách hàng này không còn nợ tồn đọng!</span>", unsafe_allow_html=True)
+                        
                         with col_b:
-                            so_tien_tt = st.number_input(
-                                "💵 Số tiền trả *",
-                                min_value=0,
-                                max_value=int(so_no),
-                                value=int(so_no),
-                                step=100000,
-                                key=f"tt_sotien_{st.session_state.tt_form_key}"
-                            )
-
-                        if st.button("✅ XÁC NHẬN THANH TOÁN", key=f"btn_tt_{st.session_state.tt_form_key}"):
-                            if so_tien_tt <= 0:
-                                st.error("Số tiền phải lớn hơn 0!")
+                            if so_no > 0:
+                                so_tien_tt = st.number_input(
+                                    "💵 Số tiền trả *",
+                                    min_value=0,
+                                    max_value=int(so_no),
+                                    value=int(so_no),
+                                    step=100000,
+                                    key=f"tt_sotien_{st.session_state.tt_form_key}"
+                                )
                             else:
-                                ngay_tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                row_tt = [ngay_tt, id_kh_sel, ten_kh_sel, so_tien_tt, st.session_state.name, ghi_chu_tt]
-                                if append_row("Thanh_Toan", row_tt):
-                                    st.success(f"✅ Đã ghi nhận **{fmt_currency(so_tien_tt)}** từ **{ten_kh_sel}**!")
-                                    st.session_state.tt_form_key += 1
-                                    st.cache_data.clear()
-                                    st.rerun()
+                                so_tien_tt = 0
+
+                        if so_no > 0:
+                            if st.button("✅ XÁC NHẬN THANH TOÁN", key=f"btn_tt_{st.session_state.tt_form_key}"):
+                                if so_tien_tt <= 0:
+                                    st.error("Số tiền phải lớn hơn 0!")
                                 else:
-                                    st.error("Có lỗi khi ghi dữ liệu, vui lòng thử lại!")
+                                    ngay_tt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    row_tt = [ngay_tt, id_kh_sel, ten_kh_sel, so_tien_tt, st.session_state.name, ghi_chu_tt]
+                                    if append_row("Thanh_Toan", row_tt):
+                                        st.success(f"✅ Đã ghi nhận **{fmt_currency(so_tien_tt)}** từ **{ten_kh_sel}**!")
+                                        st.session_state.tt_form_key += 1
+                                        st.cache_data.clear()
+                                        st.rerun()
+                                    else:
+                                        st.error("Có lỗi khi ghi dữ liệu, vui lòng thử lại!")
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="section-header">🕐 LỊCH SỬ THANH TOÁN</div>', unsafe_allow_html=True)
