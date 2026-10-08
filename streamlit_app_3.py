@@ -486,23 +486,48 @@ def parse_num(s):
         if not s or s.lower() in ["-", "n/a", "nan", "none"]:
             return 0.0
 
-        if "," in s and "." not in s:
-            parts = s.split(",")
-            if len(parts[-1]) != 3:
-                s = parts[0] + "." + parts[1]
-            else:
-                s = s.replace(",", "")
-        elif "." in s and "," in s:
+        is_negative = s.startswith("-")
+        if is_negative:
+            s = s[1:]
+
+        # Nếu có cả dấu chấm và dấu phẩy
+        if "." in s and "," in s:
             if s.rfind(".") > s.rfind(","):
+                # Dạng 1,194.50 (US) -> bỏ phẩy
                 s = s.replace(",", "")
             else:
+                # Dạng 1.194,50 (VN) -> bỏ chấm, phẩy thành chấm
                 s = s.replace(".", "").replace(",", ".")
-        elif s.count(".") > 1:
-            s = s.replace(".", "")
-        elif s.count(",") > 1:
-            s = s.replace(",", "")
+        elif "." in s:
+            # Chỉ có dấu chấm
+            if s.count(".") > 1:
+                # Dạng 1.000.000 -> bỏ chấm
+                s = s.replace(".", "")
+            else:
+                parts = s.split(".")
+                # Nếu sau dấu chấm có đúng 3 chữ số (1.194 hoặc 74.000) -> phân cách hàng nghìn VN
+                if len(parts[-1]) == 3:
+                    s = s.replace(".", "")
+                else:
+                    # Số thập phân (1.5 hoặc 1.25)
+                    pass
+        elif "," in s:
+            # Chỉ có dấu phẩy: 0,4000000004 hoặc 4651434,4 hoặc 1,194
+            if s.count(",") > 1:
+                s = s.replace(",", "")
+            else:
+                parts = s.split(",")
+                # Nếu sau dấu phẩy có đúng 3 chữ số và phần đầu khác 0 (1,194)
+                if len(parts[-1]) == 3 and parts[0] != "0":
+                    s = s.replace(",", "")
+                else:
+                    # Số thập phân kiểu VN (0,4000000004 -> 0.4000000004)
+                    s = parts[0] + "." + parts[1]
 
         val = float(s)
+        if is_negative:
+            val = -val
+
         if abs(val) < 1.0:
             return 0.0
         return round(val)
@@ -1859,13 +1884,7 @@ if st.session_state.role == "admin":
         st.markdown('<div class="section-header">📋 THỐNG KÊ PO</div>', unsafe_allow_html=True)
         df_dash_ck = load_sheet("Dashboard")
 
-        with st.expander("🔧 Debug: Xem nội dung Dashboard sheet (để xác định đúng row/col)"):
-            if not df_dash_ck.empty:
-                st.caption(f"Kích thước: {df_dash_ck.shape[0]} hàng × {df_dash_ck.shape[1]} cột")
-                st.caption(f"Tên cột: {list(df_dash_ck.columns)}")
-                st.dataframe(df_dash_ck.reset_index(), use_container_width=True)
-            else:
-                st.warning("Dashboard sheet rỗng!")
+
 
         if not df_dash_ck.empty:
             try:
