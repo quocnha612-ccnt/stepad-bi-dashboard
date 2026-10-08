@@ -553,6 +553,7 @@ COL_TRANSLATE = {
     "Trạng thái tồn kho":        {"zh": "库存状态"},
     "Tổng kho":                  {"zh": "总库存"},
     "Ngày":                      {"zh": "日期"},
+    "Thời gian":                 {"zh": "时间"},
     "Kho":                       {"zh": "仓库"},
     "Người nhập":                {"zh": "录入人"},
     "Ghi chú":                   {"zh": "备注"},
@@ -565,6 +566,11 @@ COL_TRANSLATE = {
     "Tồn kho Bắc":               {"zh": "北区库存"},
     "Tồn kho Nam":               {"zh": "南区库存"},
     "Ngưỡng cảnh báo":           {"zh": "预警阈值"},
+    "Tồn hệ thống":              {"zh": "系统库存"},
+    "Tồn thực tế":               {"zh": "实际库存"},
+    "Chênh lệch":                {"zh": "差异数量"},
+    "Người kiểm kê":             {"zh": "盘点人员"},
+    "Lý do / Ghi chú":           {"zh": "原因/备注"},
 }
 
 def translate_columns(df):
@@ -1483,11 +1489,11 @@ with t_don:
             st.info("Chưa có lịch sử thanh toán.")
 
 # ============================================================
-# TAB: SẢN PHẨM (Admin only)
+# TAB: SẢN PHẨM & KIỂM KÊ KHO (Admin only)
 # ============================================================
 if st.session_state.role == "admin":
     with t_sp:
-        with st.spinner("Đang tải..."):
+        with st.spinner("Đang tải dữ liệu kho..."):
             df_sp_full = load_sheet("San_Pham")
 
         if not df_sp_full.empty and 'Trạng thái tồn kho' in df_sp_full.columns:
@@ -1515,6 +1521,110 @@ if st.session_state.role == "admin":
 
         st.markdown("<br>", unsafe_allow_html=True)
 
+        # ------------------------------------------------------------
+        # TÍNH NĂNG MỚI: KIỂM KÊ & CÂN KHO THỰC TẾ
+        # ------------------------------------------------------------
+        st.markdown('<div class="section-header">⚖️ KIỂM KÊ & CÂN KHO THỰC TẾ</div>', unsafe_allow_html=True)
+
+        if not df_sp_full.empty:
+            if "kk_form_key" not in st.session_state:
+                st.session_state.kk_form_key = 0
+
+            ds_sku_sp = df_sp_full['SKU Sản phẩm'].tolist() if 'SKU Sản phẩm' in df_sp_full.columns else []
+            ds_ten_sp_kk = df_sp_full['Tên sản phẩm'].tolist() if 'Tên sản phẩm' in df_sp_full.columns else []
+            ds_sku_kk_display = [f"{s} — {t}" for s, t in zip(ds_sku_sp, ds_ten_sp_kk)]
+
+            col_kk1, col_kk2 = st.columns([1, 2])
+            with col_kk1:
+                # Mặc định chọn Nam do bạn trực tiếp quản lý kho Nam
+                kho_kk = st.selectbox("🏭 Kho kiểm kê *", ["Nam", "Bắc"], key=f"kk_kho_{st.session_state.kk_form_key}")
+            with col_kk2:
+                sel_sku_kk = st.selectbox(
+                    "🏷️ Chọn sản phẩm kiểm kê *",
+                    [T("chon")] + ds_sku_kk_display,
+                    key=f"kk_sku_{st.session_state.kk_form_key}"
+                )
+
+            if sel_sku_kk != T("chon"):
+                sku_code_kk = sel_sku_kk.split(" — ")[0].strip()
+                row_sp = df_sp_full[df_sp_full['SKU Sản phẩm'] == sku_code_kk].iloc[0]
+                ten_sp_kk = str(row_sp.get('Tên sản phẩm', ''))
+
+                # Lấy tồn kho hệ thống theo kho tương ứng
+                col_ton_target = 'Tồn kho Nam' if kho_kk == "Nam" else 'Tồn kho Bắc'
+                ton_he_thong = int(parse_num(row_sp.get(col_ton_target, 0)))
+
+                col_c1, col_c2, col_c3 = st.columns(3)
+                with col_c1:
+                    st.metric(f"📋 Tồn hệ thống ({kho_kk})", f"{ton_he_thong:,} cái")
+
+                with col_c2:
+                    sl_thuc_te = st.number_input(
+                        f"📦 Tồn thực tế đếm được ({kho_kk}) *",
+                        min_value=0,
+                        value=max(0, ton_he_thong),
+                        step=1,
+                        key=f"kk_slthucte_{st.session_state.kk_form_key}"
+                    )
+
+                chenh_lech = int(sl_thuc_te - ton_he_thong)
+
+                with col_c3:
+                    if chenh_lech > 0:
+                        st.metric("📊 Chênh lệch", f"+{chenh_lech:,} cái", delta=f"Thừa {chenh_lech:,}", delta_color="normal")
+                    elif chenh_lech < 0:
+                        st.metric("📊 Chênh lệch", f"{chenh_lech:,} cái", delta=f"Thiếu {abs(chenh_lech):,}", delta_color="inverse")
+                    else:
+                        st.metric("📊 Chênh lệch", "0 cái", delta="Khớp 100%", delta_color="off")
+
+                ghi_chu_kk = st.text_input(
+                    "📝 Lý do kiểm kê / Ghi chú điều chỉnh",
+                    placeholder="Ví dụ: Kiểm kê định kỳ tháng 10, bù trừ hàng thừa/thiếu...",
+                    key=f"kk_ghichu_{st.session_state.kk_form_key}"
+                )
+
+                st.markdown("<br>", unsafe_allow_html=True)
+                if st.button("✅ XÁC NHẬN CÂN KHO", key=f"btn_kk_{st.session_state.kk_form_key}"):
+                    if chenh_lech == 0:
+                        st.info("ℹ️ Tồn kho thực tế khớp hoàn toàn với hệ thống, không phát sinh chênh lệch.")
+                    else:
+                        ngay_kk = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        row_kk = [
+                            ngay_kk,
+                            sku_code_kk,
+                            ten_sp_kk,
+                            kho_kk,
+                            ton_he_thong,
+                            sl_thuc_te,
+                            chenh_lech,
+                            st.session_state.name,
+                            ghi_chu_kk
+                        ]
+                        if append_row("Kiem_Ke", row_kk):
+                            st.success(f"✅ Đã cân kho thành công! Tồn kho mã **{sku_code_kk}** tại kho **{kho_kk}** đã được điều chỉnh về **{sl_thuc_te:,} cái** (Chênh lệch: {chenh_lech:+d}).")
+                            st.session_state.kk_form_key += 1
+                            st.cache_data.clear()
+                            st.rerun()
+                        else:
+                            st.error("Có lỗi khi ghi vào bảng kiểm kê, vui lòng kiểm tra lại kết nối Sheet!")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🕐 LỊCH SỬ KIỂM KÊ KHO</div>', unsafe_allow_html=True)
+        df_kiem_ke = load_sheet("Kiem_Ke")
+        if not df_kiem_ke.empty:
+            st.dataframe(
+                translate_columns(df_kiem_ke.tail(15).iloc[::-1]),
+                use_container_width=True, hide_index=True
+            )
+            st.caption(f"Hiển thị 15 lần kiểm kê gần nhất | Tổng: {len(df_kiem_ke)} lần")
+        else:
+            st.info("Chưa có dữ liệu kiểm kê kho.")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ------------------------------------------------------------
+        # NHẬP HÀNG VÀO KHO
+        # ------------------------------------------------------------
         st.markdown('<div class="section-header">📥 NHẬP HÀNG VÀO KHO</div>', unsafe_allow_html=True)
 
         if not df_sp_full.empty:
@@ -1529,7 +1639,7 @@ if st.session_state.role == "admin":
 
             col_nk1, col_nk2 = st.columns([1, 2])
             with col_nk1:
-                kho_nhap = st.selectbox("🏭 Kho nhập *", ["Bắc", "Nam"], key=f"nk_kho_{st.session_state.nk_form_key}")
+                kho_nhap = st.selectbox("🏭 Kho nhập *", ["Nam", "Bắc"], key=f"nk_kho_{st.session_state.nk_form_key}")
             with col_nk2:
                 ghi_chu_nk = st.text_input("📝 Ghi chú chung", placeholder="Nhập lý do, nguồn hàng...", key=f"nk_ghichu_{st.session_state.nk_form_key}")
 
