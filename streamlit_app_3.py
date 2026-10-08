@@ -1522,11 +1522,13 @@ if st.session_state.role == "admin":
         st.markdown("<br>", unsafe_allow_html=True)
 
         # ------------------------------------------------------------
-        # TÍNH NĂNG MỚI: KIỂM KÊ & CÂN KHO THỰC TẾ
+        # TÍNH NĂNG MỚI: KIỂM KÊ & CÂN KHO THỰC TẾ (NHIỀU SẢN PHẨM)
         # ------------------------------------------------------------
         st.markdown('<div class="section-header">⚖️ KIỂM KÊ & CÂN KHO THỰC TẾ</div>', unsafe_allow_html=True)
 
         if not df_sp_full.empty:
+            if "kk_items" not in st.session_state:
+                st.session_state.kk_items = [{"sku": T("chon"), "sl_thucte": 0, "last_sku": T("chon")}]
             if "kk_form_key" not in st.session_state:
                 st.session_state.kk_form_key = 0
 
@@ -1539,74 +1541,148 @@ if st.session_state.role == "admin":
                 # Mặc định chọn Nam do bạn trực tiếp quản lý kho Nam
                 kho_kk = st.selectbox("🏭 Kho kiểm kê *", ["Nam", "Bắc"], key=f"kk_kho_{st.session_state.kk_form_key}")
             with col_kk2:
-                sel_sku_kk = st.selectbox(
-                    "🏷️ Chọn sản phẩm kiểm kê *",
-                    [T("chon")] + ds_sku_kk_display,
-                    key=f"kk_sku_{st.session_state.kk_form_key}"
-                )
-
-            if sel_sku_kk != T("chon"):
-                sku_code_kk = sel_sku_kk.split(" — ")[0].strip()
-                row_sp = df_sp_full[df_sp_full['SKU Sản phẩm'] == sku_code_kk].iloc[0]
-                ten_sp_kk = str(row_sp.get('Tên sản phẩm', ''))
-
-                # Lấy tồn kho hệ thống theo kho tương ứng
-                col_ton_target = 'Tồn kho Nam' if kho_kk == "Nam" else 'Tồn kho Bắc'
-                ton_he_thong = int(parse_num(row_sp.get(col_ton_target, 0)))
-
-                col_c1, col_c2, col_c3 = st.columns(3)
-                with col_c1:
-                    st.metric(f"📋 Tồn hệ thống ({kho_kk})", f"{ton_he_thong:,} cái")
-
-                with col_c2:
-                    sl_thuc_te = st.number_input(
-                        f"📦 Tồn thực tế đếm được ({kho_kk}) *",
-                        min_value=0,
-                        value=max(0, ton_he_thong),
-                        step=1,
-                        key=f"kk_slthucte_{st.session_state.kk_form_key}"
-                    )
-
-                chenh_lech = int(sl_thuc_te - ton_he_thong)
-
-                with col_c3:
-                    if chenh_lech > 0:
-                        st.metric("📊 Chênh lệch", f"+{chenh_lech:,} cái", delta=f"Thừa {chenh_lech:,}", delta_color="normal")
-                    elif chenh_lech < 0:
-                        st.metric("📊 Chênh lệch", f"{chenh_lech:,} cái", delta=f"Thiếu {abs(chenh_lech):,}", delta_color="inverse")
-                    else:
-                        st.metric("📊 Chênh lệch", "0 cái", delta="Khớp 100%", delta_color="off")
-
                 ghi_chu_kk = st.text_input(
-                    "📝 Lý do kiểm kê / Ghi chú điều chỉnh",
-                    placeholder="Ví dụ: Kiểm kê định kỳ tháng 10, bù trừ hàng thừa/thiếu...",
+                    "📝 Lý do kiểm kê / Ghi chú chung",
+                    placeholder="Ví dụ: Kiểm kê định kỳ tháng 10, hao hụt thực tế...",
                     key=f"kk_ghichu_{st.session_state.kk_form_key}"
                 )
 
-                st.markdown("<br>", unsafe_allow_html=True)
-                if st.button("✅ XÁC NHẬN CÂN KHO", key=f"btn_kk_{st.session_state.kk_form_key}"):
-                    if chenh_lech == 0:
-                        st.info("ℹ️ Tồn kho thực tế khớp hoàn toàn với hệ thống, không phát sinh chênh lệch.")
+            st.markdown("**📦 Danh sách sản phẩm kiểm kê:**")
+            h1, h2, h3, h4, h5 = st.columns([3, 1.2, 1.2, 1.5, 0.4])
+            with h1: st.markdown("<small style='color:#475569; font-weight:800;'>Sản phẩm</small>", unsafe_allow_html=True)
+            with h2: st.markdown("<small style='color:#475569; font-weight:800;'>Tồn hệ thống</small>", unsafe_allow_html=True)
+            with h3: st.markdown("<small style='color:#475569; font-weight:800;'>Tồn thực tế</small>", unsafe_allow_html=True)
+            with h4: st.markdown("<small style='color:#475569; font-weight:800;'>Chênh lệch</small>", unsafe_allow_html=True)
+            with h5: st.markdown("", unsafe_allow_html=True)
+
+            items_to_process = []
+
+            for i, item in enumerate(st.session_state.kk_items):
+                col_sku, col_sys, col_act, col_diff, col_del = st.columns([3, 1.2, 1.2, 1.5, 0.4])
+
+                with col_sku:
+                    options = [T("chon")] + ds_sku_kk_display
+                    idx = 0
+                    if item.get("sku") in options:
+                        idx = options.index(item["sku"])
+                    sku_sel = st.selectbox(
+                        f"SP KK {i+1}",
+                        options,
+                        index=idx,
+                        key=f"kk_sku_{st.session_state.kk_form_key}_{i}",
+                        label_visibility="collapsed"
+                    )
+                    st.session_state.kk_items[i]["sku"] = sku_sel
+
+                sku_code_kk = sku_sel.split(" — ")[0].strip() if sku_sel != T("chon") else ""
+                ten_sp_kk = ""
+                ton_he_thong = 0
+
+                if sku_code_kk:
+                    matched_sp = df_sp_full[df_sp_full['SKU Sản phẩm'] == sku_code_kk]
+                    if not matched_sp.empty:
+                        row_sp = matched_sp.iloc[0]
+                        ten_sp_kk = str(row_sp.get('Tên sản phẩm', ''))
+                        col_target = 'Tồn kho Nam' if kho_kk == "Nam" else 'Tồn kho Bắc'
+                        ton_he_thong = int(parse_num(row_sp.get(col_target, 0)))
+
+                with col_sys:
+                    if sku_code_kk:
+                        st.markdown(f"<div style='padding-top:8px; font-weight:700; color:#334155;'>{ton_he_thong:,} cái</div>", unsafe_allow_html=True)
                     else:
-                        ngay_kk = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        row_kk = [
-                            ngay_kk,
-                            sku_code_kk,
-                            ten_sp_kk,
-                            kho_kk,
-                            ton_he_thong,
-                            sl_thuc_te,
-                            chenh_lech,
-                            st.session_state.name,
-                            ghi_chu_kk
-                        ]
-                        if append_row("Kiem_Ke", row_kk):
-                            st.success(f"✅ Đã cân kho thành công! Tồn kho mã **{sku_code_kk}** tại kho **{kho_kk}** đã được điều chỉnh về **{sl_thuc_te:,} cái** (Chênh lệch: {chenh_lech:+d}).")
-                            st.session_state.kk_form_key += 1
-                            st.cache_data.clear()
-                            st.rerun()
+                        st.markdown("<div style='padding-top:8px; color:#94a3b8;'>-</div>", unsafe_allow_html=True)
+
+                # Tự động gán tồn thực tế bằng tồn hệ thống khi mới chọn SKU
+                if item.get("last_sku") != sku_sel:
+                    st.session_state.kk_items[i]["last_sku"] = sku_sel
+                    st.session_state.kk_items[i]["sl_thucte"] = max(0, ton_he_thong)
+
+                with col_act:
+                    if sku_code_kk:
+                        val_default = int(st.session_state.kk_items[i].get("sl_thucte", max(0, ton_he_thong)))
+                        sl_val = st.number_input(
+                            f"SL TT {i+1}",
+                            min_value=0,
+                            value=val_default,
+                            step=1,
+                            key=f"kk_sl_{st.session_state.kk_form_key}_{i}",
+                            label_visibility="collapsed"
+                        )
+                        st.session_state.kk_items[i]["sl_thucte"] = sl_val
+                    else:
+                        st.markdown("<div style='padding-top:8px; color:#94a3b8;'>-</div>", unsafe_allow_html=True)
+                        sl_val = 0
+
+                chenh_lech = int(sl_val - ton_he_thong) if sku_code_kk else 0
+
+                with col_diff:
+                    if sku_code_kk:
+                        if chenh_lech > 0:
+                            st.markdown(f"<div style='padding-top:8px; font-weight:800; color:#00b87c;'>+{chenh_lech:,} (Thừa)</div>", unsafe_allow_html=True)
+                        elif chenh_lech < 0:
+                            st.markdown(f"<div style='padding-top:8px; font-weight:800; color:#ef4444;'>{chenh_lech:,} (Thiếu)</div>", unsafe_allow_html=True)
                         else:
-                            st.error("Có lỗi khi ghi vào bảng kiểm kê, vui lòng kiểm tra lại kết nối Sheet!")
+                            st.markdown("<div style='padding-top:8px; font-weight:700; color:#64748b;'>0 (Khớp)</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown("<div style='padding-top:8px; color:#94a3b8;'>-</div>", unsafe_allow_html=True)
+
+                with col_del:
+                    if st.button("✕", key=f"kk_del_{st.session_state.kk_form_key}_{i}") and len(st.session_state.kk_items) > 1:
+                        st.session_state.kk_items.pop(i)
+                        st.rerun()
+
+                if sku_code_kk:
+                    items_to_process.append({
+                        "sku_code": sku_code_kk,
+                        "ten_sp": ten_sp_kk,
+                        "ton_he_thong": ton_he_thong,
+                        "sl_thuc_te": sl_val,
+                        "chenh_lech": chenh_lech
+                    })
+
+            if st.button("➕ Thêm sản phẩm kiểm kê", key=f"kk_add_{st.session_state.kk_form_key}"):
+                st.session_state.kk_items.append({"sku": T("chon"), "sl_thucte": 0, "last_sku": T("chon")})
+                st.rerun()
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("✅ XÁC NHẬN CÂN KHO TẤT CẢ", key=f"btn_kk_submit_{st.session_state.kk_form_key}"):
+                if not items_to_process:
+                    st.error("Vui lòng chọn ít nhất 1 sản phẩm để kiểm kê!")
+                else:
+                    skus_in_batch = [it["sku_code"] for it in items_to_process]
+                    if len(skus_in_batch) != len(set(skus_in_batch)):
+                        st.warning("⚠️ Có mã sản phẩm bị trùng lặp trong danh sách kiểm kê. Vui lòng kiểm tra lại!")
+                    else:
+                        items_diff = [it for it in items_to_process if it["chenh_lech"] != 0]
+                        if not items_diff:
+                            st.info("ℹ️ Tất cả các sản phẩm đã chọn đều khớp 100% với tồn hệ thống, không có chênh lệch cần điều chỉnh.")
+                        else:
+                            with st.spinner("Đang lưu dữ liệu kiểm kê vào Google Sheets..."):
+                                ngay_kk = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                success_count = 0
+                                for it in items_diff:
+                                    row_kk = [
+                                        ngay_kk,
+                                        it["sku_code"],
+                                        it["ten_sp"],
+                                        kho_kk,
+                                        it["ton_he_thong"],
+                                        it["sl_thuc_te"],
+                                        it["chenh_lech"],
+                                        st.session_state.name,
+                                        ghi_chu_kk
+                                    ]
+                                    if append_row("Kiem_Ke", row_kk):
+                                        success_count += 1
+                                
+                                if success_count == len(items_diff):
+                                    st.success(f"✅ Đã cân kho thành công {success_count} sản phẩm có chênh lệch tại kho **{kho_kk}**!")
+                                    st.session_state.kk_items = [{"sku": T("chon"), "sl_thucte": 0, "last_sku": T("chon")}]
+                                    st.session_state.kk_form_key += 1
+                                    st.cache_data.clear()
+                                    st.rerun()
+                                else:
+                                    st.error(f"Chỉ ghi nhận được {success_count}/{len(items_diff)} sản phẩm, vui lòng thử lại!")
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="section-header">🕐 LỊCH SỬ KIỂM KÊ KHO</div>', unsafe_allow_html=True)
