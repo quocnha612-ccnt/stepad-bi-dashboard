@@ -335,19 +335,87 @@ def append_row(sheet_name, row_data):
     return False
 
 # ============================================================
-# 3. HỆ THỐNG ĐĂNG NHẬP
+# 3. HỆ THỐNG ĐĂNG NHẬP & TÀI KHOẢN (ĐỒNG BỘ GOOGLE SHEET)
 # ============================================================
-USERS = {
-    "admin": {"password": "stepad2024", "role": "admin", "name": "Admin"},
+FALLBACK_USERS = {
+    "admin": {"password": "HB@868", "role": "admin", "name": "Admin"},
+    "mxtien": {"password": "tien123", "role": "sale", "name": "Mai Xuân Tiến"},
+    "macanh": {"password": "canh123", "role": "sale", "name": "Mai Anh Cảnh"},
+    "ddang": {"password": "diep123", "role": "sale", "name": "Điệp Đặng"},
     "tienmai": {"password": "tien123", "role": "sale", "name": "Mai Xuân Tiến"},
     "canhmai": {"password": "canh123", "role": "sale", "name": "Mai Anh Cảnh"},
     "diepdang": {"password": "diep123", "role": "sale", "name": "Điệp Đặng"},
-    "ctv1": {"password": "ctv001", "role": "sale", "name": "CTV1"},
-    "ctv2": {"password": "ctv002", "role": "sale", "name": "CTV2"},
-    "ctv3": {"password": "ctv003", "role": "sale", "name": "CTV3"},
-    "ctv4": {"password": "ctv004", "role": "sale", "name": "CTV4"},
-    "ctv5": {"password": "ctv005", "role": "sale", "name": "CTV5"},
 }
+
+@st.cache_data(ttl=60)
+def load_users():
+    users_dict = FALLBACK_USERS.copy()
+    try:
+        client = get_gsheet_client()
+        sh = client.open_by_key(SPREADSHEET_ID)
+        sheet_titles = [ws.title for ws in sh.worksheets()]
+
+        target_sheet = None
+        candidate_names = ["Tai_Khoan", "Thanh_Vien", "Thành viên", "Thành_viên", "Thanh vien", "Users", "TaiKhoan", "ThanhVien"]
+        for cand in candidate_names:
+            for title in sheet_titles:
+                if cand.lower().replace(" ", "_") == title.lower().replace(" ", "_") or cand.lower() == title.lower():
+                    target_sheet = title
+                    break
+            if target_sheet:
+                break
+
+        if not target_sheet:
+            target_sheet = "Tai_Khoan"
+
+        sheet = sh.worksheet(target_sheet)
+        values = sheet.get_all_values()
+        if values and len(values) > 1:
+            headers = [str(h).strip().lower() for h in values[0]]
+            col_user = next((i for i, h in enumerate(headers) if h in ["username", "user", "tài khoản"] or "đăng nhập" in h), None)
+            if col_user is None:
+                col_user = next((i for i, h in enumerate(headers) if "user" in h), 0)
+
+            col_pass = next((i for i, h in enumerate(headers) if "pass" in h or "mật khẩu" in h or "mk" in h), 1)
+            col_role = next((i for i, h in enumerate(headers) if "role" in h or "vai trò" in h or "quyền" in h or "chức vụ" in h), 2)
+            col_name = next((i for i, h in enumerate(headers) if i != col_user and ("tên" in h or "name" in h or "hiển thị" in h)), 3)
+            col_status = next((i for i, h in enumerate(headers) if "trạng thái" in h or "status" in h or "tình trạng" in h), 4)
+
+            parsed_users = {}
+            for row in values[1:]:
+                if len(row) <= max(col_user, col_pass):
+                    continue
+                u = str(row[col_user]).strip()
+                p = str(row[col_pass]).strip()
+                if not u or not p:
+                    continue
+
+                status_val = str(row[col_status]).strip().lower() if (col_status is not None and len(row) > col_status) else "hoạt động"
+                if any(k in status_val for k in ["khóa", "khoa", "nghỉ", "nghi", "tắt", "tat", "inactive", "disable"]):
+                    continue
+
+                r = str(row[col_role]).strip().lower() if (col_role is not None and len(row) > col_role and str(row[col_role]).strip()) else "sale"
+                if "admin" in r:
+                    r = "admin"
+                else:
+                    r = "sale"
+
+                name_val = str(row[col_name]).strip() if (col_name is not None and len(row) > col_name and str(row[col_name]).strip()) else u
+                parsed_users[u] = {
+                    "password": p,
+                    "role": r,
+                    "name": name_val
+                }
+
+            if parsed_users:
+                if "admin" not in parsed_users:
+                    parsed_users["admin"] = FALLBACK_USERS["admin"]
+                return parsed_users
+    except Exception:
+        pass
+    return users_dict
+
+USERS = load_users()
 
 LANG = {
     "vi": {
@@ -465,12 +533,15 @@ def login_page():
         password = st.text_input(T("login_pass"), type="password", placeholder="Nhập mật khẩu...")
         
         if st.button(T("login_btn"), use_container_width=True):
-            if username in USERS and USERS[username]["password"] == password:
+            users_db = load_users()
+            u_clean = username.strip()
+            p_clean = password.strip()
+            if u_clean in users_db and users_db[u_clean]["password"] == p_clean:
                 st.session_state.logged_in = True
-                st.query_params["user"] = username
-                st.session_state.username = username
-                st.session_state.role = USERS[username]["role"]
-                st.session_state.name = USERS[username]["name"]
+                st.query_params["user"] = u_clean
+                st.session_state.username = u_clean
+                st.session_state.role = users_db[u_clean]["role"]
+                st.session_state.name = users_db[u_clean]["name"]
                 st.rerun()
             else:
                 st.error(T("login_err"))
@@ -595,6 +666,7 @@ COL_TRANSLATE = {
     "Tồn thực tế":               {"zh": "实际库存"},
     "Chênh lệch":                {"zh": "差异数量"},
     "Người kiểm kê":             {"zh": "盘点人员"},
+    "Sale phụ trách":            {"zh": "负责销售"},
     "Lý do / Ghi chú":           {"zh": "原因/备注"},
 }
 
@@ -671,6 +743,9 @@ with col_h2:
     with col_out:
         if st.button(T("logout"), key="logout"):
             st.session_state.logged_in = False
+            if "user" in st.query_params:
+                del st.query_params["user"]
+            st.cache_data.clear()
             st.rerun()
 
 st.markdown("<hr style='border-color:#cbd5e1; margin: 6px 0 18px 0;'>", unsafe_allow_html=True)
@@ -1165,16 +1240,36 @@ with t_order:
 
     st.markdown('<div class="section-header">📋 THÔNG TIN ĐƠN HÀNG</div>', unsafe_allow_html=True)
 
+    # TỰ ĐỘNG LỌC CỬA HÀNG THEO SALE PHỤ TRÁCH (ADMIN THẤY TẤT CẢ)
+    col_sale_pt = next((c for c in df_kh.columns if "sale" in c.lower() and "phụ trách" in c.lower()), None)
+    if col_sale_pt is None:
+        col_sale_pt = next((c for c in df_kh.columns if "phụ trách" in c.lower()), None)
+
+    if st.session_state.role == "sale" and col_sale_pt:
+        cur_name = str(st.session_state.name).strip().lower()
+        cur_user = str(st.session_state.username).strip().lower()
+        def check_sale_access(val):
+            v = str(val).strip().lower()
+            if v in ["", "none", "nan", "-", "chưa gán", "chua gan"]:
+                return True
+            return v == cur_name or v == cur_user
+
+        df_kh_order = df_kh[df_kh[col_sale_pt].apply(check_sale_access)].copy()
+    else:
+        df_kh_order = df_kh.copy()
+
     col1, col2 = st.columns([2, 1])
     with col1:
-        ds_khach = df_kh['ID Khách'].tolist() if 'ID Khách' in df_kh.columns else []
-        ds_ten = df_kh['Tên cửa hàng'].tolist() if 'Tên cửa hàng' in df_kh.columns else []
-        ds_diachi = df_kh['Địa chỉ'].tolist() if 'Địa chỉ' in df_kh.columns else ['' for _ in ds_khach]
+        ds_khach = df_kh_order['ID Khách'].tolist() if 'ID Khách' in df_kh_order.columns else []
+        ds_ten = df_kh_order['Tên cửa hàng'].tolist() if 'Tên cửa hàng' in df_kh_order.columns else []
+        ds_diachi = df_kh_order['Địa chỉ'].tolist() if 'Địa chỉ' in df_kh_order.columns else ['' for _ in ds_khach]
         ds_khach_display = [f"{id} — {ten} — {dc}" for id, ten, dc in zip(ds_khach, ds_ten, ds_diachi)]
         khach_selected = st.selectbox(T("khach_hang"), ds_khach_display, key=f"sel_khach_{st.session_state.form_key}")
         id_khach = khach_selected.split(" — ")[0] if khach_selected else ""
         khu_vuc = get_khu_vuc(id_khach)
         st.markdown(f"<small style='color:#00b87c; font-weight:700;'>📍 Khu vực: <b>{khu_vuc}</b></small>", unsafe_allow_html=True)
+        if st.session_state.role == "sale" and col_sale_pt:
+            st.markdown(f"<small style='color:#64748b;'>👥 Đang hiển thị {len(df_kh_order)} cửa hàng thuộc quyền phụ trách</small>", unsafe_allow_html=True)
 
     with col2:
         ngay_don = st.date_input(T("ngay_don"), value=date.today(), key=f"ngay_{st.session_state.form_key}")
@@ -1823,19 +1918,39 @@ if st.session_state.role == "admin":
         with st.spinner("Đang tải..."):
             df_kh_full = load_sheet("Khach_Hang")
         if not df_kh_full.empty:
-            col_f1, col_f2 = st.columns(2)
-            with col_f1:
-                search_kh = st.text_input(T("tim_kh"), placeholder=T("tim_kh_ph"))
-            with col_f2:
-                if 'Kênh phân phối' in df_kh_full.columns:
-                    kenh_filter = st.selectbox(T("loc_kenh"), [T("tat_ca")] + df_kh_full['Kênh phân phối'].dropna().unique().tolist())
+            col_sale_kh = next((c for c in df_kh_full.columns if "sale" in c.lower() and "phụ trách" in c.lower()), None)
+            if col_sale_kh is None:
+                col_sale_kh = next((c for c in df_kh_full.columns if "phụ trách" in c.lower()), None)
+
+            if col_sale_kh:
+                col_f1, col_f2, col_f3 = st.columns([2, 1, 1])
+                with col_f1:
+                    search_kh = st.text_input(T("tim_kh"), placeholder=T("tim_kh_ph"))
+                with col_f2:
+                    kenh_filter = T("tat_ca")
+                    if 'Kênh phân phối' in df_kh_full.columns:
+                        kenh_filter = st.selectbox(T("loc_kenh"), [T("tat_ca")] + df_kh_full['Kênh phân phối'].dropna().unique().tolist())
+                with col_f3:
+                    sale_list = [s for s in df_kh_full[col_sale_kh].dropna().unique().tolist() if str(s).strip()]
+                    sale_filter = st.selectbox("Lọc Sale phụ trách", [T("tat_ca")] + sorted(sale_list))
+            else:
+                col_f1, col_f2 = st.columns(2)
+                with col_f1:
+                    search_kh = st.text_input(T("tim_kh"), placeholder=T("tim_kh_ph"))
+                with col_f2:
+                    kenh_filter = T("tat_ca")
+                    if 'Kênh phân phối' in df_kh_full.columns:
+                        kenh_filter = st.selectbox(T("loc_kenh"), [T("tat_ca")] + df_kh_full['Kênh phân phối'].dropna().unique().tolist())
+                sale_filter = T("tat_ca")
             
             df_display = df_kh_full.copy()
             if search_kh:
                 mask = df_display.astype(str).apply(lambda x: x.str.contains(search_kh, case=False)).any(axis=1)
                 df_display = df_display[mask]
-            if 'Kênh phân phối' in df_kh_full.columns and kenh_filter != T("tat_ca"):
+            if 'Kênh phân phối' in df_display.columns and kenh_filter != T("tat_ca"):
                 df_display = df_display[df_display['Kênh phân phối'] == kenh_filter]
+            if col_sale_kh and col_sale_kh in df_display.columns and sale_filter != T("tat_ca"):
+                df_display = df_display[df_display[col_sale_kh] == sale_filter]
             
             st.dataframe(translate_columns(df_display), use_container_width=True, hide_index=True)
             st.caption(f'{T("tong_label")} {len(df_display)} {T("tong_kh")}')
