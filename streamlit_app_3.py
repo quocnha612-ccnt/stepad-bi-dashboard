@@ -667,6 +667,11 @@ COL_TRANSLATE = {
     "Chênh lệch":                {"zh": "差异数量"},
     "Người kiểm kê":             {"zh": "盘点人员"},
     "Sale phụ trách":            {"zh": "负责销售"},
+    "Nhân viên Sale":            {"zh": "销售人员"},
+    "Số đơn":                    {"zh": "订单数"},
+    "Sản lượng (cái)":           {"zh": "销量(件)"},
+    "Doanh thu hợp lệ":          {"zh": "含税营业额"},
+    "Doanh thu thuần (-VAT)":    {"zh": "纯营业额(-税)"},
     "Lý do / Ghi chú":           {"zh": "原因/备注"},
 }
 
@@ -1216,6 +1221,105 @@ if st.session_state.role == "admin":
             else:
                 st.info(T("chua_du_lieu"))
 
+        # ============================================================
+        # TÍNH NĂNG MỚI: HIỆU SUẤT BÁN HÀNG THEO SALE PHỤ TRÁCH
+        # ============================================================
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="section-header">👥 HIỆU SUẤT BÁN HÀNG</div>', unsafe_allow_html=True)
+
+        if not df_donhang.empty and not df_kh.empty:
+            try:
+                # 1. Lọc đơn hàng theo thời gian chọn trên Dashboard
+                df_don_perf = df_donhang.copy()
+                col_ngay_d = next((c for c in df_don_perf.columns if "ngày" in c.lower() or "ngay" in c.lower()), None)
+                col_thang_d = next((c for c in df_don_perf.columns if "tháng" in c.lower() or c.lower() == "tháng"), None)
+
+                if col_ngay_d:
+                    parsed_d = pd.to_datetime(df_don_perf[col_ngay_d], format="%Y-%m-%d", errors="coerce")
+                    m_fail = parsed_d.isna()
+                    if m_fail.any():
+                        parsed_d2 = pd.to_datetime(df_don_perf.loc[m_fail, col_ngay_d], dayfirst=True, errors="coerce")
+                        parsed_d[m_fail] = parsed_d2
+                    df_don_perf["_parsed_date"] = parsed_d
+                    df_don_perf["_year"] = df_don_perf["_parsed_date"].dt.year
+                    df_don_perf["_month"] = df_don_perf["_parsed_date"].dt.month
+                    if sel_year:
+                        df_don_perf = df_don_perf[df_don_perf["_year"] == sel_year]
+                    if sel_month:
+                        df_don_perf = df_don_perf[df_don_perf["_month"] == sel_month]
+                elif col_thang_d and sel_month:
+                    def parse_thang_perf(x):
+                        s = str(x).strip().upper().replace("THÁNG","").replace("T","").strip()
+                        try: return int(s)
+                        except Exception: return None
+                    df_don_perf["_m"] = df_don_perf[col_thang_d].apply(parse_thang_perf)
+                    df_don_perf = df_don_perf[df_don_perf["_m"] == sel_month]
+
+                # 2. Xây dựng bản đồ mapping Khách hàng -> Sale phụ trách
+                col_id_k_kh = next((c for c in df_kh.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
+                col_sale_kh = next((c for c in df_kh.columns if "sale" in c.lower() and "phụ trách" in c.lower()), None)
+                if col_sale_kh is None:
+                    col_sale_kh = next((c for c in df_kh.columns if "phụ trách" in c.lower()), None)
+
+                kh_to_sale = {}
+                if col_id_k_kh and col_sale_kh:
+                    for _, r in df_kh.iterrows():
+                        kid = str(r[col_id_k_kh]).strip()
+                        s_name = str(r[col_sale_kh]).strip()
+                        if kid and s_name and s_name.lower() not in ["none", "nan", "-", ""]:
+                            kh_to_sale[kid] = s_name
+
+                # 3. Gán bạn Sale phụ trách cho từng dòng đơn hàng
+                col_id_k_don = next((c for c in df_don_perf.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
+                col_nv_don   = next((c for c in df_don_perf.columns if "nhân viên" in c.lower() or "nhan vien" in c.lower()), None)
+                col_id_don   = next((c for c in df_don_perf.columns if "id đơn" in c.lower() or "id_don" in c.lower()), df_don_perf.columns[0])
+                col_sl_don   = next((c for c in df_don_perf.columns if "số lượng" in c.lower() or "so luong" in c.lower() or c.lower() == "sl"), None)
+                col_truoc_th = next((c for c in df_don_perf.columns if "trước thuế" in c.lower() or "truoc thue" in c.lower()), None)
+                col_sau_th   = next((c for c in df_don_perf.columns if "sau thuế" in c.lower() or "sau thue" in c.lower()), None)
+
+                def map_sale_for_order(r):
+                    cid = str(r[col_id_k_don]).strip() if col_id_k_don else ""
+                    if cid in kh_to_sale:
+                        return kh_to_sale[cid]
+                    if col_nv_don:
+                        nv = str(r[col_nv_don]).strip()
+                        if nv and nv.lower() not in ["none", "nan", "-", ""]:
+                            return nv
+                    return "Chưa phân công"
+
+                df_don_perf["_sale_pt"] = df_don_perf.apply(map_sale_for_order, axis=1)
+
+                # 4. Gom nhóm tính toán
+                sale_stats = []
+                for sale_pt, grp in df_don_perf.groupby("_sale_pt"):
+                    so_don = grp[col_id_don].nunique() if col_id_don else len(grp)
+                    san_luong = grp[col_sl_don].apply(parse_num).sum() if col_sl_don else 0
+                    dt_thuan = grp[col_truoc_th].apply(parse_num).sum() if col_truoc_th else 0
+                    dt_hop_le = grp[col_sau_th].apply(parse_num).sum() if col_sau_th else 0
+
+                    sale_stats.append({
+                        "Nhân viên Sale": sale_pt,
+                        "Số đơn": int(so_don),
+                        "Sản lượng (cái)": int(san_luong),
+                        "Doanh thu hợp lệ": dt_hop_le,
+                        "Doanh thu thuần (-VAT)": dt_thuan,
+                        "_sort_key": dt_hop_le
+                    })
+
+                if sale_stats:
+                    df_sale_display = pd.DataFrame(sale_stats).sort_values("_sort_key", ascending=False).drop(columns=["_sort_key"])
+                    df_sale_display["Số đơn"] = df_sale_display["Số đơn"].apply(lambda x: f"{x:,}")
+                    df_sale_display["Sản lượng (cái)"] = df_sale_display["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
+                    df_sale_display["Doanh thu hợp lệ"] = df_sale_display["Doanh thu hợp lệ"].apply(fmt_currency)
+                    df_sale_display["Doanh thu thuần (-VAT)"] = df_sale_display["Doanh thu thuần (-VAT)"].apply(fmt_currency)
+                    st.dataframe(translate_columns(df_sale_display), use_container_width=True, hide_index=True)
+                else:
+                    st.info("Chưa có phát sinh doanh số trong khoảng thời gian đã chọn.")
+            except Exception as e:
+                st.caption(f"Đang đồng bộ dữ liệu hiệu suất: {e}")
+        else:
+            st.info(T("chua_du_lieu"))
+
 # ============================================================
 # TAB: LÊN ĐƠN HÀNG
 # ============================================================
@@ -1658,7 +1762,6 @@ if st.session_state.role == "admin":
 
             col_kk1, col_kk2 = st.columns([1, 2])
             with col_kk1:
-                # Mặc định chọn Nam do bạn trực tiếp quản lý kho Nam
                 kho_kk = st.selectbox("🏭 Kho kiểm kê *", ["Nam", "Bắc"], key=f"kk_kho_{st.session_state.kk_form_key}")
             with col_kk2:
                 ghi_chu_kk = st.text_input(
@@ -1712,7 +1815,6 @@ if st.session_state.role == "admin":
                     else:
                         st.markdown("<div style='padding-top:8px; color:#94a3b8;'>-</div>", unsafe_allow_html=True)
 
-                # Tự động gán tồn thực tế bằng tồn hệ thống khi mới chọn SKU
                 if item.get("last_sku") != sku_sel:
                     st.session_state.kk_items[i]["last_sku"] = sku_sel
                     st.session_state.kk_items[i]["sl_thucte"] = max(0, ton_he_thong)
@@ -1998,8 +2100,6 @@ if st.session_state.role == "admin":
 
         st.markdown('<div class="section-header">📋 THỐNG KÊ PO</div>', unsafe_allow_html=True)
         df_dash_ck = load_sheet("Dashboard")
-
-
 
         if not df_dash_ck.empty:
             try:
