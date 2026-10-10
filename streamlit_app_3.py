@@ -226,6 +226,24 @@ div[data-baseweb="menu"] li {
     text-transform: uppercase !important;
 }
 
+
+.stDownloadButton > button {
+    background-color: #ffffff !important;
+    color: #00b87c !important;
+    -webkit-text-fill-color: #00b87c !important;
+    font-weight: 700 !important;
+    border: 1.5px solid #00b87c !important;
+    border-radius: 8px !important;
+    padding: 6px 16px !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.stDownloadButton > button:hover {
+    background-color: #ecfdf5 !important;
+    color: #009966 !important;
+    border-color: #009966 !important;
+}
+
 .stDataFrame { 
     border: 1px solid #cbd5e1 !important; 
     border-radius: 12px !important; 
@@ -672,6 +690,8 @@ COL_TRANSLATE = {
     "Sản lượng (cái)":           {"zh": "销量(件)"},
     "Doanh thu hợp lệ":          {"zh": "含税营业额"},
     "Doanh thu thuần (-VAT)":    {"zh": "纯营业额(-税)"},
+    "Mã SKU":                    {"zh": "SKU编码"},
+    "Tỷ trọng (%)":              {"zh": "占比(%)"},
     "Lý do / Ghi chú":           {"zh": "原因/备注"},
 }
 
@@ -1221,102 +1241,296 @@ if st.session_state.role == "admin":
             else:
                 st.info(T("chua_du_lieu"))
 
+
         # ============================================================
-        # TÍNH NĂNG MỚI: HIỆU SUẤT BÁN HÀNG THEO SALE PHỤ TRÁCH
+        # PHÂN KHU NÂNG CẤP: BÁO CÁO HIỆU SUẤT SALE & BIỂU ĐỒ SẢN PHẨM
         # ============================================================
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="section-header">👥 HIỆU SUẤT BÁN HÀNG</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">📊 BÁO CÁO TOÀN DIỆN: HIỆU SUẤT BÁN HÀNG & CƠ CẤU SẢN PHẨM</div>', unsafe_allow_html=True)
 
-        if not df_donhang.empty and not df_kh.empty:
-            try:
-                # 1. Lọc đơn hàng theo thời gian chọn trên Dashboard
-                df_don_perf = df_donhang.copy()
-                col_ngay_d = next((c for c in df_don_perf.columns if "ngày" in c.lower() or "ngay" in c.lower()), None)
-                col_thang_d = next((c for c in df_don_perf.columns if "tháng" in c.lower() or c.lower() == "tháng"), None)
+        df_sp_bi = load_sheet("San_Pham")
 
-                if col_ngay_d:
-                    parsed_d = pd.to_datetime(df_don_perf[col_ngay_d], format="%Y-%m-%d", errors="coerce")
-                    m_fail = parsed_d.isna()
-                    if m_fail.any():
-                        parsed_d2 = pd.to_datetime(df_don_perf.loc[m_fail, col_ngay_d], dayfirst=True, errors="coerce")
-                        parsed_d[m_fail] = parsed_d2
-                    df_don_perf["_parsed_date"] = parsed_d
-                    df_don_perf["_year"] = df_don_perf["_parsed_date"].dt.year
-                    df_don_perf["_month"] = df_don_perf["_parsed_date"].dt.month
-                    if sel_year:
-                        df_don_perf = df_don_perf[df_don_perf["_year"] == sel_year]
-                    if sel_month:
-                        df_don_perf = df_don_perf[df_don_perf["_month"] == sel_month]
-                elif col_thang_d and sel_month:
-                    def parse_thang_perf(x):
-                        s = str(x).strip().upper().replace("THÁNG","").replace("T","").strip()
-                        try: return int(s)
-                        except Exception: return None
-                    df_don_perf["_m"] = df_don_perf[col_thang_d].apply(parse_thang_perf)
-                    df_don_perf = df_don_perf[df_don_perf["_m"] == sel_month]
+        if not df_donhang.empty:
+            df_bi_orders = df_donhang.copy()
 
-                # 2. Xây dựng bản đồ mapping Khách hàng -> Sale phụ trách
-                col_id_k_kh = next((c for c in df_kh.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
-                col_sale_kh = next((c for c in df_kh.columns if "sale" in c.lower() and "phụ trách" in c.lower()), None)
-                if col_sale_kh is None:
-                    col_sale_kh = next((c for c in df_kh.columns if "phụ trách" in c.lower()), None)
+            # 1. Chuẩn hóa ngày tháng cho Don_Hang (hỗ trợ cả ISO và DD/MM/YYYY)
+            col_d_ngay = next((c for c in df_bi_orders.columns if "ngày" in c.lower() or "ngay" in c.lower()), None)
+            col_d_thang = next((c for c in df_bi_orders.columns if "tháng" in c.lower() or c.lower() == "tháng"), None)
 
-                kh_to_sale = {}
-                if col_id_k_kh and col_sale_kh:
+            if col_d_ngay:
+                p_date = pd.to_datetime(df_bi_orders[col_d_ngay], format="%Y-%m-%d", errors="coerce")
+                mask_f = p_date.isna()
+                if mask_f.any():
+                    p_date2 = pd.to_datetime(df_bi_orders.loc[mask_f, col_d_ngay], dayfirst=True, errors="coerce")
+                    p_date[mask_f] = p_date2
+                df_bi_orders["_date"] = p_date
+                df_bi_orders["_year"] = df_bi_orders["_date"].dt.year
+                df_bi_orders["_month"] = df_bi_orders["_date"].dt.month
+            elif col_d_thang:
+                def p_thang_num(x):
+                    s = str(x).strip().upper().replace("THÁNG","").replace("T","").strip()
+                    try: return int(s)
+                    except Exception: return None
+                df_bi_orders["_month"] = df_bi_orders[col_d_thang].apply(p_thang_num)
+                df_bi_orders["_year"] = datetime.now().year
+            else:
+                df_bi_orders["_month"] = datetime.now().month
+                df_bi_orders["_year"] = datetime.now().year
+
+            # 2. Xây dựng bản đồ mapping Khách hàng -> Sale phụ trách
+            kh_sale_lookup = {}
+            if not df_kh.empty:
+                col_k_id = next((c for c in df_kh.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
+                col_k_sale = next((c for c in df_kh.columns if "sale" in c.lower() and "phụ trách" in c.lower()), None)
+                if col_k_sale is None:
+                    col_k_sale = next((c for c in df_kh.columns if "phụ trách" in c.lower()), None)
+                if col_k_id and col_k_sale:
                     for _, r in df_kh.iterrows():
-                        kid = str(r[col_id_k_kh]).strip()
-                        s_name = str(r[col_sale_kh]).strip()
-                        if kid and s_name and s_name.lower() not in ["none", "nan", "-", ""]:
-                            kh_to_sale[kid] = s_name
+                        cid = str(r[col_k_id]).strip()
+                        spt = str(r[col_k_sale]).strip()
+                        if cid and spt and spt.lower() not in ["none", "nan", "-", ""]:
+                            kh_sale_lookup[cid] = spt
 
-                # 3. Gán bạn Sale phụ trách cho từng dòng đơn hàng
-                col_id_k_don = next((c for c in df_don_perf.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
-                col_nv_don   = next((c for c in df_don_perf.columns if "nhân viên" in c.lower() or "nhan vien" in c.lower()), None)
-                col_id_don   = next((c for c in df_don_perf.columns if "id đơn" in c.lower() or "id_don" in c.lower()), df_don_perf.columns[0])
-                col_sl_don   = next((c for c in df_don_perf.columns if "số lượng" in c.lower() or "so luong" in c.lower() or c.lower() == "sl"), None)
-                col_truoc_th = next((c for c in df_don_perf.columns if "trước thuế" in c.lower() or "truoc thue" in c.lower()), None)
-                col_sau_th   = next((c for c in df_don_perf.columns if "sau thuế" in c.lower() or "sau thue" in c.lower()), None)
+            col_id_don_bi = next((c for c in df_bi_orders.columns if "id đơn" in c.lower() or "id_don" in c.lower()), df_bi_orders.columns[0])
+            col_id_k_bi = next((c for c in df_bi_orders.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
+            col_sku_bi = next((c for c in df_bi_orders.columns if "sku" in c.lower()), None)
+            col_sp_name_bi = next((c for c in df_bi_orders.columns if "tên sp" in c.lower() or "tên sản phẩm" in c.lower()), None)
+            col_sl_bi = next((c for c in df_bi_orders.columns if "số lượng" in c.lower() or "so luong" in c.lower() or c.lower() == "sl"), None)
+            col_net_bi = next((c for c in df_bi_orders.columns if "trước thuế" in c.lower() or "truoc thue" in c.lower()), None)
+            col_gross_bi = next((c for c in df_bi_orders.columns if "sau thuế" in c.lower() or "sau thue" in c.lower()), None)
+            col_nv_bi = next((c for c in df_bi_orders.columns if "nhân viên" in c.lower() or "nhan vien" in c.lower()), None)
+            col_kv_d = next((c for c in df_bi_orders.columns if "khu vực" in c.lower() or "khu vuc" in c.lower()), None)
 
-                def map_sale_for_order(r):
-                    cid = str(r[col_id_k_don]).strip() if col_id_k_don else ""
-                    if cid in kh_to_sale:
-                        return kh_to_sale[cid]
-                    if col_nv_don:
-                        nv = str(r[col_nv_don]).strip()
-                        if nv and nv.lower() not in ["none", "nan", "-", ""]:
-                            return nv
-                    return "Chưa phân công"
+            # Gán Sale phụ trách cho từng dòng đơn
+            def resolve_sale(r):
+                cid = str(r[col_id_k_bi]).strip() if col_id_k_bi else ""
+                if cid in kh_sale_lookup:
+                    return kh_sale_lookup[cid]
+                if col_nv_bi:
+                    nv = str(r[col_nv_bi]).strip()
+                    if nv and nv.lower() not in ["none", "nan", "-", ""]:
+                        return nv
+                return "Chưa phân công"
 
-                df_don_perf["_sale_pt"] = df_don_perf.apply(map_sale_for_order, axis=1)
+            df_bi_orders["_sale_name"] = df_bi_orders.apply(resolve_sale, axis=1)
 
-                # 4. Gom nhóm tính toán
-                sale_stats = []
-                for sale_pt, grp in df_don_perf.groupby("_sale_pt"):
-                    so_don = grp[col_id_don].nunique() if col_id_don else len(grp)
-                    san_luong = grp[col_sl_don].apply(parse_num).sum() if col_sl_don else 0
-                    dt_thuan = grp[col_truoc_th].apply(parse_num).sum() if col_truoc_th else 0
-                    dt_hop_le = grp[col_sau_th].apply(parse_num).sum() if col_sau_th else 0
+            # 3. BỘ LỌC THỜI GIAN ĐA NĂNG & LINH HOẠT
+            all_bi_years = sorted(df_bi_orders["_year"].dropna().astype(int).unique().tolist(), reverse=True) if "_year" in df_bi_orders.columns else [datetime.now().year]
+            all_bi_months = [1,2,3,4,5,6,7,8,9,10,11,12]
+            month_label_map = {m: f"Tháng {m}" for m in all_bi_months}
 
-                    sale_stats.append({
-                        "Nhân viên Sale": sale_pt,
-                        "Số đơn": int(so_don),
-                        "Sản lượng (cái)": int(san_luong),
-                        "Doanh thu hợp lệ": dt_hop_le,
-                        "Doanh thu thuần (-VAT)": dt_thuan,
-                        "_sort_key": dt_hop_le
+            f_c1, f_c2, f_c3, f_c4 = st.columns([1.1, 2.2, 1.3, 1.4])
+            with f_c1:
+                filter_bi_year = st.selectbox(
+                    "📅 Chọn Năm",
+                    ["Tất cả năm"] + [str(y) for y in all_bi_years],
+                    key="bi_filter_year"
+                )
+            with f_c2:
+                filter_bi_months = st.multiselect(
+                    "🗓️ Chọn Tháng (chọn 1 hoặc nhiều tháng)",
+                    options=all_bi_months,
+                    format_func=lambda m: month_label_map.get(m, f"T{m}"),
+                    default=[],
+                    placeholder="Tất cả các tháng (mặc định)",
+                    help="Để trống để xem tất cả các tháng hoặc chọn từng tháng bạn muốn đánh giá",
+                    key="bi_filter_months"
+                )
+            with f_c3:
+                kv_opts = ["Tất cả kênh"]
+                if col_kv_d:
+                    kv_opts += sorted([str(k) for k in df_bi_orders[col_kv_d].dropna().unique().tolist() if str(k).strip()])
+                filter_bi_kv = st.selectbox("📍 Kênh bán hàng", kv_opts, key="bi_filter_kv")
+            with f_c4:
+                sale_opts = ["Tất cả Sale"] + sorted([str(s) for s in df_bi_orders["_sale_name"].dropna().unique().tolist() if str(s).strip()])
+                filter_bi_sale = st.selectbox("👤 Nhân viên Sale", sale_opts, key="bi_filter_sale")
+
+            # Áp dụng bộ lọc vào DataFrame
+            df_bi_filtered = df_bi_orders.copy()
+            if filter_bi_year != "Tất cả năm":
+                df_bi_filtered = df_bi_filtered[df_bi_filtered["_year"] == int(filter_bi_year)]
+            if filter_bi_months:
+                df_bi_filtered = df_bi_filtered[df_bi_filtered["_month"].isin(filter_bi_months)]
+            if filter_bi_kv != "Tất cả kênh" and col_kv_d:
+                df_bi_filtered = df_bi_filtered[df_bi_filtered[col_kv_d] == filter_bi_kv]
+            if filter_bi_sale != "Tất cả Sale":
+                df_bi_filtered = df_bi_filtered[df_bi_filtered["_sale_name"] == filter_bi_sale]
+
+            # 4. HÀNG 4 THẺ METRICS TỔNG QUAN
+            kpi_gross_sum = df_bi_filtered[col_gross_bi].apply(parse_num).sum() if col_gross_bi else 0.0
+            kpi_net_sum = df_bi_filtered[col_net_bi].apply(parse_num).sum() if col_net_bi else 0.0
+            kpi_qty_sum = int(df_bi_filtered[col_sl_bi].apply(parse_num).sum()) if col_sl_bi else 0
+            kpi_orders_sum = df_bi_filtered[col_id_don_bi].nunique() if col_id_don_bi else len(df_bi_filtered)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+            with kpi1: st.metric("💰 TỔNG DOANH THU (HỢP LỆ)", fmt_currency(kpi_gross_sum))
+            with kpi2: st.metric("💵 DOANH THU THUẦN (-VAT)", fmt_currency(kpi_net_sum))
+            with kpi3: st.metric("📦 TỔNG SẢN LƯỢNG", f"{kpi_qty_sum:,} cái")
+            with kpi4: st.metric("📑 TỔNG SỐ ĐƠN HÀNG", f"{kpi_orders_sum:,} đơn")
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            # 5. BỐ CỤC 2 BẢNG RIÊNG BIỆT: BẢNG 1 (SALE) & BẢNG 2 (SẢN PHẨM)
+            col_b1, col_b2 = st.columns([1.1, 1], gap="medium")
+
+            # ------------------------------------------------------------
+            # BẢNG 1: HIỆU SUẤT BÁN HÀNG THEO SALE
+            # ------------------------------------------------------------
+            with col_b1:
+                st.markdown('<div class="section-header">👥 BẢNG 1: HIỆU SUẤT BÁN HÀNG THEO SALE</div>', unsafe_allow_html=True)
+                
+                sale_data_rows = []
+                for s_name, grp in df_bi_filtered.groupby("_sale_name"):
+                    s_orders = grp[col_id_don_bi].nunique() if col_id_don_bi else len(grp)
+                    s_qty = int(grp[col_sl_bi].apply(parse_num).sum()) if col_sl_bi else 0
+                    s_net = grp[col_net_bi].apply(parse_num).sum() if col_net_bi else 0.0
+                    s_gross = grp[col_gross_bi].apply(parse_num).sum() if col_gross_bi else 0.0
+                    s_pct = (s_gross / kpi_gross_sum * 100) if kpi_gross_sum > 0 else 0.0
+
+                    sale_data_rows.append({
+                        "Nhân viên Sale": s_name,
+                        "Số đơn": s_orders,
+                        "Sản lượng (cái)": s_qty,
+                        "Doanh thu hợp lệ": s_gross,
+                        "Doanh thu thuần (-VAT)": s_net,
+                        "Tỷ trọng (%)": f"{s_pct:.1f}%",
+                        "_sort": s_gross
                     })
 
-                if sale_stats:
-                    df_sale_display = pd.DataFrame(sale_stats).sort_values("_sort_key", ascending=False).drop(columns=["_sort_key"])
-                    df_sale_display["Số đơn"] = df_sale_display["Số đơn"].apply(lambda x: f"{x:,}")
-                    df_sale_display["Sản lượng (cái)"] = df_sale_display["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
-                    df_sale_display["Doanh thu hợp lệ"] = df_sale_display["Doanh thu hợp lệ"].apply(fmt_currency)
-                    df_sale_display["Doanh thu thuần (-VAT)"] = df_sale_display["Doanh thu thuần (-VAT)"].apply(fmt_currency)
-                    st.dataframe(translate_columns(df_sale_display), use_container_width=True, hide_index=True)
+                if sale_data_rows:
+                    df_sale_res = pd.DataFrame(sale_data_rows).sort_values("_sort", ascending=False).drop(columns=["_sort"])
+                    
+                    # File CSV để tải về
+                    csv_sale = df_sale_res.to_csv(index=False).encode('utf-8-sig')
+
+                    # Định dạng hiển thị
+                    df_sale_view = df_sale_res.copy()
+                    df_sale_view["Số đơn"] = df_sale_view["Số đơn"].apply(lambda x: f"{x:,}")
+                    df_sale_view["Sản lượng (cái)"] = df_sale_view["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
+                    df_sale_view["Doanh thu hợp lệ"] = df_sale_view["Doanh thu hợp lệ"].apply(fmt_currency)
+                    df_sale_view["Doanh thu thuần (-VAT)"] = df_sale_view["Doanh thu thuần (-VAT)"].apply(fmt_currency)
+
+                    st.dataframe(translate_columns(df_sale_view), use_container_width=True, hide_index=True)
+
+                    st.download_button(
+                        label="📥 Tải báo cáo Hiệu suất Sale (.CSV)",
+                        data=csv_sale,
+                        file_name=f"Hieu_Suat_Sale_{datetime.now().strftime('%Y%m%d')}.csv",
+                        mime="text/csv",
+                        key="btn_down_sale_bi"
+                    )
                 else:
-                    st.info("Chưa có phát sinh doanh số trong khoảng thời gian đã chọn.")
-            except Exception as e:
-                st.caption(f"Đang đồng bộ dữ liệu hiệu suất: {e}")
+                    st.info("Chưa có phát sinh đơn hàng trong khoảng thời gian đã lọc.")
+
+            # ------------------------------------------------------------
+            # BẢNG 2: BIỂU ĐỒ & CƠ CẤU SẢN PHẨM (SKU)
+            # ------------------------------------------------------------
+            with col_b2:
+                st.markdown('<div class="section-header">🍩 BẢNG 2: BIỂU ĐỒ & CƠ CẤU SẢN PHẨM (SKU)</div>', unsafe_allow_html=True)
+
+                # Lấy tên chính thức từ bảng San_Pham
+                sku_official_names = {}
+                if not df_sp_bi.empty and 'SKU Sản phẩm' in df_sp_bi.columns and 'Tên sản phẩm' in df_sp_bi.columns:
+                    for _, r_sp in df_sp_bi.iterrows():
+                        k_sku = str(r_sp['SKU Sản phẩm']).strip()
+                        k_nam = str(r_sp['Tên sản phẩm']).strip()
+                        if k_sku:
+                            sku_official_names[k_sku] = k_nam
+
+                sku_data_rows = []
+                if col_sku_bi:
+                    for sku_val, grp_sku in df_bi_filtered.groupby(col_sku_bi):
+                        sku_str = str(sku_val).strip()
+                        if not sku_str or sku_str.lower() in ["none", "nan", ""]:
+                            continue
+                        
+                        prod_name = sku_official_names.get(sku_str, "")
+                        if not prod_name and col_sp_name_bi:
+                            prod_name = str(grp_sku[col_sp_name_bi].dropna().iloc[0]).strip() if not grp_sku[col_sp_name_bi].dropna().empty else sku_str
+                        if not prod_name:
+                            prod_name = sku_str
+
+                        p_qty = int(grp_sku[col_sl_bi].apply(parse_num).sum()) if col_sl_bi else 0
+                        p_net = grp_sku[col_net_bi].apply(parse_num).sum() if col_net_bi else 0.0
+                        p_gross = grp_sku[col_gross_bi].apply(parse_num).sum() if col_gross_bi else 0.0
+                        p_pct_qty = (p_qty / kpi_qty_sum * 100) if kpi_qty_sum > 0 else 0.0
+                        p_pct_rev = (p_net / kpi_net_sum * 100) if kpi_net_sum > 0 else 0.0
+
+                        sku_data_rows.append({
+                            "Mã SKU": sku_str,
+                            "Tên sản phẩm": prod_name,
+                            "Sản lượng (cái)": p_qty,
+                            "Doanh thu thuần (-VAT)": p_net,
+                            "Tỷ trọng sản lượng": p_pct_qty,
+                            "Tỷ trọng doanh thu": p_pct_rev,
+                            "_qty_sort": p_qty,
+                            "_rev_sort": p_net
+                        })
+
+                if sku_data_rows:
+                    df_sku_res = pd.DataFrame(sku_data_rows)
+
+                    view_mode = st.radio(
+                        "Tỷ trọng biểu đồ theo:",
+                        ["Sản lượng bán (cái)", "Doanh thu thuần (đ)"],
+                        horizontal=True,
+                        key="pie_view_mode"
+                    )
+
+                    is_qty_mode = "Sản lượng" in view_mode
+                    val_col = "_qty_sort" if is_qty_mode else "_rev_sort"
+                    hover_format = "%{value:,.0f} cái" if is_qty_mode else "%{value:,.0f} đ"
+
+                    df_sku_sorted = df_sku_res.sort_values(val_col, ascending=False)
+
+                    # Biểu đồ tròn Donut Chart sang trọng, chuyên nghiệp
+                    fig_donut = px.pie(
+                        df_sku_sorted,
+                        names="Mã SKU",
+                        values=val_col,
+                        hole=0.45,
+                        color_discrete_sequence=[
+                            "#00b87c", "#10b981", "#059669", "#34d399", "#6ee7b7",
+                            "#0284c7", "#38bdf8", "#6366f1", "#8b5cf6", "#f59e0b",
+                            "#ec4899", "#14b8a6"
+                        ]
+                    )
+                    fig_donut.update_traces(
+                        textposition='inside',
+                        textinfo='percent+label',
+                        hovertemplate="<b>%{label}</b><br>Tỷ trọng: %{percent}<br>Số lượng/DT: " + hover_format + "<extra></extra>"
+                    )
+                    fig_donut.update_layout(
+                        height=280,
+                        margin=dict(l=10, r=10, t=10, b=10),
+                        paper_bgcolor="#ffffff",
+                        plot_bgcolor="#ffffff",
+                        legend=dict(orientation="h", y=-0.1, x=0.0)
+                    )
+                    st.plotly_chart(fig_donut, use_container_width=True)
+
+                    # Bảng chi tiết cơ cấu sản phẩm
+                    df_sku_table = df_sku_sorted[["Mã SKU", "Tên sản phẩm", "Sản lượng (cái)", "Doanh thu thuần (-VAT)"]].copy()
+                    df_sku_table["Tỷ trọng (%)"] = df_sku_sorted["Tỷ trọng sản lượng" if is_qty_mode else "Tỷ trọng doanh thu"].apply(lambda x: f"{x:.1f}%")
+
+                    csv_sku = df_sku_table.to_csv(index=False).encode('utf-8-sig')
+
+                    df_sku_table_view = df_sku_table.copy()
+                    df_sku_table_view["Sản lượng (cái)"] = df_sku_table_view["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
+                    df_sku_table_view["Doanh thu thuần (-VAT)"] = df_sku_table_view["Doanh thu thuần (-VAT)"].apply(fmt_currency)
+
+                    st.dataframe(translate_columns(df_sku_table_view), use_container_width=True, hide_index=True)
+
+                    st.download_button(
+                        label="📥 Tải báo cáo Cơ cấu Sản phẩm (.CSV)",
+                        data=csv_sku,
+                        file_name=f"Co_Cau_SKU_{datetime.now().strftime('%Y%m%d')}.csv",
+                        mime="text/csv",
+                        key="btn_down_sku_bi"
+                    )
+                else:
+                    st.info("Chưa có dữ liệu cơ cấu sản phẩm trong thời gian đã lọc.")
         else:
             st.info(T("chua_du_lieu"))
 
@@ -1762,6 +1976,7 @@ if st.session_state.role == "admin":
 
             col_kk1, col_kk2 = st.columns([1, 2])
             with col_kk1:
+                # Mặc định chọn Nam do bạn trực tiếp quản lý kho Nam
                 kho_kk = st.selectbox("🏭 Kho kiểm kê *", ["Nam", "Bắc"], key=f"kk_kho_{st.session_state.kk_form_key}")
             with col_kk2:
                 ghi_chu_kk = st.text_input(
@@ -1815,6 +2030,7 @@ if st.session_state.role == "admin":
                     else:
                         st.markdown("<div style='padding-top:8px; color:#94a3b8;'>-</div>", unsafe_allow_html=True)
 
+                # Tự động gán tồn thực tế bằng tồn hệ thống khi mới chọn SKU
                 if item.get("last_sku") != sku_sel:
                     st.session_state.kk_items[i]["last_sku"] = sku_sel
                     st.session_state.kk_items[i]["sl_thucte"] = max(0, ton_he_thong)
@@ -2100,6 +2316,8 @@ if st.session_state.role == "admin":
 
         st.markdown('<div class="section-header">📋 THỐNG KÊ PO</div>', unsafe_allow_html=True)
         df_dash_ck = load_sheet("Dashboard")
+
+
 
         if not df_dash_ck.empty:
             try:
