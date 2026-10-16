@@ -482,6 +482,53 @@ LANG = {
         "thong_ke_po": "📋 THỐNG KÊ PO", "sku_title": "🏷️ PHÂN TÍCH SKU",
         "sku_chay": "🔥 TOP 3 MÃ BÁN CHẠY", "sku_cham": "⚠️ TOP 3 MÃ BÁN CHẬM",
         "ma_sku": "Mã SKU", "san_luong": "Sản lượng", "chon": "-- Chọn --",
+
+        # Song ngữ phân khu Circle K mới
+        "ck_analytics_title": "⏱️ PHÂN TÍCH TẦN SUẤT & CƠ CẤU ĐƠN HÀNG CIRCLE K (THEO KỲ)",
+        "ck_year_lbl": "📅 Chọn Năm",
+        "ck_year_all": "Tất cả năm",
+        "ck_cycle_lbl": "⏳ Xem chu kỳ theo",
+        "ck_cycle_month": "Theo Tháng",
+        "ck_cycle_quarter": "Theo Quý",
+        "ck_cycle_week": "Theo Tuần",
+        "ck_cycle_year": "Theo Năm",
+        "ck_sel_month_lbl": "🗓️ Chọn Tháng (chọn 1 hoặc nhiều)",
+        "ck_sel_quarter_lbl": "📊 Chọn Quý (chọn 1 hoặc nhiều)",
+        "ck_sel_week_lbl": "📆 Chọn Tuần (chọn 1 hoặc nhiều)",
+        "ck_all_placeholder": "Tất cả (mặc định)",
+        "ck_warehouse_lbl": "🏭 Kho xuất hàng",
+        "ck_all_warehouse": "Tất cả kho",
+        "ck_metric_po_count": "📑 SỐ LƯỢNG ĐƠN PO",
+        "ck_metric_min": "🔻 ĐƠN NHỎ NHẤT (MIN)",
+        "ck_metric_max": "🔺 ĐƠN LỚN NHẤT (MAX)",
+        "ck_metric_avg": "⚖️ TRUNG BÌNH CỘNG (AVG)",
+        "ck_metric_total_net": "💰 TỔNG TIỀN HÀNG THUẦN",
+        "ck_table_po_title": "📋 NHẬT KÝ TẦN SUẤT ĐẶT ĐƠN CIRCLE K",
+        "ck_table_sku_title": "🍩 CƠ CẤU MÃ HÀNG HÓA CIRCLE K THEO KỲ",
+        "ck_btn_down_po": "📥 Tải dữ liệu Đơn hàng Circle K (.CSV / Excel)",
+        "ck_btn_down_sku": "📥 Tải Cơ cấu SKU Circle K (.CSV / Excel)",
+        "ck_old_section_title": "🏪 TỔNG HỢP NĂM & LỊCH SỬ KÊNH CIRCLE K (SHEET GỐC)",
+        "ck_old_po_stats": "📋 THỐNG KÊ PO (THEO DASHBOARD SHEET)",
+        "ck_po_unit": "PO",
+        "ck_piece_unit": "cái",
+        "ck_no_po_msg": "Không có đơn hàng Circle K nào trong kỳ chọn.",
+        "ck_no_sku_msg": "Không có dữ liệu SKU Circle K trong kỳ chọn.",
+        "ck_no_data_msg": "Chưa tìm thấy dữ liệu đơn hàng nào của kênh Circle K.",
+
+        # Song ngữ phân khu Dashboard BI
+        "bi_dash_title": "📊 BÁO CÁO TOÀN DIỆN: HIỆU SUẤT BÁN HÀNG & CƠ CẤU SẢN PHẨM",
+        "bi_kpi_gross": "💰 TỔNG DOANH THU (HỢP LỆ)",
+        "bi_kpi_net": "💵 DOANH THU THUẦN (-VAT)",
+        "bi_kpi_qty": "📦 TỔNG SẢN LƯỢNG",
+        "bi_kpi_orders": "📑 TỔNG SỐ ĐƠN HÀNG",
+        "bi_table1_title": "👥 BẢNG 1: HIỆU SUẤT BÁN HÀNG THEO SALE",
+        "bi_table2_title": "🍩 BẢNG 2: BIỂU ĐỒ & CƠ CẤU SẢN PHẨM (SKU)",
+        "bi_btn_down_sale": "📥 Tải báo cáo Hiệu suất Sale (.CSV)",
+        "bi_btn_down_sku": "📥 Tải báo cáo Cơ cấu Sản phẩm (.CSV)",
+        "bi_filter_channel": "📍 Kênh bán hàng",
+        "bi_filter_sale": "👤 Nhân viên Sale",
+        "bi_all_channels": "Tất cả kênh",
+        "bi_all_sales": "Tất cả Sale",
     },
     "zh": {
         "title": "STEPAD CRM",
@@ -517,10 +564,57 @@ LANG = {
         "ds_sp": "🏷️ 产品列表", "sp_canh_bao": "个产品库存需注意！",
         "ds_kh": "👥 客户列表", "tim_kh": "🔍 搜索客户",
         "tim_kh_ph": "名称、ID、区域...", "loc_kenh": "按渠道筛选", "tong_kh": "位客户",
-        "ck_title": "🏪 Circle K 分析", "bieu_do_title": "📊 Circle K 月度营业额",
+        "ck_title": "🏪 Circle K 分析", "bieu_do_title": "📊 Circle K 月度营业额 (含税)",
         "thong_ke_po": "📋 PO统计", "sku_title": "🏷️ SKU分析",
         "sku_chay": "🔥 销量TOP 3", "sku_cham": "⚠️ 滞销TOP 3",
         "ma_sku": "SKU编码", "san_luong": "销量", "chon": "-- 请选择 --",
+
+        # Song ngữ phân khu Circle K mới (Chuẩn tiếng Trung thương mại)
+        "ck_analytics_title": "⏱️ Circle K 采购频次与SKU销售结构分析 (按周期)",
+        "ck_year_lbl": "📅 选择年份",
+        "ck_year_all": "全部年份",
+        "ck_cycle_lbl": "⏳ 统计周期",
+        "ck_cycle_month": "按月度",
+        "ck_cycle_quarter": "按季度",
+        "ck_cycle_week": "按周次",
+        "ck_cycle_year": "按年度",
+        "ck_sel_month_lbl": "🗓️ 选择月份 (可多选)",
+        "ck_sel_quarter_lbl": "📊 选择季度 (可多选)",
+        "ck_sel_week_lbl": "📆 选择周次 (可多选)",
+        "ck_all_placeholder": "全部周期 (默认)",
+        "ck_warehouse_lbl": "🏭 出库仓库",
+        "ck_all_warehouse": "全部仓库",
+        "ck_metric_po_count": "📑 PO订单总数",
+        "ck_metric_min": "🔻 最小订单货款 (MIN)",
+        "ck_metric_max": "🔺 最大订单货款 (MAX)",
+        "ck_metric_avg": "⚖️ 平均每单货款 (AVG)",
+        "ck_metric_total_net": "💰 纯货款总额 (不含税)",
+        "ck_table_po_title": "📋 Circle K 采购订单频次明细表",
+        "ck_table_sku_title": "🍩 Circle K 周期SKU销售结构",
+        "ck_btn_down_po": "📥 导出 Circle K 订单明细 (.CSV / Excel)",
+        "ck_btn_down_sku": "📥 导出 Circle K SKU结构 (.CSV / Excel)",
+        "ck_old_section_title": "🏪 Circle K 年度汇总与历史走势 (原始数据)",
+        "ck_old_po_stats": "📋 PO数据统计 (基于Dashboard工作表)",
+        "ck_po_unit": "笔",
+        "ck_piece_unit": "件",
+        "ck_no_po_msg": "当前筛选周期内无 Circle K 订单数据。",
+        "ck_no_sku_msg": "当前筛选周期内无 Circle K SKU销售数据。",
+        "ck_no_data_msg": "未找到 Circle K 渠道的相关订单数据。",
+
+        # Song ngữ phân khu Dashboard BI
+        "bi_dash_title": "📊 全面分析报告：销售人员业绩与产品销售结构",
+        "bi_kpi_gross": "💰 含税销售总额",
+        "bi_kpi_net": "💵 纯货款总额 (不含税)",
+        "bi_kpi_qty": "📦 销售总件数",
+        "bi_kpi_orders": "📑 订单总数",
+        "bi_table1_title": "👥 表1：各销售人员业绩统计",
+        "bi_table2_title": "🍩 表2：产品销售结构分析 (SKU)",
+        "bi_btn_down_sale": "📥 导出销售业绩报告 (.CSV)",
+        "bi_btn_down_sku": "📥 导出产品结构报告 (.CSV)",
+        "bi_filter_channel": "📍 销售渠道",
+        "bi_filter_sale": "👤 销售人员",
+        "bi_all_channels": "全部渠道",
+        "bi_all_sales": "全部销售",
     }
 }
 
@@ -632,6 +726,7 @@ def fmt_currency(val):
 COL_TRANSLATE = {
     "ID Đơn":                    {"zh": "订单ID"},
     "Ngày lên đơn":              {"zh": "下单日期"},
+    "Ngày đặt đơn":              {"zh": "下单日期"},
     "ID Khách":                  {"zh": "客户ID"},
     "ID Khách hàng":             {"zh": "客户ID"},
     "Khu vực":                   {"zh": "区域"},
@@ -645,20 +740,27 @@ COL_TRANSLATE = {
     "ID Chi tiết":               {"zh": "明细ID"},
     "SKU":                       {"zh": "SKU"},
     "SKU Sản phẩm":              {"zh": "SKU编码"},
+    "Mã SKU":                    {"zh": "SKU编码"},
     "Tên SP":                    {"zh": "产品名称"},
     "Tên sản phẩm":              {"zh": "产品名称"},
     "Số lượng":                  {"zh": "数量"},
+    "Sản lượng (cái)":           {"zh": "销量(件)"},
     "Đơn giá":                   {"zh": "单价"},
     "Thuế suất":                 {"zh": "税率"},
     "Thành tiền trước thuế":     {"zh": "税前金额"},
+    "Thành tiền thuần (-VAT)":   {"zh": "不含税金额"},
+    "Doanh thu thuần (-VAT)":    {"zh": "不含税销售额"},
+    "Doanh thu hợp lệ":          {"zh": "含税销售额"},
     "Tiền thuế":                 {"zh": "税额"},
     "Tổng sau thuế":             {"zh": "税后总计"},
     "Kho xuất":                  {"zh": "出库仓"},
+    "Kho":                       {"zh": "仓库"},
     "Tên cửa hàng":              {"zh": "门店名称"},
     "Địa chỉ":                   {"zh": "地址"},
     "Kênh phân phối":            {"zh": "渠道"},
     "Tổng doanh thu":            {"zh": "总营业额"},
     "Tỷ lệ TT":                  {"zh": "付款率"},
+    "Tỷ trọng (%)":              {"zh": "占比(%)"},
     "Giá Nha Trang":             {"zh": "芽庄价"},
     "Giá Circle K":              {"zh": "Circle K价"},
     "Giá MT":                    {"zh": "现代贸易价"},
@@ -667,7 +769,6 @@ COL_TRANSLATE = {
     "Tổng kho":                  {"zh": "总库存"},
     "Ngày":                      {"zh": "日期"},
     "Thời gian":                 {"zh": "时间"},
-    "Kho":                       {"zh": "仓库"},
     "Người nhập":                {"zh": "录入人"},
     "Ghi chú":                   {"zh": "备注"},
     "Số tiền trả":               {"zh": "还款金额"},
@@ -686,11 +787,6 @@ COL_TRANSLATE = {
     "Sale phụ trách":            {"zh": "负责销售"},
     "Nhân viên Sale":            {"zh": "销售人员"},
     "Số đơn":                    {"zh": "订单数"},
-    "Sản lượng (cái)":           {"zh": "销量(件)"},
-    "Doanh thu hợp lệ":          {"zh": "含税营业额"},
-    "Doanh thu thuần (-VAT)":    {"zh": "纯营业额(-税)"},
-    "Mã SKU":                    {"zh": "SKU编码"},
-    "Tỷ trọng (%)":              {"zh": "占比(%)"},
     "Lý do / Ghi chú":           {"zh": "原因/备注"},
 }
 
@@ -1245,7 +1341,7 @@ if st.session_state.role == "admin":
         # PHÂN KHU NÂNG CẤP: BÁO CÁO HIỆU SUẤT SALE & BIỂU ĐỒ SẢN PHẨM
         # ============================================================
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="section-header">📊 BÁO CÁO TOÀN DIỆN: HIỆU SUẤT BÁN HÀNG & CƠ CẤU SẢN PHẨM</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="section-header">{T("bi_dash_title")}</div>', unsafe_allow_html=True)
 
         if not df_donhang.empty:
             df_bi_orders = df_donhang.copy()
@@ -1304,48 +1400,47 @@ if st.session_state.role == "admin":
                     nv = str(r[col_nv_bi]).strip()
                     if nv and nv.lower() not in ["none", "nan", "-", ""]:
                         return nv
-                return "Chưa phân công"
+                return "Chưa phân công" if st.session_state.get("lang","vi") == "vi" else "未分配"
 
             df_bi_orders["_sale_name"] = df_bi_orders.apply(resolve_sale, axis=1)
 
             all_bi_years = sorted(df_bi_orders["_year"].dropna().astype(int).unique().tolist(), reverse=True) if "_year" in df_bi_orders.columns else [datetime.now().year]
             all_bi_months = [1,2,3,4,5,6,7,8,9,10,11,12]
-            month_label_map = {m: f"Tháng {m}" for m in all_bi_months}
+            month_label_map = (MONTH_NAMES_VI if st.session_state.get("lang","vi") == "vi" else MONTH_NAMES_ZH)
 
             f_c1, f_c2, f_c3, f_c4 = st.columns([1.1, 2.2, 1.3, 1.4])
             with f_c1:
                 filter_bi_year = st.selectbox(
-                    "📅 Chọn Năm",
-                    ["Tất cả năm"] + [str(y) for y in all_bi_years],
+                    T("ck_year_lbl"),
+                    [T("ck_year_all")] + [str(y) for y in all_bi_years],
                     key="bi_filter_year"
                 )
             with f_c2:
                 filter_bi_months = st.multiselect(
-                    "🗓️ Chọn Tháng (chọn 1 hoặc nhiều tháng)",
+                    T("ck_sel_month_lbl"),
                     options=all_bi_months,
                     format_func=lambda m: month_label_map.get(m, f"T{m}"),
                     default=[],
-                    placeholder="Tất cả các tháng (mặc định)",
-                    help="Để trống để xem tất cả các tháng hoặc chọn từng tháng bạn muốn đánh giá",
+                    placeholder=T("ck_all_placeholder"),
                     key="bi_filter_months"
                 )
             with f_c3:
-                kv_opts = ["Tất cả kênh"]
+                kv_opts = [T("bi_all_channels")]
                 if col_kv_d:
                     kv_opts += sorted([str(k) for k in df_bi_orders[col_kv_d].dropna().unique().tolist() if str(k).strip()])
-                filter_bi_kv = st.selectbox("📍 Kênh bán hàng", kv_opts, key="bi_filter_kv")
+                filter_bi_kv = st.selectbox(T("bi_filter_channel"), kv_opts, key="bi_filter_kv")
             with f_c4:
-                sale_opts = ["Tất cả Sale"] + sorted([str(s) for s in df_bi_orders["_sale_name"].dropna().unique().tolist() if str(s).strip()])
-                filter_bi_sale = st.selectbox("👤 Nhân viên Sale", sale_opts, key="bi_filter_sale")
+                sale_opts = [T("bi_all_sales")] + sorted([str(s) for s in df_bi_orders["_sale_name"].dropna().unique().tolist() if str(s).strip()])
+                filter_bi_sale = st.selectbox(T("bi_filter_sale"), sale_opts, key="bi_filter_sale")
 
             df_bi_filtered = df_bi_orders.copy()
-            if filter_bi_year != "Tất cả năm":
+            if filter_bi_year != T("ck_year_all"):
                 df_bi_filtered = df_bi_filtered[df_bi_filtered["_year"] == int(filter_bi_year)]
             if filter_bi_months:
                 df_bi_filtered = df_bi_filtered[df_bi_filtered["_month"].isin(filter_bi_months)]
-            if filter_bi_kv != "Tất cả kênh" and col_kv_d:
+            if filter_bi_kv != T("bi_all_channels") and col_kv_d:
                 df_bi_filtered = df_bi_filtered[df_bi_filtered[col_kv_d] == filter_bi_kv]
-            if filter_bi_sale != "Tất cả Sale":
+            if filter_bi_sale != T("bi_all_sales"):
                 df_bi_filtered = df_bi_filtered[df_bi_filtered["_sale_name"] == filter_bi_sale]
 
             kpi_gross_sum = df_bi_filtered[col_gross_bi].apply(parse_num).sum() if col_gross_bi else 0.0
@@ -1353,12 +1448,15 @@ if st.session_state.role == "admin":
             kpi_qty_sum = int(df_bi_filtered[col_sl_bi].apply(parse_num).sum()) if col_sl_bi else 0
             kpi_orders_sum = df_bi_filtered[col_id_don_bi].nunique() if col_id_don_bi else len(df_bi_filtered)
 
+            unit_piece = T("ck_piece_unit")
+            unit_order = "đơn" if st.session_state.get("lang","vi") == "vi" else "单"
+
             st.markdown("<br>", unsafe_allow_html=True)
             kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-            with kpi1: st.metric("💰 TỔNG DOANH THU (HỢP LỆ)", fmt_currency(kpi_gross_sum))
-            with kpi2: st.metric("💵 DOANH THU THUẦN (-VAT)", fmt_currency(kpi_net_sum))
-            with kpi3: st.metric("📦 TỔNG SẢN LƯỢNG", f"{kpi_qty_sum:,} cái")
-            with kpi4: st.metric("📑 TỔNG SỐ ĐƠN HÀNG", f"{kpi_orders_sum:,} đơn")
+            with kpi1: st.metric(T("bi_kpi_gross"), fmt_currency(kpi_gross_sum))
+            with kpi2: st.metric(T("bi_kpi_net"), fmt_currency(kpi_net_sum))
+            with kpi3: st.metric(T("bi_kpi_qty"), f"{kpi_qty_sum:,} {unit_piece}")
+            with kpi4: st.metric(T("bi_kpi_orders"), f"{kpi_orders_sum:,} {unit_order}")
 
             st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1368,7 +1466,7 @@ if st.session_state.role == "admin":
             # BẢNG 1: HIỆU SUẤT BÁN HÀNG THEO SALE
             # ------------------------------------------------------------
             with col_b1:
-                st.markdown('<div class="section-header">👥 BẢNG 1: HIỆU SUẤT BÁN HÀNG THEO SALE</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="section-header">{T("bi_table1_title")}</div>', unsafe_allow_html=True)
                 
                 sale_data_rows = []
                 for s_name, grp in df_bi_filtered.groupby("_sale_name"):
@@ -1390,7 +1488,7 @@ if st.session_state.role == "admin":
 
                 if sale_data_rows:
                     df_sale_res = pd.DataFrame(sale_data_rows).sort_values("_sort", ascending=False).drop(columns=["_sort"])
-                    csv_sale = df_sale_res.to_csv(index=False).encode('utf-8-sig')
+                    csv_sale = translate_columns(df_sale_res.copy()).to_csv(index=False).encode('utf-8-sig')
 
                     df_sale_view = df_sale_res.copy()
                     df_sale_view["Số đơn"] = df_sale_view["Số đơn"].apply(lambda x: f"{x:,}")
@@ -1401,20 +1499,20 @@ if st.session_state.role == "admin":
                     st.dataframe(translate_columns(df_sale_view), use_container_width=True, hide_index=True)
 
                     st.download_button(
-                        label="📥 Tải báo cáo Hiệu suất Sale (.CSV)",
+                        label=T("bi_btn_down_sale"),
                         data=csv_sale,
                         file_name=f"Hieu_Suat_Sale_{datetime.now().strftime('%Y%m%d')}.csv",
                         mime="text/csv",
                         key="btn_down_sale_bi"
                     )
                 else:
-                    st.info("Chưa có phát sinh đơn hàng trong khoảng thời gian đã lọc.")
+                    st.info(T("chua_du_lieu"))
 
             # ------------------------------------------------------------
             # BẢNG 2: BIỂU ĐỒ & CƠ CẤU SẢN PHẨM (SKU)
             # ------------------------------------------------------------
             with col_b2:
-                st.markdown('<div class="section-header">🍩 BẢNG 2: BIỂU ĐỒ & CƠ CẤU SẢN PHẨM (SKU)</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="section-header">{T("bi_table2_title")}</div>', unsafe_allow_html=True)
 
                 sku_official_names = {}
                 if not df_sp_bi.empty and 'SKU Sản phẩm' in df_sp_bi.columns and 'Tên sản phẩm' in df_sp_bi.columns:
@@ -1457,16 +1555,21 @@ if st.session_state.role == "admin":
                 if sku_data_rows:
                     df_sku_res = pd.DataFrame(sku_data_rows)
 
+                    opt_qty_lbl = "Sản lượng bán (cái)" if st.session_state.get("lang","vi") == "vi" else "按销量占比(件)"
+                    opt_rev_lbl = "Doanh thu thuần (đ)" if st.session_state.get("lang","vi") == "vi" else "按纯货款金额占比(đ)"
+                    radio_title = "Tỷ trọng biểu đồ theo:" if st.session_state.get("lang","vi") == "vi" else "图表占比维度："
+
                     view_mode = st.radio(
-                        "Tỷ trọng biểu đồ theo:",
-                        ["Sản lượng bán (cái)", "Doanh thu thuần (đ)"],
+                        radio_title,
+                        [opt_qty_lbl, opt_rev_lbl],
                         horizontal=True,
                         key="pie_view_mode"
                     )
 
-                    is_qty_mode = "Sản lượng" in view_mode
+                    is_qty_mode = (view_mode == opt_qty_lbl)
                     val_col = "_qty_sort" if is_qty_mode else "_rev_sort"
-                    hover_format = "%{value:,.0f} cái" if is_qty_mode else "%{value:,.0f} đ"
+                    hover_unit = unit_piece if is_qty_mode else "đ"
+                    hover_format = "%{value:,.0f} " + hover_unit
 
                     df_sku_sorted = df_sku_res.sort_values(val_col, ascending=False)
 
@@ -1481,10 +1584,15 @@ if st.session_state.role == "admin":
                             "#ec4899", "#14b8a6"
                         ]
                     )
+                    hovertemp = (
+                        "<b>%{label}</b><br>Tỷ trọng: %{percent}<br>Số lượng/DT: " + hover_format + "<extra></extra>"
+                        if st.session_state.get("lang","vi") == "vi"
+                        else "<b>%{label}</b><br>占比: %{percent}<br>销量/货款: " + hover_format + "<extra></extra>"
+                    )
                     fig_donut.update_traces(
                         textposition='inside',
                         textinfo='percent+label',
-                        hovertemplate="<b>%{label}</b><br>Tỷ trọng: %{percent}<br>Số lượng/DT: " + hover_format + "<extra></extra>"
+                        hovertemplate=hovertemp
                     )
                     fig_donut.update_layout(
                         height=280,
@@ -1498,7 +1606,7 @@ if st.session_state.role == "admin":
                     df_sku_table = df_sku_sorted[["Mã SKU", "Tên sản phẩm", "Sản lượng (cái)", "Doanh thu thuần (-VAT)"]].copy()
                     df_sku_table["Tỷ trọng (%)"] = df_sku_sorted["Tỷ trọng sản lượng" if is_qty_mode else "Tỷ trọng doanh thu"].apply(lambda x: f"{x:.1f}%")
 
-                    csv_sku = df_sku_table.to_csv(index=False).encode('utf-8-sig')
+                    csv_sku = translate_columns(df_sku_table.copy()).to_csv(index=False).encode('utf-8-sig')
 
                     df_sku_table_view = df_sku_table.copy()
                     df_sku_table_view["Sản lượng (cái)"] = df_sku_table_view["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
@@ -1507,14 +1615,14 @@ if st.session_state.role == "admin":
                     st.dataframe(translate_columns(df_sku_table_view), use_container_width=True, hide_index=True)
 
                     st.download_button(
-                        label="📥 Tải báo cáo Cơ cấu Sản phẩm (.CSV)",
+                        label=T("bi_btn_down_sku"),
                         data=csv_sku,
                         file_name=f"Co_Cau_SKU_{datetime.now().strftime('%Y%m%d')}.csv",
                         mime="text/csv",
                         key="btn_down_sku_bi"
                     )
                 else:
-                    st.info("Chưa có dữ liệu cơ cấu sản phẩm trong thời gian đã lọc.")
+                    st.info(T("chua_du_lieu"))
         else:
             st.info(T("chua_du_lieu"))
 
@@ -2260,9 +2368,9 @@ if st.session_state.role == "admin":
         # ------------------------------------------------------------
         # [PHẦN MỚI TRÊN CÙNG]: PHÂN TÍCH TẦN SUẤT ĐƠN & CƠ CẤU MÃ HÀNG
         # ------------------------------------------------------------
-        st.markdown('<div class="section-header">⏱️ PHÂN TÍCH TẦN SUẤT & CƠ CẤU ĐƠN HÀNG CIRCLE K (THEO KỲ)</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="section-header">{T("ck_analytics_title")}</div>', unsafe_allow_html=True)
 
-        with st.spinner("Đang tổng hợp dữ liệu Circle K..."):
+        with st.spinner("Đang tổng hợp dữ liệu Circle K..." if st.session_state.get("lang","vi") == "vi" else "正在汇总 Circle K 数据..."):
             df_don_all = load_sheet("Don_Hang")
             df_sp_ck = load_sheet("San_Pham")
 
@@ -2326,344 +2434,64 @@ if st.session_state.role == "admin":
 
             with f1:
                 sel_ck_year = st.selectbox(
-                    "📅 Chọn Năm",
-                    ["Tất cả năm"] + [str(y) for y in ck_years],
+                    T("ck_year_lbl"),
+                    [T("ck_year_all")] + [str(y) for y in ck_years],
                     key="filter_ck_year"
                 )
 
             with f2:
-                cycle_mode = st.selectbox(
-                    "⏳ Xem chu kỳ theo",
-                    ["Theo Tháng", "Theo Quý", "Theo Tuần", "Theo Năm"],
+                cycle_dict = {
+                    "month": T("ck_cycle_month"),
+                    "quarter": T("ck_cycle_quarter"),
+                    "week": T("ck_cycle_week"),
+                    "year": T("ck_cycle_year"),
+                }
+                cycle_mode_label = st.selectbox(
+                    T("ck_cycle_lbl"),
+                    list(cycle_dict.values()),
                     key="filter_ck_cycle_mode"
                 )
+                cycle_key = next((k for k, v in cycle_dict.items() if v == cycle_mode_label), "month")
 
             df_scope = df_ck_data.copy()
-            if sel_ck_year != "Tất cả năm":
+            if sel_ck_year != T("ck_year_all"):
                 df_scope = df_scope[df_scope["_year"] == int(sel_ck_year)]
 
             with f3:
-                if cycle_mode == "Theo Tháng":
+                if cycle_key == "month":
                     avail_months = sorted(df_scope["_month"].dropna().astype(int).unique().tolist()) if not df_scope.empty else list(range(1, 13))
-                    month_labels = {m: f"Tháng {m}" for m in range(1, 13)}
+                    m_labels = MONTH_NAMES_VI if st.session_state.get("lang","vi") == "vi" else MONTH_NAMES_ZH
                     sel_ck_months = st.multiselect(
-                        "🗓️ Chọn Tháng (chọn 1 hoặc nhiều)",
+                        T("ck_sel_month_lbl"),
                         options=avail_months,
-                        format_func=lambda m: month_labels.get(m, f"T{m}"),
+                        format_func=lambda m: m_labels.get(m, f"T{m}"),
                         default=[],
-                        placeholder="Tất cả các tháng (mặc định)",
+                        placeholder=T("ck_all_placeholder"),
                         key="filter_ck_months"
                     )
-                elif cycle_mode == "Theo Quý":
+                elif cycle_key == "quarter":
                     avail_quarters = sorted(df_scope["_quarter"].dropna().astype(int).unique().tolist()) if not df_scope.empty else [1, 2, 3, 4]
-                    quarter_labels = {1: "Quý 1 (T1-T3)", 2: "Quý 2 (T4-T6)", 3: "Quý 3 (T7-T9)", 4: "Quý 4 (T10-T12)"}
+                    q_labels_vi = {1: "Quý 1 (T1-T3)", 2: "Quý 2 (T4-T6)", 3: "Quý 3 (T7-T9)", 4: "Quý 4 (T10-T12)"}
+                    q_labels_zh = {1: "一季度 (1-3月)", 2: "二季度 (4-6月)", 3: "三季度 (7-9月)", 4: "四季度 (10-12月)"}
+                    q_labels = q_labels_vi if st.session_state.get("lang","vi") == "vi" else q_labels_zh
                     sel_ck_quarters = st.multiselect(
-                        "📊 Chọn Quý (chọn 1 hoặc nhiều)",
+                        T("ck_sel_quarter_lbl"),
                         options=avail_quarters,
-                        format_func=lambda q: quarter_labels.get(q, f"Quý {q}"),
+                        format_func=lambda q: q_labels.get(q, f"Q{q}"),
                         default=[],
-                        placeholder="Tất cả các quý (mặc định)",
+                        placeholder=T("ck_all_placeholder"),
                         key="filter_ck_quarters"
                     )
-                elif cycle_mode == "Theo Tuần":
+                elif cycle_key == "week":
                     avail_weeks = sorted(df_scope["_week"].dropna().astype(int).unique().tolist()) if not df_scope.empty else list(range(1, 53))
+                    w_fmt = (lambda w: f"Tuần {w}") if st.session_state.get("lang","vi") == "vi" else (lambda w: f"第 {w} 周")
                     sel_ck_weeks = st.multiselect(
-                        "📆 Chọn Tuần (chọn 1 hoặc nhiều)",
+                        T("ck_sel_week_lbl"),
                         options=avail_weeks,
-                        format_func=lambda w: f"Tuần {w}",
+                        format_func=w_fmt,
                         default=[],
-                        placeholder="Tất cả các tuần (mặc định)",
+                        placeholder=T("ck_all_placeholder"),
                         key="filter_ck_weeks"
                     )
                 else:
-                    st.markdown("<div style='padding-top:28px; color:#64748b; font-weight:600;'>Đang tổng hợp trọn năm</div>", unsafe_allow_html=True)
-
-            with f4:
-                kho_list = ["Tất cả kho"]
-                if col_kho_ck and not df_scope.empty:
-                    for k in df_scope[col_kho_ck].dropna().unique():
-                        k_str = str(k).strip()
-                        if k_str and k_str not in kho_list:
-                            kho_list.append(k_str)
-                sel_ck_kho = st.selectbox("🏭 Kho xuất hàng", kho_list, key="filter_ck_kho")
-
-            df_ck_f = df_scope.copy()
-            if cycle_mode == "Theo Tháng" and sel_ck_months:
-                df_ck_f = df_ck_f[df_ck_f["_month"].isin(sel_ck_months)]
-            elif cycle_mode == "Theo Quý" and sel_ck_quarters:
-                df_ck_f = df_ck_f[df_ck_f["_quarter"].isin(sel_ck_quarters)]
-            elif cycle_mode == "Theo Tuần" and sel_ck_weeks:
-                df_ck_f = df_ck_f[df_ck_f["_week"].isin(sel_ck_weeks)]
-
-            if sel_ck_kho != "Tất cả kho" and col_kho_ck:
-                df_ck_f = df_ck_f[df_ck_f[col_kho_ck] == sel_ck_kho]
-
-            po_records = []
-            for pkey, grp_po in df_ck_f.groupby("_po_key"):
-                first_row = grp_po.iloc[0]
-                po_date_val = grp_po["_date"].max() if "_date" in grp_po.columns else date.today()
-                date_str = po_date_val.strftime("%Y-%m-%d") if pd.notna(po_date_val) else str(first_row.get(col_ngay_ck, ""))
-                po_code_display = str(first_row.get(col_po_ck, "")).strip()
-                if not po_code_display or po_code_display.lower() in ["none", "nan"]:
-                    po_code_display = pkey
-                
-                id_don_display = str(first_row.get(col_id_don_ck, pkey)).strip()
-                kho_display = str(first_row.get(col_kho_ck, "Chưa rõ")).strip()
-                
-                po_qty = int(grp_po[col_sl_ck].apply(parse_num).sum()) if col_sl_ck else 0
-                po_net = grp_po[col_net_ck].apply(parse_num).sum() if col_net_ck else 0.0
-
-                po_records.append({
-                    "Ngày đặt đơn": date_str,
-                    "Mã PO": po_code_display,
-                    "ID Đơn": id_don_display,
-                    "Kho": kho_display,
-                    "Sản lượng (cái)": po_qty,
-                    "Thành tiền thuần (-VAT)": po_net,
-                    "_date_sort": po_date_val,
-                    "_net_sort": po_net
-                })
-
-            df_po_summary = pd.DataFrame(po_records)
-            if not df_po_summary.empty:
-                df_po_summary = df_po_summary.sort_values("_date_sort", ascending=False)
-
-            total_ck_po = len(df_po_summary)
-            min_ck_po = df_po_summary["_net_sort"].min() if total_ck_po > 0 else 0.0
-            max_ck_po = df_po_summary["_net_sort"].max() if total_ck_po > 0 else 0.0
-            avg_ck_po = df_po_summary["_net_sort"].mean() if total_ck_po > 0 else 0.0
-            total_ck_net = df_po_summary["_net_sort"].sum() if total_ck_po > 0 else 0.0
-
-            st.markdown("<br>", unsafe_allow_html=True)
-            m1, m2, m3, m4, m5 = st.columns(5)
-            with m1: st.metric("📑 SỐ LƯỢNG ĐƠN PO", f"{total_ck_po:,} PO")
-            with m2: st.metric("🔻 ĐƠN NHỎ NHẤT (MIN)", fmt_currency(min_ck_po))
-            with m3: st.metric("🔺 ĐƠN LỚN NHẤT (MAX)", fmt_currency(max_ck_po))
-            with m4: st.metric("⚖️ TRUNG BÌNH CỘNG (AVG)", fmt_currency(avg_ck_po))
-            with m5: st.metric("💰 TỔNG TIỀN HÀNG THUẦN", fmt_currency(total_ck_net))
-
-            st.markdown("<br>", unsafe_allow_html=True)
-
-            ck_col_l, ck_col_r = st.columns([1.1, 1], gap="medium")
-
-            with ck_col_l:
-                st.markdown('<div class="section-header">📋 NHẬT KÝ TẦN SUẤT ĐẶT ĐƠN CIRCLE K</div>', unsafe_allow_html=True)
-                if not df_po_summary.empty:
-                    df_po_export = df_po_summary[["Ngày đặt đơn", "Mã PO", "ID Đơn", "Kho", "Sản lượng (cái)", "Thành tiền thuần (-VAT)"]].copy()
-                    csv_po_ck = df_po_export.to_csv(index=False).encode('utf-8-sig')
-
-                    df_po_view = df_po_export.copy()
-                    df_po_view["Sản lượng (cái)"] = df_po_view["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
-                    df_po_view["Thành tiền thuần (-VAT)"] = df_po_view["Thành tiền thuần (-VAT)"].apply(fmt_currency)
-
-                    st.dataframe(translate_columns(df_po_view), use_container_width=True, hide_index=True)
-
-                    st.download_button(
-                        label="📥 Tải dữ liệu Đơn hàng Circle K (.CSV / Excel)",
-                        data=csv_po_ck,
-                        file_name=f"Don_Hang_CircleK_{datetime.now().strftime('%Y%m%d')}.csv",
-                        mime="text/csv",
-                        key="btn_down_po_ck"
-                    )
-                else:
-                    st.info("Không có đơn hàng Circle K nào trong kỳ chọn.")
-
-            with ck_col_r:
-                st.markdown('<div class="section-header">🍩 CƠ CẤU MÃ HÀNG HÓA CIRCLE K THEO KỲ</div>', unsafe_allow_html=True)
-                
-                sku_official_names = {}
-                if not df_sp_ck.empty and 'SKU Sản phẩm' in df_sp_ck.columns and 'Tên sản phẩm' in df_sp_ck.columns:
-                    for _, r_sp in df_sp_ck.iterrows():
-                        k_sku = str(r_sp['SKU Sản phẩm']).strip()
-                        k_nam = str(r_sp['Tên sản phẩm']).strip()
-                        if k_sku:
-                            sku_official_names[k_sku] = k_nam
-
-                sku_ck_rows = []
-                total_ck_qty = int(df_ck_f[col_sl_ck].apply(parse_num).sum()) if col_sl_ck else 0
-
-                if col_sku_ck:
-                    for sku_val, grp_sku in df_ck_f.groupby(col_sku_ck):
-                        sku_str = str(sku_val).strip()
-                        if not sku_str or sku_str.lower() in ["none", "nan", ""]:
-                            continue
-
-                        prod_name = sku_official_names.get(sku_str, "")
-                        if not prod_name and col_sp_name_ck:
-                            prod_name = str(grp_sku[col_sp_name_ck].dropna().iloc[0]).strip() if not grp_sku[col_sp_name_ck].dropna().empty else sku_str
-                        if not prod_name:
-                            prod_name = sku_str
-
-                        p_qty = int(grp_sku[col_sl_ck].apply(parse_num).sum()) if col_sl_ck else 0
-                        p_net = grp_sku[col_net_ck].apply(parse_num).sum() if col_net_ck else 0.0
-                        p_pct = (p_qty / total_ck_qty * 100) if total_ck_qty > 0 else 0.0
-
-                        sku_ck_rows.append({
-                            "Mã SKU": sku_str,
-                            "Tên sản phẩm": prod_name,
-                            "Sản lượng (cái)": p_qty,
-                            "Doanh thu thuần (-VAT)": p_net,
-                            "Tỷ trọng (%)": f"{p_pct:.1f}%",
-                            "_qty_sort": p_qty
-                        })
-
-                if sku_ck_rows:
-                    df_sku_ck = pd.DataFrame(sku_ck_rows).sort_values("_qty_sort", ascending=False)
-                    
-                    fig_ck_donut = px.pie(
-                        df_sku_ck,
-                        names="Mã SKU",
-                        values="_qty_sort",
-                        hole=0.45,
-                        color_discrete_sequence=[
-                            "#00b87c", "#10b981", "#059669", "#34d399", "#6ee7b7",
-                            "#0284c7", "#38bdf8", "#6366f1", "#8b5cf6", "#f59e0b",
-                            "#ec4899", "#14b8a6"
-                        ]
-                    )
-                    fig_ck_donut.update_traces(
-                        textposition='inside',
-                        textinfo='percent+label',
-                        hovertemplate="<b>%{label}</b><br>Tỷ trọng: %{percent}<br>Sản lượng: %{value:,} cái<extra></extra>"
-                    )
-                    fig_ck_donut.update_layout(
-                        height=280,
-                        margin=dict(l=10, r=10, t=10, b=10),
-                        paper_bgcolor="#ffffff",
-                        plot_bgcolor="#ffffff",
-                        legend=dict(orientation="h", y=-0.1, x=0.0)
-                    )
-                    st.plotly_chart(fig_ck_donut, use_container_width=True)
-
-                    df_sku_ck_export = df_sku_ck[["Mã SKU", "Tên sản phẩm", "Sản lượng (cái)", "Doanh thu thuần (-VAT)", "Tỷ trọng (%)"]].copy()
-                    csv_sku_ck = df_sku_ck_export.to_csv(index=False).encode('utf-8-sig')
-
-                    df_sku_ck_view = df_sku_ck_export.copy()
-                    df_sku_ck_view["Sản lượng (cái)"] = df_sku_ck_view["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
-                    df_sku_ck_view["Doanh thu thuần (-VAT)"] = df_sku_ck_view["Doanh thu thuần (-VAT)"].apply(fmt_currency)
-
-                    st.dataframe(translate_columns(df_sku_ck_view), use_container_width=True, hide_index=True)
-
-                    st.download_button(
-                        label="📥 Tải Cơ cấu SKU Circle K (.CSV / Excel)",
-                        data=csv_sku_ck,
-                        file_name=f"Co_Cau_SKU_CircleK_{datetime.now().strftime('%Y%m%d')}.csv",
-                        mime="text/csv",
-                        key="btn_down_sku_ck"
-                    )
-                else:
-                    st.info("Không có dữ liệu SKU Circle K trong kỳ chọn.")
-        else:
-            st.info("Chưa tìm thấy dữ liệu đơn hàng nào của kênh Circle K.")
-
-        # ------------------------------------------------------------
-        # [PHẦN CŨ DƯỚI CÙNG]: TỔNG HỢP NĂM VÀ LỊCH SỬ KÊNH (GIỮ NGUYÊN)
-        # ------------------------------------------------------------
-        st.markdown("<hr style='border-color:#cbd5e1; margin: 32px 0 22px 0;'>", unsafe_allow_html=True)
-        st.markdown('<div class="section-header">🏪 TỔNG HỢP NĂM & LỊCH SỬ KÊNH CIRCLE K (SHEET GỐC)</div>', unsafe_allow_html=True)
-        
-        df_ck_raw = load_sheet("Biểu đồ CircleK")
-        df_don_ck = load_sheet("Don_Hang")
-
-        if not df_ck_raw.empty:
-            try:
-                cols = df_ck_raw.columns.tolist()
-                if len(cols) >= 4:
-                    df_ck_plot = df_ck_raw.copy()
-                    col_thang = cols[0]
-                    col_bac = cols[1]
-                    col_nam = cols[2]
-                    col_tong = cols[3]
-
-                    df_ck_plot[col_bac] = df_ck_plot[col_bac].apply(parse_num)
-                    df_ck_plot[col_nam] = df_ck_plot[col_nam].apply(parse_num)
-                    df_ck_plot[col_tong] = df_ck_plot[col_tong].apply(parse_num)
-
-                    fig = go.Figure()
-                    fig.add_trace(go.Bar(x=df_ck_plot[col_thang], y=df_ck_plot[col_bac], name='Miền Bắc', marker_color='#10b981', hovertemplate='%{y:,.0f} đ'))
-                    fig.add_trace(go.Bar(x=df_ck_plot[col_thang], y=df_ck_plot[col_nam], name='Miền Nam', marker_color='#34d399', hovertemplate='%{y:,.0f} đ'))
-                    fig.add_trace(go.Bar(x=df_ck_plot[col_thang], y=df_ck_plot[col_tong], name='TỔNG', marker_color='#00b87c', hovertemplate='%{y:,.0f} đ'))
-                    fig.update_layout(
-                        title={'text': T("bieu_do_title"), 'x': 0.5, 'font': {'color': '#0f172a', 'size': 14, 'family': 'Plus Jakarta Sans'}},
-                        barmode='group', height=400,
-                        xaxis=dict(tickfont=dict(color='#475569')),
-                        yaxis=dict(gridcolor='#f1f5f9', tickfont=dict(color='#475569')),
-                        legend=dict(font=dict(color='#0f172a'), orientation="h", y=1.1),
-                        paper_bgcolor='#ffffff',
-                        plot_bgcolor='#ffffff',
-                        margin=dict(l=10, r=10, t=40, b=10)
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-            except Exception as e:
-                st.warning(f"Đang tải biểu đồ... ({e})")
-
-        st.markdown('<div class="section-header">📋 THỐNG KÊ PO (THEO DASHBOARD SHEET)</div>', unsafe_allow_html=True)
-        df_dash_ck = load_sheet("Dashboard")
-
-        if not df_dash_ck.empty:
-            try:
-                col1, col2 = st.columns(2)
-                n_rows = df_dash_ck.shape[0]
-                n_cols = df_dash_ck.shape[1]
-
-                def safe_iloc(r, c):
-                    if r < n_rows and c < n_cols:
-                        return df_dash_ck.iloc[r, c]
-                    return 0
-
-                with col1:
-                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>📍 Miền Nam</div>", unsafe_allow_html=True)
-                    c1, c2, c3, c4 = st.columns(4)
-                    with c1: st.metric("SL PO", int(parse_num(safe_iloc(17, 0))))
-                    with c2: st.metric("Min", fmt_currency(parse_num(safe_iloc(19, 0))))
-                    with c3: st.metric("Max", fmt_currency(parse_num(safe_iloc(21, 0))))
-                    with c4: st.metric("Avg", fmt_currency(parse_num(safe_iloc(23, 0))))
-                with col2:
-                    st.markdown("<div style='font-weight:800; color:#0f172a; margin-bottom:8px;'>📍 Miền Bắc</div>", unsafe_allow_html=True)
-                    c1, c2, c3, c4 = st.columns(4)
-                    with c1: st.metric("SL PO", int(parse_num(safe_iloc(17, 1))))
-                    with c2: st.metric("Min", fmt_currency(parse_num(safe_iloc(19, 1))))
-                    with c3: st.metric("Max", fmt_currency(parse_num(safe_iloc(21, 1))))
-                    with c4: st.metric("Avg", fmt_currency(parse_num(safe_iloc(23, 1))))
-            except Exception as e:
-                st.warning(f"Lỗi hiển thị PO: {e}")
-
-        st.markdown('<div class="section-header">🏷️ PHÂN TÍCH SKU</div>', unsafe_allow_html=True)
-        col_top, col_slow = st.columns(2)
-
-        def safe_get(df, r, c):
-            try:
-                if r < df.shape[0] and c < df.shape[1]:
-                    v = df.iloc[r, c]
-                    return v if str(v).strip() not in ["", "nan", "None"] else None
-            except Exception:
-                pass
-            return None
-
-        with col_top:
-            st.markdown(f'🔥 **{T("sku_chay")}**')
-            try:
-                rows_top = [16, 17, 18]
-                skus = [safe_get(df_dash_ck, r, 4) for r in rows_top]
-                sls  = [safe_get(df_dash_ck, r, 5) for r in rows_top]
-                data_top = [(s, q) for s, q in zip(skus, sls) if s is not None]
-                if data_top:
-                    st.table(pd.DataFrame(data_top, columns=[T("ma_sku"), T("san_luong")]))
-                else:
-                    st.info("Chưa có dữ liệu.")
-            except Exception as e:
-                st.info(f"Lỗi đọc SKU chạy: {e}")
-
-        with col_slow:
-            st.markdown(f'⚠️ **{T("sku_cham")}**')
-            try:
-                rows_slow = [21, 22, 23]
-                skus = [safe_get(df_dash_ck, r, 4) for r in rows_slow]
-                sls  = [safe_get(df_dash_ck, r, 5) for r in rows_slow]
-                data_slow = [(s, q) for s, q in zip(skus, sls) if s is not None]
-                if data_slow:
-                    st.table(pd.DataFrame(data_slow, columns=[T("ma_sku"), T("san_luong")]))
-                else:
-                    st.info("Chưa có dữ liệu.")
-            except Exception as e:
-                st.info(f"Lỗi đọc SKU chậm: {e}")
+                    st.markdown(f"<div style='padding-
