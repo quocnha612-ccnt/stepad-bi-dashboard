@@ -673,7 +673,7 @@ def parse_num(s):
     try:
         if s is None or s == "":
             return 0.0
-        s = str(s).strip().replace("đ", "").replace("VND", "").replace(" ", "").replace(" ", "")
+        s = str(s).strip().replace("đ", "").replace("VND", "").replace("\xa0", "").replace(" ", "")
         if not s or s.lower() in ["-", "n/a", "nan", "none"]:
             return 0.0
 
@@ -2631,7 +2631,7 @@ if st.session_state.role == "admin":
                 if sku_ck_rows:
                     df_sku_ck = pd.DataFrame(sku_ck_rows).sort_values("_qty_sort", ascending=False)
                     
-                    # Bảng màu tương phản đa sắc rực rỡ, phân biệt cực tốt từng lát bánh
+                    # Bảng màu tương phản đa sắc rực rỡ, phân biệt từng lát bánh
                     distinct_donut_colors = [
                         "#00b87c",  # Stepad Emerald Green
                         "#0284c7",  # Sky Blue
@@ -2654,12 +2654,13 @@ if st.session_state.role == "admin":
                         else "<b>%{text}</b> - %{label}<br>占比: %{percent}<br>销量: %{value:,} 件<extra></extra>"
                     )
 
+                    # Định dạng D3 format %{percent:.1%} hiển thị chuẩn xác (26.0% thay vì 0.3%)
                     fig_ck_donut = go.Figure(data=[go.Pie(
                         labels=df_sku_ck['Tên sản phẩm'],
                         values=df_sku_ck['_qty_sort'],
                         text=df_sku_ck['Mã SKU'],
                         textposition='inside',
-                        texttemplate='<b>%{text}</b><br>%{percent:.1f}%',
+                        texttemplate='<b>%{text}</b><br>%{percent:.1%}',
                         hole=0.52,
                         marker=dict(colors=color_cycle[:len(df_sku_ck)], line=dict(color='#ffffff', width=2)),
                         hovertemplate=hovertemp_ck
