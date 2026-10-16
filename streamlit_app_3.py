@@ -26,6 +26,15 @@ st.markdown("""
     font-family: 'Plus Jakarta Sans', sans-serif !important; 
 }
 
+/* Bảo toàn font biểu tượng Material Icons để không bị đè chữ tại menu 3 chấm của bảng */
+[data-testid="stIconMaterial"], 
+.material-symbols-rounded, 
+.material-icons, 
+[class*="material-symbols"],
+[class*="material-icons"] {
+    font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+}
+
 /* Nền app xám nhẹ chống chói mắt */
 .stApp { 
     background-color: #f8fafc !important; 
@@ -205,6 +214,23 @@ div[data-baseweb="menu"] li {
     color: #ffffff !important;
 }
 
+.stDownloadButton > button {
+    background-color: #ffffff !important;
+    color: #00b87c !important;
+    -webkit-text-fill-color: #00b87c !important;
+    font-weight: 700 !important;
+    border: 1.5px solid #00b87c !important;
+    border-radius: 8px !important;
+    padding: 6px 16px !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.stDownloadButton > button:hover {
+    background-color: #ecfdf5 !important;
+    color: #009966 !important;
+    border-color: #009966 !important;
+}
+
 [data-testid="metric-container"] {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
@@ -224,24 +250,6 @@ div[data-baseweb="menu"] li {
     font-weight: 700 !important;
     font-size: 0.8rem !important;
     text-transform: uppercase !important;
-}
-
-
-.stDownloadButton > button {
-    background-color: #ffffff !important;
-    color: #00b87c !important;
-    -webkit-text-fill-color: #00b87c !important;
-    font-weight: 700 !important;
-    border: 1.5px solid #00b87c !important;
-    border-radius: 8px !important;
-    padding: 6px 16px !important;
-    transition: all 0.2s ease-in-out;
-}
-
-.stDownloadButton > button:hover {
-    background-color: #ecfdf5 !important;
-    color: #009966 !important;
-    border-color: #009966 !important;
 }
 
 .stDataFrame { 
@@ -582,35 +590,26 @@ def parse_num(s):
         # Nếu có cả dấu chấm và dấu phẩy
         if "." in s and "," in s:
             if s.rfind(".") > s.rfind(","):
-                # Dạng 1,194.50 (US) -> bỏ phẩy
                 s = s.replace(",", "")
             else:
-                # Dạng 1.194,50 (VN) -> bỏ chấm, phẩy thành chấm
                 s = s.replace(".", "").replace(",", ".")
         elif "." in s:
-            # Chỉ có dấu chấm
             if s.count(".") > 1:
-                # Dạng 1.000.000 -> bỏ chấm
                 s = s.replace(".", "")
             else:
                 parts = s.split(".")
-                # Nếu sau dấu chấm có đúng 3 chữ số (1.194 hoặc 74.000) -> phân cách hàng nghìn VN
                 if len(parts[-1]) == 3:
                     s = s.replace(".", "")
                 else:
-                    # Số thập phân (1.5 hoặc 1.25)
                     pass
         elif "," in s:
-            # Chỉ có dấu phẩy: 0,4000000004 hoặc 4651434,4 hoặc 1,194
             if s.count(",") > 1:
                 s = s.replace(",", "")
             else:
                 parts = s.split(",")
-                # Nếu sau dấu phẩy có đúng 3 chữ số và phần đầu khác 0 (1,194)
                 if len(parts[-1]) == 3 and parts[0] != "0":
                     s = s.replace(",", "")
                 else:
-                    # Số thập phân kiểu VN (0,4000000004 -> 0.4000000004)
                     s = parts[0] + "." + parts[1]
 
         val = float(s)
@@ -795,8 +794,9 @@ if st.session_state.role == "admin":
             df_kh      = load_sheet("Khach_Hang")
             df_chitiet = load_sheet("Chi_tiet_don")
             df_donhang = load_sheet("Don_Hang")
+            df_sp_bi   = load_sheet("San_Pham")
 
-        st.markdown('<div class="section-header">🗓️ BỘ LỌC THỜI GIAN</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🗓️ BỘ LỌC THỜI GIAN CHUNG</div>', unsafe_allow_html=True)
 
         available_years = []
         available_months_map = {}
@@ -1241,19 +1241,15 @@ if st.session_state.role == "admin":
             else:
                 st.info(T("chua_du_lieu"))
 
-
         # ============================================================
         # PHÂN KHU NÂNG CẤP: BÁO CÁO HIỆU SUẤT SALE & BIỂU ĐỒ SẢN PHẨM
         # ============================================================
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="section-header">📊 BÁO CÁO TOÀN DIỆN: HIỆU SUẤT BÁN HÀNG & CƠ CẤU SẢN PHẨM</div>', unsafe_allow_html=True)
 
-        df_sp_bi = load_sheet("San_Pham")
-
         if not df_donhang.empty:
             df_bi_orders = df_donhang.copy()
 
-            # 1. Chuẩn hóa ngày tháng cho Don_Hang (hỗ trợ cả ISO và DD/MM/YYYY)
             col_d_ngay = next((c for c in df_bi_orders.columns if "ngày" in c.lower() or "ngay" in c.lower()), None)
             col_d_thang = next((c for c in df_bi_orders.columns if "tháng" in c.lower() or c.lower() == "tháng"), None)
 
@@ -1277,7 +1273,6 @@ if st.session_state.role == "admin":
                 df_bi_orders["_month"] = datetime.now().month
                 df_bi_orders["_year"] = datetime.now().year
 
-            # 2. Xây dựng bản đồ mapping Khách hàng -> Sale phụ trách
             kh_sale_lookup = {}
             if not df_kh.empty:
                 col_k_id = next((c for c in df_kh.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
@@ -1301,7 +1296,6 @@ if st.session_state.role == "admin":
             col_nv_bi = next((c for c in df_bi_orders.columns if "nhân viên" in c.lower() or "nhan vien" in c.lower()), None)
             col_kv_d = next((c for c in df_bi_orders.columns if "khu vực" in c.lower() or "khu vuc" in c.lower()), None)
 
-            # Gán Sale phụ trách cho từng dòng đơn
             def resolve_sale(r):
                 cid = str(r[col_id_k_bi]).strip() if col_id_k_bi else ""
                 if cid in kh_sale_lookup:
@@ -1314,7 +1308,6 @@ if st.session_state.role == "admin":
 
             df_bi_orders["_sale_name"] = df_bi_orders.apply(resolve_sale, axis=1)
 
-            # 3. BỘ LỌC THỜI GIAN ĐA NĂNG & LINH HOẠT
             all_bi_years = sorted(df_bi_orders["_year"].dropna().astype(int).unique().tolist(), reverse=True) if "_year" in df_bi_orders.columns else [datetime.now().year]
             all_bi_months = [1,2,3,4,5,6,7,8,9,10,11,12]
             month_label_map = {m: f"Tháng {m}" for m in all_bi_months}
@@ -1345,7 +1338,6 @@ if st.session_state.role == "admin":
                 sale_opts = ["Tất cả Sale"] + sorted([str(s) for s in df_bi_orders["_sale_name"].dropna().unique().tolist() if str(s).strip()])
                 filter_bi_sale = st.selectbox("👤 Nhân viên Sale", sale_opts, key="bi_filter_sale")
 
-            # Áp dụng bộ lọc vào DataFrame
             df_bi_filtered = df_bi_orders.copy()
             if filter_bi_year != "Tất cả năm":
                 df_bi_filtered = df_bi_filtered[df_bi_filtered["_year"] == int(filter_bi_year)]
@@ -1356,7 +1348,6 @@ if st.session_state.role == "admin":
             if filter_bi_sale != "Tất cả Sale":
                 df_bi_filtered = df_bi_filtered[df_bi_filtered["_sale_name"] == filter_bi_sale]
 
-            # 4. HÀNG 4 THẺ METRICS TỔNG QUAN
             kpi_gross_sum = df_bi_filtered[col_gross_bi].apply(parse_num).sum() if col_gross_bi else 0.0
             kpi_net_sum = df_bi_filtered[col_net_bi].apply(parse_num).sum() if col_net_bi else 0.0
             kpi_qty_sum = int(df_bi_filtered[col_sl_bi].apply(parse_num).sum()) if col_sl_bi else 0
@@ -1371,7 +1362,6 @@ if st.session_state.role == "admin":
 
             st.markdown("<br>", unsafe_allow_html=True)
 
-            # 5. BỐ CỤC 2 BẢNG RIÊNG BIỆT: BẢNG 1 (SALE) & BẢNG 2 (SẢN PHẨM)
             col_b1, col_b2 = st.columns([1.1, 1], gap="medium")
 
             # ------------------------------------------------------------
@@ -1400,11 +1390,8 @@ if st.session_state.role == "admin":
 
                 if sale_data_rows:
                     df_sale_res = pd.DataFrame(sale_data_rows).sort_values("_sort", ascending=False).drop(columns=["_sort"])
-                    
-                    # File CSV để tải về
                     csv_sale = df_sale_res.to_csv(index=False).encode('utf-8-sig')
 
-                    # Định dạng hiển thị
                     df_sale_view = df_sale_res.copy()
                     df_sale_view["Số đơn"] = df_sale_view["Số đơn"].apply(lambda x: f"{x:,}")
                     df_sale_view["Sản lượng (cái)"] = df_sale_view["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
@@ -1429,7 +1416,6 @@ if st.session_state.role == "admin":
             with col_b2:
                 st.markdown('<div class="section-header">🍩 BẢNG 2: BIỂU ĐỒ & CƠ CẤU SẢN PHẨM (SKU)</div>', unsafe_allow_html=True)
 
-                # Lấy tên chính thức từ bảng San_Pham
                 sku_official_names = {}
                 if not df_sp_bi.empty and 'SKU Sản phẩm' in df_sp_bi.columns and 'Tên sản phẩm' in df_sp_bi.columns:
                     for _, r_sp in df_sp_bi.iterrows():
@@ -1484,7 +1470,6 @@ if st.session_state.role == "admin":
 
                     df_sku_sorted = df_sku_res.sort_values(val_col, ascending=False)
 
-                    # Biểu đồ tròn Donut Chart sang trọng, chuyên nghiệp
                     fig_donut = px.pie(
                         df_sku_sorted,
                         names="Mã SKU",
@@ -1510,7 +1495,6 @@ if st.session_state.role == "admin":
                     )
                     st.plotly_chart(fig_donut, use_container_width=True)
 
-                    # Bảng chi tiết cơ cấu sản phẩm
                     df_sku_table = df_sku_sorted[["Mã SKU", "Tên sản phẩm", "Sản lượng (cái)", "Doanh thu thuần (-VAT)"]].copy()
                     df_sku_table["Tỷ trọng (%)"] = df_sku_sorted["Tỷ trọng sản lượng" if is_qty_mode else "Tỷ trọng doanh thu"].apply(lambda x: f"{x:.1f}%")
 
@@ -1558,7 +1542,6 @@ with t_order:
 
     st.markdown('<div class="section-header">📋 THÔNG TIN ĐƠN HÀNG</div>', unsafe_allow_html=True)
 
-    # TỰ ĐỘNG LỌC CỬA HÀNG THEO SALE PHỤ TRÁCH (ADMIN THẤY TẤT CẢ)
     col_sale_pt = next((c for c in df_kh.columns if "sale" in c.lower() and "phụ trách" in c.lower()), None)
     if col_sale_pt is None:
         col_sale_pt = next((c for c in df_kh.columns if "phụ trách" in c.lower()), None)
@@ -1856,7 +1839,6 @@ with t_don:
                 df_kh_tt["_no_num"] = df_kh_tt[col_no].apply(parse_num)
                 col_dia_kh = next((c for c in df_kh_tt.columns if "địa chỉ" in c.lower()), None)
 
-                # DANH SÁCH TOÀN BỘ KHÁCH HÀNG (KỂ CẢ KHÔNG CÒN NỢ)
                 ds_kh_all = []
                 for _, row in df_kh_tt.iterrows():
                     cid = str(row[col_id_kh]).strip()
@@ -1976,7 +1958,6 @@ if st.session_state.role == "admin":
 
             col_kk1, col_kk2 = st.columns([1, 2])
             with col_kk1:
-                # Mặc định chọn Nam do bạn trực tiếp quản lý kho Nam
                 kho_kk = st.selectbox("🏭 Kho kiểm kê *", ["Nam", "Bắc"], key=f"kk_kho_{st.session_state.kk_form_key}")
             with col_kk2:
                 ghi_chu_kk = st.text_input(
@@ -2030,7 +2011,6 @@ if st.session_state.role == "admin":
                     else:
                         st.markdown("<div style='padding-top:8px; color:#94a3b8;'>-</div>", unsafe_allow_html=True)
 
-                # Tự động gán tồn thực tế bằng tồn hệ thống khi mới chọn SKU
                 if item.get("last_sku") != sku_sel:
                     st.session_state.kk_items[i]["last_sku"] = sku_sel
                     st.session_state.kk_items[i]["sl_thucte"] = max(0, ton_he_thong)
@@ -2277,7 +2257,310 @@ if st.session_state.role == "admin":
     # TAB: CIRCLE K
     # ============================================================
     with t_ck:
-        st.markdown('<div class="section-header">🏪 PHÂN TÍCH CIRCLE K</div>', unsafe_allow_html=True)
+        # ------------------------------------------------------------
+        # [PHẦN MỚI TRÊN CÙNG]: PHÂN TÍCH TẦN SUẤT ĐƠN & CƠ CẤU MÃ HÀNG
+        # ------------------------------------------------------------
+        st.markdown('<div class="section-header">⏱️ PHÂN TÍCH TẦN SUẤT & CƠ CẤU ĐƠN HÀNG CIRCLE K (THEO KỲ)</div>', unsafe_allow_html=True)
+
+        with st.spinner("Đang tổng hợp dữ liệu Circle K..."):
+            df_don_all = load_sheet("Don_Hang")
+            df_sp_ck = load_sheet("San_Pham")
+
+        if not df_don_all.empty:
+            col_kv_d = next((c for c in df_don_all.columns if "khu vực" in c.lower() or "khu vuc" in c.lower()), None)
+            col_id_k_d = next((c for c in df_don_all.columns if "id khách" in c.lower() or "id_khach" in c.lower()), None)
+            col_loai_d = next((c for c in df_don_all.columns if "loại đơn" in c.lower() or "loai don" in c.lower()), None)
+
+            mask_ck = pd.Series(False, index=df_don_all.index)
+            if col_kv_d:
+                mask_ck = mask_ck | df_don_all[col_kv_d].astype(str).str.contains("Circle K|CK", case=False, na=False)
+            if col_id_k_d:
+                mask_ck = mask_ck | df_don_all[col_id_k_d].astype(str).str.upper().str.startswith("CK")
+            if col_loai_d:
+                mask_ck = mask_ck | df_don_all[col_loai_d].astype(str).str.contains("Circle K|CK", case=False, na=False)
+
+            df_ck_data = df_don_all[mask_ck].copy()
+        else:
+            df_ck_data = pd.DataFrame()
+
+        if not df_ck_data.empty:
+            col_ngay_ck = next((c for c in df_ck_data.columns if "ngày" in c.lower() or "ngay" in c.lower()), None)
+            col_po_ck = next((c for c in df_ck_data.columns if "mã po" in c.lower() or "ma po" in c.lower() or "po" in c.lower()), None)
+            col_id_don_ck = next((c for c in df_ck_data.columns if "id đơn" in c.lower() or "id_don" in c.lower()), df_ck_data.columns[0])
+            col_kho_ck = next((c for c in df_ck_data.columns if "kho" in c.lower()), None)
+            col_sku_ck = next((c for c in df_ck_data.columns if "sku" in c.lower()), None)
+            col_sp_name_ck = next((c for c in df_ck_data.columns if "tên sp" in c.lower() or "tên sản phẩm" in c.lower()), None)
+            col_sl_ck = next((c for c in df_ck_data.columns if "số lượng" in c.lower() or "so luong" in c.lower() or c.lower() == "sl"), None)
+            col_net_ck = next((c for c in df_ck_data.columns if "trước thuế" in c.lower() or "truoc thue" in c.lower()), None)
+
+            if col_ngay_ck:
+                p_date = pd.to_datetime(df_ck_data[col_ngay_ck], format="%Y-%m-%d", errors="coerce")
+                m_fail = p_date.isna()
+                if m_fail.any():
+                    p_date2 = pd.to_datetime(df_ck_data.loc[m_fail, col_ngay_ck], dayfirst=True, errors="coerce")
+                    p_date[m_fail] = p_date2
+                df_ck_data["_date"] = p_date
+                df_ck_data["_year"] = df_ck_data["_date"].dt.year
+                df_ck_data["_month"] = df_ck_data["_date"].dt.month
+                df_ck_data["_quarter"] = df_ck_data["_date"].dt.quarter
+                df_ck_data["_week"] = df_ck_data["_date"].dt.isocalendar().week
+            else:
+                df_ck_data["_date"] = pd.to_datetime(date.today())
+                df_ck_data["_year"] = datetime.now().year
+                df_ck_data["_month"] = datetime.now().month
+                df_ck_data["_quarter"] = (datetime.now().month - 1) // 3 + 1
+                df_ck_data["_week"] = 1
+
+            def get_po_id(r):
+                if col_po_ck and pd.notna(r[col_po_ck]) and str(r[col_po_ck]).strip():
+                    return str(r[col_po_ck]).strip()
+                return str(r[col_id_don_ck]).strip()
+
+            df_ck_data["_po_key"] = df_ck_data.apply(get_po_id, axis=1)
+
+            ck_years = sorted(df_ck_data["_year"].dropna().astype(int).unique().tolist(), reverse=True)
+            if not ck_years:
+                ck_years = [datetime.now().year]
+
+            f1, f2, f3, f4 = st.columns([1.1, 1.2, 2.2, 1.2])
+
+            with f1:
+                sel_ck_year = st.selectbox(
+                    "📅 Chọn Năm",
+                    ["Tất cả năm"] + [str(y) for y in ck_years],
+                    key="filter_ck_year"
+                )
+
+            with f2:
+                cycle_mode = st.selectbox(
+                    "⏳ Xem chu kỳ theo",
+                    ["Theo Tháng", "Theo Quý", "Theo Tuần", "Theo Năm"],
+                    key="filter_ck_cycle_mode"
+                )
+
+            df_scope = df_ck_data.copy()
+            if sel_ck_year != "Tất cả năm":
+                df_scope = df_scope[df_scope["_year"] == int(sel_ck_year)]
+
+            with f3:
+                if cycle_mode == "Theo Tháng":
+                    avail_months = sorted(df_scope["_month"].dropna().astype(int).unique().tolist()) if not df_scope.empty else list(range(1, 13))
+                    month_labels = {m: f"Tháng {m}" for m in range(1, 13)}
+                    sel_ck_months = st.multiselect(
+                        "🗓️ Chọn Tháng (chọn 1 hoặc nhiều)",
+                        options=avail_months,
+                        format_func=lambda m: month_labels.get(m, f"T{m}"),
+                        default=[],
+                        placeholder="Tất cả các tháng (mặc định)",
+                        key="filter_ck_months"
+                    )
+                elif cycle_mode == "Theo Quý":
+                    avail_quarters = sorted(df_scope["_quarter"].dropna().astype(int).unique().tolist()) if not df_scope.empty else [1, 2, 3, 4]
+                    quarter_labels = {1: "Quý 1 (T1-T3)", 2: "Quý 2 (T4-T6)", 3: "Quý 3 (T7-T9)", 4: "Quý 4 (T10-T12)"}
+                    sel_ck_quarters = st.multiselect(
+                        "📊 Chọn Quý (chọn 1 hoặc nhiều)",
+                        options=avail_quarters,
+                        format_func=lambda q: quarter_labels.get(q, f"Quý {q}"),
+                        default=[],
+                        placeholder="Tất cả các quý (mặc định)",
+                        key="filter_ck_quarters"
+                    )
+                elif cycle_mode == "Theo Tuần":
+                    avail_weeks = sorted(df_scope["_week"].dropna().astype(int).unique().tolist()) if not df_scope.empty else list(range(1, 53))
+                    sel_ck_weeks = st.multiselect(
+                        "📆 Chọn Tuần (chọn 1 hoặc nhiều)",
+                        options=avail_weeks,
+                        format_func=lambda w: f"Tuần {w}",
+                        default=[],
+                        placeholder="Tất cả các tuần (mặc định)",
+                        key="filter_ck_weeks"
+                    )
+                else:
+                    st.markdown("<div style='padding-top:28px; color:#64748b; font-weight:600;'>Đang tổng hợp trọn năm</div>", unsafe_allow_html=True)
+
+            with f4:
+                kho_list = ["Tất cả kho"]
+                if col_kho_ck and not df_scope.empty:
+                    for k in df_scope[col_kho_ck].dropna().unique():
+                        k_str = str(k).strip()
+                        if k_str and k_str not in kho_list:
+                            kho_list.append(k_str)
+                sel_ck_kho = st.selectbox("🏭 Kho xuất hàng", kho_list, key="filter_ck_kho")
+
+            df_ck_f = df_scope.copy()
+            if cycle_mode == "Theo Tháng" and sel_ck_months:
+                df_ck_f = df_ck_f[df_ck_f["_month"].isin(sel_ck_months)]
+            elif cycle_mode == "Theo Quý" and sel_ck_quarters:
+                df_ck_f = df_ck_f[df_ck_f["_quarter"].isin(sel_ck_quarters)]
+            elif cycle_mode == "Theo Tuần" and sel_ck_weeks:
+                df_ck_f = df_ck_f[df_ck_f["_week"].isin(sel_ck_weeks)]
+
+            if sel_ck_kho != "Tất cả kho" and col_kho_ck:
+                df_ck_f = df_ck_f[df_ck_f[col_kho_ck] == sel_ck_kho]
+
+            po_records = []
+            for pkey, grp_po in df_ck_f.groupby("_po_key"):
+                first_row = grp_po.iloc[0]
+                po_date_val = grp_po["_date"].max() if "_date" in grp_po.columns else date.today()
+                date_str = po_date_val.strftime("%Y-%m-%d") if pd.notna(po_date_val) else str(first_row.get(col_ngay_ck, ""))
+                po_code_display = str(first_row.get(col_po_ck, "")).strip()
+                if not po_code_display or po_code_display.lower() in ["none", "nan"]:
+                    po_code_display = pkey
+                
+                id_don_display = str(first_row.get(col_id_don_ck, pkey)).strip()
+                kho_display = str(first_row.get(col_kho_ck, "Chưa rõ")).strip()
+                
+                po_qty = int(grp_po[col_sl_ck].apply(parse_num).sum()) if col_sl_ck else 0
+                po_net = grp_po[col_net_ck].apply(parse_num).sum() if col_net_ck else 0.0
+
+                po_records.append({
+                    "Ngày đặt đơn": date_str,
+                    "Mã PO": po_code_display,
+                    "ID Đơn": id_don_display,
+                    "Kho": kho_display,
+                    "Sản lượng (cái)": po_qty,
+                    "Thành tiền thuần (-VAT)": po_net,
+                    "_date_sort": po_date_val,
+                    "_net_sort": po_net
+                })
+
+            df_po_summary = pd.DataFrame(po_records)
+            if not df_po_summary.empty:
+                df_po_summary = df_po_summary.sort_values("_date_sort", ascending=False)
+
+            total_ck_po = len(df_po_summary)
+            min_ck_po = df_po_summary["_net_sort"].min() if total_ck_po > 0 else 0.0
+            max_ck_po = df_po_summary["_net_sort"].max() if total_ck_po > 0 else 0.0
+            avg_ck_po = df_po_summary["_net_sort"].mean() if total_ck_po > 0 else 0.0
+            total_ck_net = df_po_summary["_net_sort"].sum() if total_ck_po > 0 else 0.0
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            m1, m2, m3, m4, m5 = st.columns(5)
+            with m1: st.metric("📑 SỐ LƯỢNG ĐƠN PO", f"{total_ck_po:,} PO")
+            with m2: st.metric("🔻 ĐƠN NHỎ NHẤT (MIN)", fmt_currency(min_ck_po))
+            with m3: st.metric("🔺 ĐƠN LỚN NHẤT (MAX)", fmt_currency(max_ck_po))
+            with m4: st.metric("⚖️ TRUNG BÌNH CỘNG (AVG)", fmt_currency(avg_ck_po))
+            with m5: st.metric("💰 TỔNG TIỀN HÀNG THUẦN", fmt_currency(total_ck_net))
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            ck_col_l, ck_col_r = st.columns([1.1, 1], gap="medium")
+
+            with ck_col_l:
+                st.markdown('<div class="section-header">📋 NHẬT KÝ TẦN SUẤT ĐẶT ĐƠN CIRCLE K</div>', unsafe_allow_html=True)
+                if not df_po_summary.empty:
+                    df_po_export = df_po_summary[["Ngày đặt đơn", "Mã PO", "ID Đơn", "Kho", "Sản lượng (cái)", "Thành tiền thuần (-VAT)"]].copy()
+                    csv_po_ck = df_po_export.to_csv(index=False).encode('utf-8-sig')
+
+                    df_po_view = df_po_export.copy()
+                    df_po_view["Sản lượng (cái)"] = df_po_view["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
+                    df_po_view["Thành tiền thuần (-VAT)"] = df_po_view["Thành tiền thuần (-VAT)"].apply(fmt_currency)
+
+                    st.dataframe(translate_columns(df_po_view), use_container_width=True, hide_index=True)
+
+                    st.download_button(
+                        label="📥 Tải dữ liệu Đơn hàng Circle K (.CSV / Excel)",
+                        data=csv_po_ck,
+                        file_name=f"Don_Hang_CircleK_{datetime.now().strftime('%Y%m%d')}.csv",
+                        mime="text/csv",
+                        key="btn_down_po_ck"
+                    )
+                else:
+                    st.info("Không có đơn hàng Circle K nào trong kỳ chọn.")
+
+            with ck_col_r:
+                st.markdown('<div class="section-header">🍩 CƠ CẤU MÃ HÀNG HÓA CIRCLE K THEO KỲ</div>', unsafe_allow_html=True)
+                
+                sku_official_names = {}
+                if not df_sp_ck.empty and 'SKU Sản phẩm' in df_sp_ck.columns and 'Tên sản phẩm' in df_sp_ck.columns:
+                    for _, r_sp in df_sp_ck.iterrows():
+                        k_sku = str(r_sp['SKU Sản phẩm']).strip()
+                        k_nam = str(r_sp['Tên sản phẩm']).strip()
+                        if k_sku:
+                            sku_official_names[k_sku] = k_nam
+
+                sku_ck_rows = []
+                total_ck_qty = int(df_ck_f[col_sl_ck].apply(parse_num).sum()) if col_sl_ck else 0
+
+                if col_sku_ck:
+                    for sku_val, grp_sku in df_ck_f.groupby(col_sku_ck):
+                        sku_str = str(sku_val).strip()
+                        if not sku_str or sku_str.lower() in ["none", "nan", ""]:
+                            continue
+
+                        prod_name = sku_official_names.get(sku_str, "")
+                        if not prod_name and col_sp_name_ck:
+                            prod_name = str(grp_sku[col_sp_name_ck].dropna().iloc[0]).strip() if not grp_sku[col_sp_name_ck].dropna().empty else sku_str
+                        if not prod_name:
+                            prod_name = sku_str
+
+                        p_qty = int(grp_sku[col_sl_ck].apply(parse_num).sum()) if col_sl_ck else 0
+                        p_net = grp_sku[col_net_ck].apply(parse_num).sum() if col_net_ck else 0.0
+                        p_pct = (p_qty / total_ck_qty * 100) if total_ck_qty > 0 else 0.0
+
+                        sku_ck_rows.append({
+                            "Mã SKU": sku_str,
+                            "Tên sản phẩm": prod_name,
+                            "Sản lượng (cái)": p_qty,
+                            "Doanh thu thuần (-VAT)": p_net,
+                            "Tỷ trọng (%)": f"{p_pct:.1f}%",
+                            "_qty_sort": p_qty
+                        })
+
+                if sku_ck_rows:
+                    df_sku_ck = pd.DataFrame(sku_ck_rows).sort_values("_qty_sort", ascending=False)
+                    
+                    fig_ck_donut = px.pie(
+                        df_sku_ck,
+                        names="Mã SKU",
+                        values="_qty_sort",
+                        hole=0.45,
+                        color_discrete_sequence=[
+                            "#00b87c", "#10b981", "#059669", "#34d399", "#6ee7b7",
+                            "#0284c7", "#38bdf8", "#6366f1", "#8b5cf6", "#f59e0b",
+                            "#ec4899", "#14b8a6"
+                        ]
+                    )
+                    fig_ck_donut.update_traces(
+                        textposition='inside',
+                        textinfo='percent+label',
+                        hovertemplate="<b>%{label}</b><br>Tỷ trọng: %{percent}<br>Sản lượng: %{value:,} cái<extra></extra>"
+                    )
+                    fig_ck_donut.update_layout(
+                        height=280,
+                        margin=dict(l=10, r=10, t=10, b=10),
+                        paper_bgcolor="#ffffff",
+                        plot_bgcolor="#ffffff",
+                        legend=dict(orientation="h", y=-0.1, x=0.0)
+                    )
+                    st.plotly_chart(fig_ck_donut, use_container_width=True)
+
+                    df_sku_ck_export = df_sku_ck[["Mã SKU", "Tên sản phẩm", "Sản lượng (cái)", "Doanh thu thuần (-VAT)", "Tỷ trọng (%)"]].copy()
+                    csv_sku_ck = df_sku_ck_export.to_csv(index=False).encode('utf-8-sig')
+
+                    df_sku_ck_view = df_sku_ck_export.copy()
+                    df_sku_ck_view["Sản lượng (cái)"] = df_sku_ck_view["Sản lượng (cái)"].apply(lambda x: f"{x:,}")
+                    df_sku_ck_view["Doanh thu thuần (-VAT)"] = df_sku_ck_view["Doanh thu thuần (-VAT)"].apply(fmt_currency)
+
+                    st.dataframe(translate_columns(df_sku_ck_view), use_container_width=True, hide_index=True)
+
+                    st.download_button(
+                        label="📥 Tải Cơ cấu SKU Circle K (.CSV / Excel)",
+                        data=csv_sku_ck,
+                        file_name=f"Co_Cau_SKU_CircleK_{datetime.now().strftime('%Y%m%d')}.csv",
+                        mime="text/csv",
+                        key="btn_down_sku_ck"
+                    )
+                else:
+                    st.info("Không có dữ liệu SKU Circle K trong kỳ chọn.")
+        else:
+            st.info("Chưa tìm thấy dữ liệu đơn hàng nào của kênh Circle K.")
+
+        # ------------------------------------------------------------
+        # [PHẦN CŨ DƯỚI CÙNG]: TỔNG HỢP NĂM VÀ LỊCH SỬ KÊNH (GIỮ NGUYÊN)
+        # ------------------------------------------------------------
+        st.markdown("<hr style='border-color:#cbd5e1; margin: 32px 0 22px 0;'>", unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🏪 TỔNG HỢP NĂM & LỊCH SỬ KÊNH CIRCLE K (SHEET GỐC)</div>', unsafe_allow_html=True)
         
         df_ck_raw = load_sheet("Biểu đồ CircleK")
         df_don_ck = load_sheet("Don_Hang")
@@ -2314,10 +2597,8 @@ if st.session_state.role == "admin":
             except Exception as e:
                 st.warning(f"Đang tải biểu đồ... ({e})")
 
-        st.markdown('<div class="section-header">📋 THỐNG KÊ PO</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">📋 THỐNG KÊ PO (THEO DASHBOARD SHEET)</div>', unsafe_allow_html=True)
         df_dash_ck = load_sheet("Dashboard")
-
-
 
         if not df_dash_ck.empty:
             try:
